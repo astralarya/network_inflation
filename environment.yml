@@ -3,7 +3,9 @@ channels:
   - conda-forge
   - pytorch
 dependencies:
+  - ipywidgets
   - jpeg
+  - jupyter
   - libpng
   - matplotlib
   - numpy
