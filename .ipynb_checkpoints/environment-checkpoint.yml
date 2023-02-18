@@ -1,0 +1,13 @@
+name: network_inflation
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - jpeg
+  - libpng
+  - matplotlib
+  - numpy
+  - pytorch
+  - torchdata 
+  - torchinfo
+  - torchvision
