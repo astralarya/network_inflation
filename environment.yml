@@ -8,6 +8,8 @@ dependencies:
   - matplotlib
   - numpy
   - pytorch
+  - scipy
   - torchdata 
   - torchinfo
   - torchvision
+  - tqdm
