@@ -36,6 +36,8 @@ def eval_data(data_root: str):
     )
 
 def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_size=256, num_epochs=10):
+    optim_name = f"{name}.__optim__"
+
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
@@ -49,12 +51,21 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
     network.train()
 
     save_epoch = model.load(network, name)
-    model.load(optimizer, f"{name}.__optim__.", save_epoch)
+    optim_epoch = model.load(optimizer, optim_name, save_epoch)
+
+    if save_epoch is not None and optim_epoch != save_epoch:
+        raise Exception("Missing optim state for model save")
+    elif save_epoch is not None:
+        print(f"Resuming from epoch: {save_epoch}")
+    else:
+        print("Starting new training")
+        model.save(network, name, 0)
+        model.save(optimizer, optim_name, 0)
 
     network.to(device)
 
-    start_epoch = 0 if save_epoch is None else save_epoch + 1
-    for epoch in range(start_epoch, num_epochs):
+    start_epoch = 1 if save_epoch is None else save_epoch + 1
+    for epoch in range(start_epoch, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
             optimizer.zero_grad()
@@ -65,7 +76,7 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
             epoch_loss += loss.item()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
         model.save(network, name, epoch)
-        model.save(optimizer, f"{name}.__optim__.", epoch)
+        model.save(optimizer, optim_name, epoch)
 
 
 def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
