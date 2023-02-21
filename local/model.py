@@ -34,3 +34,4 @@ def reset_model(model: nn.Module):
             module.reset_parameters()
 
     model.apply(fn=reset)
+
