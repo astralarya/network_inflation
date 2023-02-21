@@ -1,5 +1,6 @@
 import copy
 import glob
+import os
 from pathlib import Path
 from typing import Mapping, Optional
 
@@ -72,3 +73,13 @@ def reset(model: nn.Module):
 def clone(model: nn.Module):
     return copy.deepcopy(model)
     
+
+def clean(name: str):
+    save_paths = [
+        *glob.glob(f"{out_dir}/{name}.{'[0-9]'*8}.pkl"),
+        *glob.glob(f"{out_dir}/{name}.__*__.{'[0-9]'*8}.pkl"),
+        *glob.glob(f"{out_dir}/{name}.log"),
+    ]
+    for path in save_paths:
+        print(f"Deleting `{path}`")
+        os.remove(path)
