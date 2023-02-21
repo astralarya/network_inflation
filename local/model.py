@@ -10,11 +10,12 @@ import torch.nn as nn
 from .device import device
 
 
-out_dir = "models"
+out_dir = Path("models")
+out_dir.mkdir(exist_ok=True)
 
 
 def save(model: nn.Module, name: str, epoch: int):
-    save_path = Path(out_dir).joinpath(f"{name}.{epoch:08}.pkl")
+    save_path = out_dir.joinpath(f"{name}.{epoch:08}.pkl")
     with save_path.open("wb") as save_file:
         print(f"Saving `{save_path}`")
         torch.save(model.state_dict(), save_file)
@@ -22,7 +23,7 @@ def save(model: nn.Module, name: str, epoch: int):
 
 def save_state(model_dict: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None):
     if log is not None:
-        with open(Path(out_dir).joinpath(f"{name}.log"), "a") as logfile:
+        with out_dir.joinpath(f"{name}.log").open("a") as logfile:
             logfile.write(log)
     for key, value in model_dict.items():
         save(value, name if key is None else f"{name}.__{key}__", epoch)
