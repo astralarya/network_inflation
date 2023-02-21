@@ -28,16 +28,6 @@ def save_state(model_dict: Mapping[Optional[str], nn.Module], name: str, epoch: 
         save(value, name if key is None else f"{name}.__{key}__", epoch)
 
 
-def load(model: nn.Module, name: str, epoch: int = None):
-    epoch = get_epoch(name, epoch)
-    if epoch is None:
-        return None
-    save_path = f"{out_dir}/{name}.{epoch:08}.pkl"
-    print(f"Loading `{save_path}`")
-    model.load_state_dict(torch.load(save_path, map_location=device))
-    return epoch
-
-
 def get_epoch(name: str, epoch: int = None):
     if epoch is not None:
         save_paths = glob.glob(f"{out_dir}/{name}.{epoch:08}.pkl")
@@ -50,6 +40,16 @@ def get_epoch(name: str, epoch: int = None):
         if save_path is not None
         else None
     )
+
+
+def load(model: nn.Module, name: str, epoch: int = None):
+    epoch = get_epoch(name, epoch)
+    if epoch is None:
+        return None
+    save_path = f"{out_dir}/{name}.{epoch:08}.pkl"
+    print(f"Loading `{save_path}`")
+    model.load_state_dict(torch.load(save_path, map_location=device))
+    return epoch
 
 
 def load_state(model_dict: Mapping[Optional[str], nn.Module], name: str, epoch: int = None):
