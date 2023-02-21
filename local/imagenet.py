@@ -35,7 +35,7 @@ def eval_data(data_root: str):
         ])
     )
 
-def train_model(model: nn.Module, name: str, data: datasets.DatasetFolder, batch_size=256, num_epochs=10):
+def train(model: nn.Module, name: str, data: datasets.DatasetFolder, batch_size=256, num_epochs=10):
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
@@ -62,7 +62,7 @@ def train_model(model: nn.Module, name: str, data: datasets.DatasetFolder, batch
         model.save(model, f"{name}", epoch)
 
 
-def eval_model(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
+def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
