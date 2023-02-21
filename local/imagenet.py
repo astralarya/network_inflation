@@ -38,35 +38,36 @@ def eval_data(data_root: str):
     )
 
 def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_size=256, num_epochs=10):
-    optim_name = f"{name}.__optim__"
-
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
         num_workers=2,
         shuffle=True,
     )
-
-    criterion = nn.CrossEntropyLoss().to(device)
     optimizer = optim.AdamW(network.parameters())
+    criterion = nn.CrossEntropyLoss().to(device)
 
     network.train()
 
-    save_epoch = model.load(network, name)
-    optim_epoch = model.load(optimizer, optim_name, save_epoch)
+    save_epoch = model.load_state({
+        None: network,
+        "optim": optimizer,
+    }, name)
 
-    if save_epoch is not None and optim_epoch != save_epoch:
-        raise Exception("Missing optim state for model save")
-    elif save_epoch is not None:
+    if save_epoch is not None:
         print(f"Resuming from epoch: {save_epoch}")
     else:
         print("Starting new training")
-        model.save(network, name, 0)
-        model.save(optimizer, optim_name, 0)
+        model.save_state(
+            {
+                None: network,
+                "optim": optimizer,
+            },
+            name, 0,
+        )
+    start_epoch = 1 if save_epoch is None else save_epoch + 1
 
     network.to(device)
-
-    start_epoch = 1 if save_epoch is None else save_epoch + 1
     for epoch in range(start_epoch, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
@@ -77,10 +78,14 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
             optimizer.step()
             epoch_loss += loss.item()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        with open(Path(model.out_dir).joinpath(f"{name}.log"), "a") as logfile:
-            logfile.write(f"{epoch}\t{epoch_loss}")
-        model.save(network, name, epoch)
-        model.save(optimizer, optim_name, epoch)
+        model.save_state(
+            {
+                None: network,
+                "optim": optimizer,
+            },
+            name, epoch,
+            log=f"{epoch}\t{epoch_loss}"
+        )
 
 
 def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
