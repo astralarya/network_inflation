@@ -36,6 +36,7 @@ def load(model: nn.Module, name: str, epoch: int = None):
     model.load_state_dict(torch.load(save_path, map_location=device))
     return epoch
 
+
 def get_epoch(name: str, epoch: int = None):
     if epoch is not None:
         save_paths = glob.glob(f"{out_dir}/{name}.{epoch:08}.pkl")
