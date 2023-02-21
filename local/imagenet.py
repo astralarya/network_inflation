@@ -55,8 +55,11 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
         "optim": optimizer,
     }
     save_epoch = model.load_state(state, name)
-    start_epoch = 1 if save_epoch is None else save_epoch + 1
 
+    start_epoch = 1 if save_epoch is None else save_epoch + 1
+    total = len(data_loader.dataset)
+
+    print(f"Iterating {total} samples")
     for epoch in range(start_epoch, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
@@ -66,6 +69,7 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
+        epoch_loss = epoch_loss / total
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
         model.save_state(
             state, name, epoch,
