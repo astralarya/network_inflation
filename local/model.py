@@ -21,8 +21,9 @@ def save(model: nn.Module, name: str, epoch: int):
 
 
 def save_state(model_dict: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None):
-    with open(Path(out_dir).joinpath(f"{name}.log"), "a") as logfile:
-        logfile.write(log)
+    if log is not None:
+        with open(Path(out_dir).joinpath(f"{name}.log"), "a") as logfile:
+            logfile.write(log)
     for key, value in model_dict.items():
         save(value, name if key is None else f"{name}.__{key}__", epoch)
 
@@ -58,6 +59,11 @@ def load_state(model_dict: Mapping[Optional[str], nn.Module], name: str, epoch: 
         load_epoch = load(value, name if key is None else f"{name}.__{key}__", epoch)
         if epoch is not None and load_epoch != epoch:
             raise Exception(f"Missing state `{name}.__{key}__.{epoch}.pkl`")
+    if epoch is not None:
+        print(f"Resuming from epoch {epoch}")
+    else:
+        print("Saving initial state as epoch 0")
+        save_state(model_dict, name, 0)
     return epoch
 
 

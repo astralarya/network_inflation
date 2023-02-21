@@ -49,23 +49,12 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
 
     network.train()
     network.to(device)
-    
-    save_epoch = model.load_state({
+
+    state = {
         None: network,
         "optim": optimizer,
-    }, name)
-
-    if save_epoch is not None:
-        print(f"Resuming from epoch: {save_epoch}")
-    else:
-        print("Starting new training")
-        model.save_state(
-            {
-                None: network,
-                "optim": optimizer,
-            },
-            name, 0,
-        )
+    }
+    save_epoch = model.load_state(state, name)
     start_epoch = 1 if save_epoch is None else save_epoch + 1
 
     for epoch in range(start_epoch, num_epochs + 1):
@@ -79,11 +68,7 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
             epoch_loss += loss.item()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
         model.save_state(
-            {
-                None: network,
-                "optim": optimizer,
-            },
-            name, epoch,
+            state, name, epoch,
             log=f"{epoch}\t{epoch_loss}"
         )
 
