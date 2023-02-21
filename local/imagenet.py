@@ -4,7 +4,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
-from . import model
+from . import model as model
 from .device import device
 
 def train_data(data_root: str):
@@ -35,7 +35,7 @@ def eval_data(data_root: str):
         ])
     )
 
-def train(model: nn.Module, name: str, data: datasets.DatasetFolder, batch_size=256, num_epochs=10):
+def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_size=256, num_epochs=10):
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
@@ -44,22 +44,28 @@ def train(model: nn.Module, name: str, data: datasets.DatasetFolder, batch_size=
     )
 
     criterion = nn.CrossEntropyLoss().to(device)
-    optimizer = optim.AdamW(model.parameters())
+    optimizer = optim.AdamW(network.parameters())
 
-    model.train()
+    network.train()
 
-    model.to(device)
-    for epoch in range(num_epochs):
+    save_epoch = model.load(network, name)
+    model.load(optimizer, f"{name}.__optim__.", save_epoch)
+
+    network.to(device)
+
+    start_epoch = 0 if save_epoch is None else save_epoch + 1
+    for epoch in range(start_epoch, num_epochs):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
             optimizer.zero_grad()
-            outputs = model(inputs.to(device))
+            outputs = network(inputs.to(device))
             loss = criterion(outputs, labels.to(device))
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        model.save(model, f"{name}", epoch)
+        model.save(network, name, epoch)
+        model.save(optimizer, f"{name}.__optim__.", epoch)
 
 
 def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
