@@ -4,7 +4,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
-from .model import save_model
+from . import model
 from .device import device
 
 def train_data(data_root: str):
@@ -59,7 +59,7 @@ def train_model(model: nn.Module, name: str, data: datasets.DatasetFolder, batch
             optimizer.step()
             epoch_loss += loss.item()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        save_model(model, name, epoch)
+        model.save(model, f"{name}", epoch)
 
 
 def eval_model(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):

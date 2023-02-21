@@ -1,3 +1,4 @@
+import copy
 import glob
 from pathlib import Path
 
@@ -8,13 +9,13 @@ import torch.nn as nn
 models_dir = "models"
 
 
-def save_model(model, name, epoch):
-    save_path = Path(models_dir).joinpath(f"{name}.{epoch:03}.pkl")
+def save(model: nn.Module, name: str, epoch: int):
+    save_path = Path(models_dir).joinpath(f"{name}.{epoch:08}.pkl")
     with save_path.open("wb") as save_file:
         torch.save(model.state_dict(), save_file)
 
 
-def load_model(model, name):
+def load(model: nn.Module, name: str):
     save_paths = glob.glob(f"{models_dir}/{name}.*.pkl")
     save_paths.sort(reverse=True)
     save_path = next(iter(save_paths), None)
@@ -26,7 +27,7 @@ def load_model(model, name):
         return None
 
 
-def reset_model(model: nn.Module):
+def reset(model: nn.Module):
     @torch.no_grad()
     def reset(module: nn.Module):
         reset_parameters = getattr(module, "reset_parameters", None)
@@ -34,4 +35,8 @@ def reset_model(model: nn.Module):
             module.reset_parameters()
 
     model.apply(fn=reset)
+
+
+def clone(model: nn.Module):
+    return copy.deepcopy(model)
 
