@@ -6,6 +6,8 @@ from typing import Mapping, Optional
 import torch
 import torch.nn as nn
 
+from .device import device
+
 
 out_dir = "models"
 
@@ -30,7 +32,7 @@ def load(model: nn.Module, name: str, epoch: int = None):
         return None
     save_path = f"{out_dir}/{name}.{epoch:08}.pkl"
     print(f"Loading `{save_path}`")
-    model.load_state_dict(torch.load(save_path))
+    model.load_state_dict(torch.load(save_path, map_location=device))
     return epoch
 
 def get_epoch(name: str, epoch: int = None):

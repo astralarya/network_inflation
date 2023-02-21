@@ -48,7 +48,8 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
     criterion = nn.CrossEntropyLoss().to(device)
 
     network.train()
-
+    network.to(device)
+    
     save_epoch = model.load_state({
         None: network,
         "optim": optimizer,
@@ -67,7 +68,6 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
         )
     start_epoch = 1 if save_epoch is None else save_epoch + 1
 
-    network.to(device)
     for epoch in range(start_epoch, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
