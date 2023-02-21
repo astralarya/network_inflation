@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -75,6 +77,8 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
             optimizer.step()
             epoch_loss += loss.item()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
+        with open(Path(model.out_dir).joinpath(f"{name}.log"), "a") as logfile:
+            logfile.write(f"{epoch}\t{epoch_loss}")
         model.save(network, name, epoch)
         model.save(optimizer, optim_name, epoch)
 
