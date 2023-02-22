@@ -9,35 +9,48 @@ from tqdm import tqdm
 from . import model as model
 from .device import device
 
+
 def train_data(data_root: str):
     return datasets.ImageFolder(
         data_root,
-        transform=transforms.Compose([
-            transforms.Resize(256),
-            transforms.RandomHorizontalFlip(),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
+        transform=transforms.Compose(
+            [
+                transforms.Resize(256),
+                transforms.RandomHorizontalFlip(),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        ),
     )
+
 
 def eval_data(data_root: str):
     return datasets.ImageFolder(
         data_root,
-        transform=transforms.Compose([
-            transforms.Resize(256),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.TenCrop(224),
-            transforms.Lambda(
-                lambda crops: torch.stack([
-                    crop for crop in crops
-                ])
-            ),
-        ])
+        transform=transforms.Compose(
+            [
+                transforms.Resize(256),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+                transforms.TenCrop(224),
+                transforms.Lambda(lambda crops: torch.stack([crop for crop in crops])),
+            ]
+        ),
     )
 
-def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_size=256, num_epochs=10):
+
+def train(
+    network: nn.Module,
+    name: str,
+    data: datasets.DatasetFolder,
+    batch_size=256,
+    num_epochs=10,
+):
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
@@ -70,10 +83,7 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
             optimizer.step()
             epoch_loss += loss.item() / total
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        model.save_state(
-            state, name, epoch,
-            log=f"{epoch}\t{epoch_loss}"
-        )
+        model.save_state(state, name, epoch, log=f"{epoch}\t{epoch_loss}")
 
 
 def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
@@ -85,7 +95,7 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
     with torch.no_grad():
         model.eval()
         model.to(device)
-        error = 0.0
+        accuracy = 0.0
         total = len(data_loader.dataset)
         print(f"Iterating {total} samples")
         for inputs, labels in tqdm(data_loader):
@@ -93,14 +103,17 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
             outputs = model(inputs.view(-1, c, h, w).to(device))
             outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
             labels = labels.to(device)
-            error += (outputs == labels).sum() / total
-        print(f"Top1 error: {error}")
-        return error
+            accuracy += (outputs == labels).sum() / total
+        print(f"Top1 accuracy: {accuracy}")
+        return accuracy
 
 
-def run_eval(module: nn.Module, name: str, epoch: Optional[int], data: datasets.DatasetFolder):
+def run_eval(
+    module: nn.Module, name: str, epoch: Optional[int], data: datasets.DatasetFolder
+):
     if epoch is None or model.load(module, name, epoch) is not None:
         model.write_record(
-            name, "eval",
+            name,
+            "eval",
             f"{epoch}\t{eval(module, data)}",
         )
