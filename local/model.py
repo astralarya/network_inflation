@@ -22,11 +22,15 @@ def save(module: nn.Module, name: str, epoch: int):
 
 
 def save_state(modules: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None):
-    if log is not None:
-        with out_dir.joinpath(f"{name}.log").open("a") as logfile:
-            logfile.write(log)
+    write_log(log)
     for key, value in modules.items():
         save(value, name if key is None else f"{name}.__{key}__", epoch)
+
+
+def write_log(name: str, data: Optional[str] = None):
+    if data is not None:
+        with out_dir.joinpath(f"{name}.log").open("a") as logfile:
+            logfile.write(data)
 
 
 def get_epoch(name: str, epoch: int = None):
