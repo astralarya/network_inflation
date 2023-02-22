@@ -85,7 +85,7 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
     with torch.no_grad():
         model.eval()
         model.to(device)
-        error = torch.tensor(0.0).to(device)
+        error = 0.0
         total = len(data_loader.dataset)
         print(f"Iterating {total} samples")
         for inputs, labels in tqdm(data_loader):
@@ -93,10 +93,9 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
             outputs = model(inputs.view(-1, c, h, w).to(device))
             outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
             labels = labels.to(device)
-            error.add_((outputs == labels).sum())
-        result = error / total
-        print(f"Top1 error: {result}")
-        return result
+            error += (outputs == labels).sum() / total
+        print(f"Top1 error: {error}")
+        return error
 
 
 def run_eval(module: nn.Module, name: str, epoch: Optional[int], data: datasets.DatasetFolder):
