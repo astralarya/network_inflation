@@ -45,7 +45,9 @@ def save(module: nn.Module, name: str, epoch: int):
         torch.save(module.state_dict(), save_file)
 
 
-def save_state(modules: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None):
+def save_state(
+    modules: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None
+):
     write_log(log)
     for key, value in modules.items():
         save(value, name if key is None else f"{name}.__{key}__", epoch)
@@ -61,7 +63,9 @@ def load(module: nn.Module, name: str, epoch: int = None):
     return epoch
 
 
-def load_state(modules: Mapping[Optional[str], nn.Module], name: str, epoch: int = None):
+def load_state(
+    modules: Mapping[Optional[str], nn.Module], name: str, epoch: int = None
+):
     if None in modules:
         epoch = get_epoch(name, epoch)
     for key, value in modules.items():
@@ -88,7 +92,7 @@ def reset(module: nn.Module):
 
 def clone(module: nn.Module):
     return copy.deepcopy(module)
-    
+
 
 def clean(name: str):
     save_paths = [
