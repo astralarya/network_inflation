@@ -1,4 +1,4 @@
-from pathlib import Path
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -94,4 +94,17 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
             outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
             labels = labels.to(device)
             correct.add_((outputs == labels).sum())
-        print(correct / total)
+        return correct / total
+
+
+def run_eval(module: nn.Module, name: str, epoch: Optional[int], data: datasets.DatasetFolder):
+    if epoch is None:
+        model.write_record(
+            name, "eval",
+            f"None\t{eval(module, data)}",
+        )
+    elif model.load(module, name, epoch) is not None:
+        model.write_record(
+            name, "eval",
+            f"{epoch}\t{eval(module, data)}",
+        )
