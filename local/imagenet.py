@@ -86,7 +86,8 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
         model.eval()
         model.to(device)
         error = torch.tensor(0.0).to(device)
-        total = len(data_loader)
+        total = len(data_loader.dataset)
+        print(f"Iterating {total} samples")
         for inputs, labels in tqdm(data_loader):
             bs, ncrops, c, h, w = inputs.shape
             outputs = model(inputs.view(-1, c, h, w).to(device))
