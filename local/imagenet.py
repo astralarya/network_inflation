@@ -85,24 +85,21 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
     with torch.no_grad():
         model.eval()
         model.to(device)
-        accuracy = torch.tensor(0.0).to(device)
+        error = torch.tensor(0.0).to(device)
         total = len(data_loader)
         for inputs, labels in tqdm(data_loader):
             bs, ncrops, c, h, w = inputs.shape
             outputs = model(inputs.view(-1, c, h, w).to(device))
             outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
             labels = labels.to(device)
-            accuracy.add_((outputs == labels).sum() / total)
-        return accuracy
+            error.add_((outputs == labels).sum())
+        result = error / total
+        print(f"Top1 error: {result}")
+        return result
 
 
 def run_eval(module: nn.Module, name: str, epoch: Optional[int], data: datasets.DatasetFolder):
-    if epoch is None:
-        model.write_record(
-            name, "eval",
-            f"None\t{eval(module, data)}",
-        )
-    elif model.load(module, name, epoch) is not None:
+    if epoch is None or model.load(module, name, epoch) is not None:
         model.write_record(
             name, "eval",
             f"{epoch}\t{eval(module, data)}",
