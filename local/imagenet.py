@@ -68,8 +68,7 @@ def train(network: nn.Module, name: str, data: datasets.DatasetFolder, batch_siz
             loss = criterion(outputs, labels.to(device))
             loss.backward()
             optimizer.step()
-            epoch_loss += loss.item()
-        epoch_loss = epoch_loss / total
+            epoch_loss += loss.item() / total
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
         model.save_state(
             state, name, epoch,
@@ -86,15 +85,15 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
     with torch.no_grad():
         model.eval()
         model.to(device)
-        correct = torch.tensor(0).to(device)
+        accuracy = torch.tensor(0.0).to(device)
         total = len(data_loader)
         for inputs, labels in tqdm(data_loader):
             bs, ncrops, c, h, w = inputs.shape
             outputs = model(inputs.view(-1, c, h, w).to(device))
             outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
             labels = labels.to(device)
-            correct.add_((outputs == labels).sum())
-        return correct / total
+            accuracy.add_((outputs == labels).sum() / total)
+        return accuracy
 
 
 def run_eval(module: nn.Module, name: str, epoch: Optional[int], data: datasets.DatasetFolder):
