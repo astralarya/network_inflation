@@ -14,18 +14,18 @@ out_dir = Path("models")
 out_dir.mkdir(exist_ok=True)
 
 
-def save(model: nn.Module, name: str, epoch: int):
+def save(module: nn.Module, name: str, epoch: int):
     save_path = out_dir.joinpath(f"{name}.{epoch:08}.pkl")
     with save_path.open("wb") as save_file:
         print(f"Saving `{save_path}`")
-        torch.save(model.state_dict(), save_file)
+        torch.save(module.state_dict(), save_file)
 
 
-def save_state(model_dict: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None):
+def save_state(modules: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None):
     if log is not None:
         with out_dir.joinpath(f"{name}.log").open("a") as logfile:
             logfile.write(log)
-    for key, value in model_dict.items():
+    for key, value in modules.items():
         save(value, name if key is None else f"{name}.__{key}__", epoch)
 
 
@@ -43,20 +43,20 @@ def get_epoch(name: str, epoch: int = None):
     )
 
 
-def load(model: nn.Module, name: str, epoch: int = None):
+def load(module: nn.Module, name: str, epoch: int = None):
     epoch = get_epoch(name, epoch)
     if epoch is None:
         return None
     save_path = f"{out_dir}/{name}.{epoch:08}.pkl"
     print(f"Loading `{save_path}`")
-    model.load_state_dict(torch.load(save_path, map_location=device))
+    module.load_state_dict(torch.load(save_path, map_location=device))
     return epoch
 
 
-def load_state(model_dict: Mapping[Optional[str], nn.Module], name: str, epoch: int = None):
-    if None in model_dict:
+def load_state(modules: Mapping[Optional[str], nn.Module], name: str, epoch: int = None):
+    if None in modules:
         epoch = get_epoch(name, epoch)
-    for key, value in model_dict.items():
+    for key, value in modules.items():
         load_epoch = load(value, name if key is None else f"{name}.__{key}__", epoch)
         if epoch is not None and load_epoch != epoch:
             raise Exception(f"Missing state `{name}.__{key}__.{epoch}.pkl`")
@@ -64,22 +64,22 @@ def load_state(model_dict: Mapping[Optional[str], nn.Module], name: str, epoch: 
         print(f"Resuming from epoch {epoch}")
     else:
         print("Saving initial state as epoch 0")
-        save_state(model_dict, name, 0)
+        save_state(modules, name, 0)
     return epoch
 
 
-def reset(model: nn.Module):
+def reset(module: nn.Module):
     @torch.no_grad()
     def reset(module: nn.Module):
         reset_parameters = getattr(module, "reset_parameters", None)
         if callable(reset_parameters):
             module.reset_parameters()
 
-    model.apply(fn=reset)
+    module.apply(fn=reset)
 
 
-def clone(model: nn.Module):
-    return copy.deepcopy(model)
+def clone(module: nn.Module):
+    return copy.deepcopy(module)
     
 
 def clean(name: str):
