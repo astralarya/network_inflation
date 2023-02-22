@@ -14,25 +14,6 @@ out_dir = Path("models")
 out_dir.mkdir(exist_ok=True)
 
 
-def save(module: nn.Module, name: str, epoch: int):
-    save_path = out_dir.joinpath(f"{name}.{epoch:08}.pkl")
-    with save_path.open("wb") as save_file:
-        print(f"Saving `{save_path}`")
-        torch.save(module.state_dict(), save_file)
-
-
-def save_state(modules: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None):
-    write_log(log)
-    for key, value in modules.items():
-        save(value, name if key is None else f"{name}.__{key}__", epoch)
-
-
-def write_log(name: str, data: Optional[str] = None):
-    if data is not None:
-        with out_dir.joinpath(f"{name}.log").open("a") as logfile:
-            logfile.write(data)
-
-
 def get_epoch(name: str, epoch: int = None):
     if epoch is not None:
         save_paths = glob.glob(f"{out_dir}/{name}.{epoch:08}.pkl")
@@ -45,6 +26,25 @@ def get_epoch(name: str, epoch: int = None):
         if save_path is not None
         else None
     )
+
+
+def write_log(name: str, data: Optional[str] = None):
+    if data is not None:
+        with out_dir.joinpath(f"{name}.log").open("a") as logfile:
+            logfile.write(data)
+
+
+def save(module: nn.Module, name: str, epoch: int):
+    save_path = out_dir.joinpath(f"{name}.{epoch:08}.pkl")
+    with save_path.open("wb") as save_file:
+        print(f"Saving `{save_path}`")
+        torch.save(module.state_dict(), save_file)
+
+
+def save_state(modules: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None):
+    write_log(log)
+    for key, value in modules.items():
+        save(value, name if key is None else f"{name}.__{key}__", epoch)
 
 
 def load(module: nn.Module, name: str, epoch: int = None):
