@@ -34,6 +34,10 @@ def write_log(name: str, data: Optional[str] = None):
             logfile.write(data)
 
 
+def write_record(name: str, part: str, data: Optional[str] = None):
+    write_log(f"{name}.__{part}__", data)
+
+
 def save(module: nn.Module, name: str, epoch: int):
     save_path = out_dir.joinpath(f"{name}.{epoch:08}.pkl")
     with save_path.open("wb") as save_file:
@@ -91,6 +95,7 @@ def clean(name: str):
         *glob.glob(f"{out_dir}/{name}.{'[0-9]'*8}.pkl"),
         *glob.glob(f"{out_dir}/{name}.__*__.{'[0-9]'*8}.pkl"),
         *glob.glob(f"{out_dir}/{name}.log"),
+        *glob.glob(f"{out_dir}/{name}.__*__.log"),
     ]
     for path in save_paths:
         print(f"Deleting `{path}`")
