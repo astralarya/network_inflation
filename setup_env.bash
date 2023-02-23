@@ -1,11 +1,12 @@
 sudo apt-get update
-sudo apt-get install wget bzip2 git libxml2-dev
+sudo apt-get install -y screen wget bzip2 git libxml2-dev
 
 
 wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
 bash Anaconda3-2022.10-Linux-x86_64.sh -b -p $HOME/anaconda3
 rm Anaconda3-2022.10-Linux-x86_64.sh
-source ~/.bashrc
+eval "$($HOME/anaconda3/bin/conda shell.bash hook)"
+conda update -y conda
 
 
 wget https://github.com/git-lfs/git-lfs/releases/download/v3.3.0/git-lfs-linux-amd64-v3.3.0.tar.gz
