@@ -1,18 +1,13 @@
 name: network_inflation
 channels:
+  - default
   - conda-forge
-  - pytorch
 dependencies:
-  - huggingface_hub
-  - ipywidgets
-  - jpeg
+  - python>=3.7
   - jupyter
-  - libpng
   - matplotlib
-  - numpy
-  - pytorch
-  - scipy
-  - torchdata 
-  - torchinfo
-  - torchvision
+  - pytorch::pytorch=1.13.1
+  - pytorch::torchdata
+  - conda-forge::torchinfo
+  - pytorch::torchvision=0.14.1
   - tqdm
