@@ -26,6 +26,8 @@ Clone the dataset after accepting the terms with:
 ```bash
 huggingface-cli login
 git clone https://huggingface.co/datasets/imagenet-1k
+cd imagenet-1k
+git lfs pull
 ```
 
 Then unpack the data
