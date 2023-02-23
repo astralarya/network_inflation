@@ -1,5 +1,4 @@
 import glob
-import os
 from pathlib import Path
 import shutil
 import sys
@@ -8,8 +7,8 @@ import tarfile
 from tqdm import tqdm
 
 
-git_dir = Path(sys.argv[0])
-out_dir = Path(__file__, "data/imagenet-1k")
+git_dir = Path(sys.argv[1])
+out_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(__file__, "data/imagenet-1k")
 
 
 def get_files(split: str):
