@@ -30,7 +30,7 @@ def transform_name(name: str):
 # Setup output dir
 
 out_dir.mkdir(parents=True, exist_ok=True)
-for split in ["test", "train", "val"]
+for split in ["test", "train", "val"]:
     out_dir.joinpath(split).mkdir(exist_ok=True)
 
 # Extract files
