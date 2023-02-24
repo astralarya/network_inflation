@@ -1,7 +1,7 @@
 import argparse
 
-from .local import imagenet
-from .local import resnet
+from local import imagenet
+from local import resnet
 
 
 parser = argparse.ArgumentParser(
