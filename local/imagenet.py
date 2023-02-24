@@ -50,8 +50,8 @@ def train(
     data: datasets.DatasetFolder,
     init_fn: Optional[Callable[[nn.Module], Any]] = model.reset,
     batch_size=256,
-    num_epochs=10,
-    num_workers=2,
+    num_epochs=2048,
+    num_workers=4,
 ):
     data_loader = torch.utils.data.DataLoader2(
         data,
