@@ -7,7 +7,7 @@ from torchvision import datasets, transforms
 from tqdm import tqdm
 
 from . import model as model
-from .device import device
+from .device import device, device_step
 
 
 def train_data(data_root: str):
