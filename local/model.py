@@ -41,7 +41,6 @@ def write_log(name: str, data: Optional[str] = None, storage_dir: Optional[str] 
 
 
 def write_record(name: str, part: str, data: Optional[str] = None, storage_dir: Optional[str] = None):
-    storage_dir = storage_dir if storage_dir is not None else default_dir
     write_log(f"{name}.__{part}__", data, storage_dir)
 
 
@@ -56,8 +55,7 @@ def save(module: nn.Module, name: str, epoch: int, storage_dir: Optional[str] = 
 def save_state(
     modules: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None, storage_dir: Optional[str] = None
 ):
-    storage_dir = storage_dir if storage_dir is not None else default_dir
-    write_log(log, storage_dir)
+    write_log(name, log, storage_dir)
     for key, value in modules.items():
         save(value, name if key is None else f"{name}.__{key}__", epoch, storage_dir)
 
@@ -76,7 +74,6 @@ def load(module: nn.Module, name: str, epoch: int = None, storage_dir: Optional[
 def load_state(
     modules: Mapping[Optional[str], nn.Module], name: str, epoch: int = None, storage_dir: Optional[str] = None
 ):
-    storage_dir = storage_dir if storage_dir is not None else default_dir
     if None in modules:
         epoch = get_epoch(name, epoch, storage_dir)
     for key, value in modules.items():
