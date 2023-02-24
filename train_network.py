@@ -18,7 +18,7 @@ name = args.name
 network = getattr(resnet, args.network, lambda: None)()
 
 if network is None:
-    print(f"Invalid resnet: {args.network}")
+    print(f"Unknown network: {args.network}")
     exit(1)
 
 
