@@ -1,5 +1,5 @@
-from local import imagenet
-from local import resnet
+from .local import imagenet
+from .local import resnet
 
 train_data = imagenet.train_data("/mnt/imagenet/imagenet-1k/train/")
 
