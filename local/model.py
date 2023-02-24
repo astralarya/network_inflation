@@ -6,6 +6,10 @@ from typing import Mapping, Optional
 
 import torch
 import torch.nn as nn
+try:
+    import torch_xla.core.xla_model as xla
+except ImportError:
+    xla = None
 
 from .device import device, cpu
 
@@ -46,7 +50,7 @@ def save(module: nn.Module, name: str, epoch: int, storage_dir: Optional[str] = 
     save_path = Path(storage_dir) / f"{name}.{epoch:08}.pkl"
     with save_path.open("wb") as save_file:
         print(f"Saving `{save_path}`")
-        torch.save(module.to(device=cpu).state_dict(), save_file)
+        torch.save(xla.save(module.state_dict()) if xla is not None else module.state_dict(), save_file)
 
 
 def save_state(
