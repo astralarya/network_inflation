@@ -13,7 +13,7 @@ parser.add_argument('--num_workers', default=16, type=int)
 args = parser.parse_args()
 
 name = args.resnet
-network = getattr(resnet, name, None)
+network = getattr(resnet, name, lambda: None)()
 
 if network is None:
     print(f"Invalid resnet: {name}")
