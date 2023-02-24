@@ -7,7 +7,7 @@ from typing import Mapping, Optional
 import torch
 import torch.nn as nn
 
-from .device import device
+from .device import device, cpu
 
 
 default_dir = "models"
@@ -46,7 +46,7 @@ def save(module: nn.Module, name: str, epoch: int, storage_dir: Optional[str] = 
     save_path = Path(storage_dir) / f"{name}.{epoch:08}.pkl"
     with save_path.open("wb") as save_file:
         print(f"Saving `{save_path}`")
-        torch.save(module.state_dict(), save_file)
+        torch.save(module.to(device=cpu).state_dict(), save_file)
 
 
 def save_state(

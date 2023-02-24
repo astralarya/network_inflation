@@ -61,10 +61,10 @@ def train(
         shuffle=True,
     )
     optimizer = optim.AdamW(network.parameters())
-    criterion = nn.CrossEntropyLoss().to(device)
+    criterion = nn.CrossEntropyLoss().to(device=device)
 
     network.train()
-    network.to(device)
+    network.to(device=device)
 
     state = {
         None: network,
@@ -82,8 +82,8 @@ def train(
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
             optimizer.zero_grad()
-            outputs = network(inputs.to(device))
-            loss = criterion(outputs, labels.to(device))
+            outputs = network(inputs.to(device=device))
+            loss = criterion(outputs, labels.to(device=device))
             loss.backward()
             optimizer.step()
             device_step()
@@ -100,15 +100,15 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
 
     with torch.no_grad():
         model.eval()
-        model.to(device)
+        model.to(device=device)
         accuracy = 0.0
         total = len(data_loader.dataset)
         print(f"Iterating {total} samples")
         for inputs, labels in tqdm(data_loader):
             bs, ncrops, c, h, w = inputs.shape
-            outputs = model(inputs.view(-1, c, h, w).to(device))
+            outputs = model(inputs.view(-1, c, h, w).to(device=device))
             outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
-            labels = labels.to(device)
+            labels = labels.to(device=device)
             accuracy += (outputs == labels).sum() / total
         print(f"Top1 accuracy: {accuracy}")
         return accuracy
