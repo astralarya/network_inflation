@@ -1,3 +1,6 @@
+# Snippets run to setup the compute environment
+
+
 sudo apt-get update
 sudo apt-get install -y screen wget bzip2 git libxml2-dev
 
@@ -15,5 +18,12 @@ pushd git-lfs-3.3.0/
 sudo ./install.sh
 popd
 rm -r git-lfs-*
+
+
+git clone git@github.com:astralarya/network_inflation.git
+cd network_inflation
+conda env create -f environment.yml
+conda activate network_inflation
+pip install https://storage.googleapis.com/tpu-pytorch/wheels/tpuvm/torch_xla-1.13-cp38-cp38-linux_x86_64.whl
 
 # https://cloud.google.com/compute/docs/disks/add-persistent-disk
