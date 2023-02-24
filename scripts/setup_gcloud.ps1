@@ -1,6 +1,6 @@
 # Run on local dev
 
-$INSTANCE_NAME = "tpu-3"
+$INSTANCE_NAME = "tpu-1"
 
 $GCLOUD_ZONE = "us-central1-f"
 $TPU_TYPE = "v2-8"
