@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 
 git_dir = Path(sys.argv[1])
-out_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(__file__, "data/imagenet-1k")
+out_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(__file__).parent.joinpath("data/imagenet-1k")
 
 
 def get_files(split: str):

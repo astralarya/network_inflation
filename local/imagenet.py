@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Callable, Optional
 
 import torch
 import torch.nn as nn
@@ -48,6 +48,7 @@ def train(
     network: nn.Module,
     name: str,
     data: datasets.DatasetFolder,
+    init_fn: Optional[Callable[[nn.Module], Any]] = model.reset,
     batch_size=256,
     num_epochs=10,
 ):
@@ -68,11 +69,13 @@ def train(
         "optim": optimizer,
     }
     save_epoch = model.load_state(state, name)
-
     start_epoch = 1 if save_epoch is None else save_epoch + 1
-    total = len(data_loader.dataset)
+    if save_epoch is None and init_fn is not None:
+        init_fn(network)
 
+    total = len(data_loader.dataset)
     print(f"Iterating {total} samples")
+
     for epoch in range(start_epoch, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):

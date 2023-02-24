@@ -3,7 +3,7 @@ import torch
 try:
     import torch_xla.core.xla_model as xla
 except ImportError:
-    xla
+    xla = None
 
 
 if torch.backends.mps.is_available():
