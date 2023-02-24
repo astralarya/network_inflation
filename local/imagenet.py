@@ -52,6 +52,7 @@ def train(
     batch_size=256,
     num_epochs=2048,
     num_workers=4,
+    storage_dir: Optional[str]=None,
 ):
     data_loader = torch.utils.data.DataLoader2(
         data,
@@ -69,7 +70,7 @@ def train(
         None: network,
         "optim": optimizer,
     }
-    save_epoch = model.load_state(state, name)
+    save_epoch = model.load_state(state, name, storage_dir=storage_dir)
     start_epoch = 1 if save_epoch is None else save_epoch + 1
     if save_epoch is None and init_fn is not None:
         init_fn(network)
@@ -85,9 +86,10 @@ def train(
             loss = criterion(outputs, labels.to(device))
             loss.backward()
             optimizer.step()
+            device_step()
             epoch_loss += loss.item() / total
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        model.save_state(state, name, epoch, log=f"{epoch}\t{epoch_loss}")
+        model.save_state(state, name, epoch, log=f"{epoch}\t{epoch_loss}", storage_dir=storage_dir)
 
 
 def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
@@ -113,11 +115,12 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
 
 
 def run_eval(
-    module: nn.Module, name: str, epoch: Optional[int], data: datasets.DatasetFolder
+    module: nn.Module, name: str, epoch: Optional[int], data: datasets.DatasetFolder, storage_dir: Optional[str] = None
 ):
-    if epoch is None or model.load(module, name, epoch) is not None:
+    if epoch is None or model.load(module, name, epoch, storage_dir=storage_dir) is not None:
         model.write_record(
             name,
             "eval",
             f"{epoch}\t{eval(module, data)}",
+            storage_dir=storage_dir
         )
