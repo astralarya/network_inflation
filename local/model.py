@@ -50,7 +50,7 @@ def save(module: nn.Module, name: str, epoch: int, storage_dir: Optional[str] = 
     save_path = Path(storage_dir) / f"{name}.{epoch:08}.pkl"
     with save_path.open("wb") as save_file:
         print(f"Saving `{save_path}`")
-        torch.save(xla.save(module.state_dict()) if xla is not None else module.state_dict(), save_file)
+        (xla.save if xla is not None else torch.save)(module.state_dict(), save_file)
 
 
 def save_state(
