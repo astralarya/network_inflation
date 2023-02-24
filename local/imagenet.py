@@ -106,7 +106,7 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
         print(f"Iterating {total} samples")
         for inputs, labels in tqdm(data_loader):
             bs, ncrops, c, h, w = inputs.shape
-            outputs = model(inputs.view(-1, c, h, w).to(device=device))
+            outputs = model(inputs.to(device=device).view(-1, c, h, w))
             outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
             labels = labels.to(device=device)
             accuracy += (outputs == labels).sum() / total
