@@ -8,8 +8,8 @@ parser = argparse.ArgumentParser(
     prog="ResNet training script"
 )
 parser.add_argument('resnet', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
-parser.add_argument('batch_size', default=64, type=int)
-parser.add_argument('num_workers', default=16, type=int)
+parser.add_argument('--batch_size', default=64, type=int)
+parser.add_argument('--num_workers', default=16, type=int)
 args = parser.parse_args()
 
 name = args.resnet
