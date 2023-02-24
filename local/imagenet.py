@@ -48,11 +48,11 @@ def train(
     network: nn.Module,
     name: str,
     data: datasets.DatasetFolder,
-    init_fn: Optional[Callable[[nn.Module], Any]] = model.reset,
     batch_size=256,
     num_epochs=2048,
-    num_workers=4,
-    storage_dir: Optional[str]=None,
+    num_workers=8,
+    init_fn: Optional[Callable[[nn.Module], Any]] = None,
+    storage_dir: Optional[str] = None,
 ):
     data_loader = torch.utils.data.DataLoader2(
         data,
@@ -89,7 +89,7 @@ def train(
             device_step()
             epoch_loss += loss.item() / total
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        model.save_state(state, name, epoch, log=f"{epoch}\t{epoch_loss}", storage_dir=storage_dir)
+        model.save_state(state, name, epoch, log=f"{epoch}\t{epoch_loss}\n", storage_dir=storage_dir)
 
 
 def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
