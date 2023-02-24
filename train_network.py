@@ -8,16 +8,17 @@ from local import resnet
 parser = argparse.ArgumentParser(
     prog="ResNet training script"
 )
-parser.add_argument('resnet', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
+parser.add_argument('name')
+parser.add_argument('--resnet', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--num_workers', default=8, type=int)
 args = parser.parse_args()
 
-name = args.resnet
-network = getattr(resnet, name, lambda: None)()
+name = args.name
+network = getattr(resnet, args.resnet, lambda: None)()
 
 if network is None:
-    print(f"Invalid resnet: {name}")
+    print(f"Invalid resnet: {args.resnet}")
     exit(1)
 
 
