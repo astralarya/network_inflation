@@ -1,7 +1,6 @@
 jupyter
-matplotlib
-pytorch
-torchdata
+torch
+torch_xla[tpuvm]
 torchinfo
 torchvision
 tqdm

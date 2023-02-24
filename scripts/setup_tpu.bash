@@ -4,9 +4,8 @@
 sudo apt-get update
 sudo apt-get install -y screen git
 
-pip3 install torch_xla[tpuvm]
-
 
 # git clone git@github.com:astralarya/network_inflation.git
+# pip install -r requirements.txt
 
 # https://cloud.google.com/compute/docs/disks/add-persistent-disk
