@@ -5,7 +5,7 @@ try:
 except ImportError:
     xla = None
 
-device_type = "cpu"
+device_type = None
 
 if torch.backends.mps.is_available():
     device = torch.device("mps")
@@ -17,7 +17,7 @@ elif torch.cuda.is_available():
     device = torch.device(f"cuda:{torch.cuda.current_device()}")
     device_type = "cuda"
 else:
-    device = "cpu"
+    device = None
 
 cpu = "cpu"
 
