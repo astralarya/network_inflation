@@ -24,7 +24,7 @@ cpu = "cpu"
 print(f"Device: {device}")
 
 
-def device_step():
-    match device_type:
-        case "xla":
-            xla.mark_step()
+def _device_step():
+    if device_type == "xla":
+        return xla.mark_step
+device_step = _device_step()
