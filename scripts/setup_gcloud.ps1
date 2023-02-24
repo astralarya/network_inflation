@@ -1,13 +1,13 @@
 # Run on local dev
 
-$INSTANCE_NAME = "tpu-1"
+$INSTANCE_NAME = "tpu-3"
 
-$GCLOUD_ZONE = "europe-west4-a"
-$TPU_TYPE = "v3-8"
+$GCLOUD_ZONE = "us-central1-f"
+$TPU_TYPE = "v2-8"
 $TPU_VERSION = "tpu-vm-pt-1.13"
 $GCLOUD_DISK = "imagenet--$INSTANCE_NAME"
 $GCLOUD_DISK_SIZE = "150GB"
-$GCLOUD_SNAPSHOT = "imagenet-1k--eu"
+$GCLOUD_SNAPSHOT = "imagenet-1k"
 
 gcloud compute disks create "$GCLOUD_DISK" `
     "--zone=$GCLOUD_ZONE" `
