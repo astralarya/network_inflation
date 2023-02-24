@@ -4,7 +4,7 @@
 sudo apt-get update
 sudo apt-get install -y screen git
 
-echo 'export XRT_TPU_CONFIG="localservice;-1;localhost:51011"' >> ~/.bashrc
+echo 'export XRT_TPU_CONFIG="localservice;0;localhost:51011"' >> ~/.bashrc
 source ~/.bashrc
 
 # https://cloud.google.com/compute/docs/disks/add-persistent-disk
