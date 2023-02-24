@@ -15,7 +15,7 @@ python -m ipykernel install --user --name=network_inflation
 This repo expects Imagenet data structured for
 [ImageFolder](https://pytorch.org/vision/main/generated/torchvision.datasets.ImageFolder.html)
 
-The [`./setup_imagenet.py`](./setup_imagenet.py)
+The [`setup_imagenet.py`](./setup_imagenet.py)
 script converts the assets in
 Hugging Face [Imagenet](https://huggingface.co/datasets/imagenet-1k).
 Access via this method requires a Hugging Face account
