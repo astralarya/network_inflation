@@ -63,9 +63,6 @@ def train(
     optimizer = optim.AdamW(network.parameters())
     criterion = nn.CrossEntropyLoss().to(device=device)
 
-    network.train()
-    network.to(device=device)
-
     state = {
         None: network,
         "optim": optimizer,
@@ -77,6 +74,9 @@ def train(
 
     total = len(data_loader.dataset)
     print(f"Iterating {total} samples")
+
+    network.train()
+    network.to(device=device)
 
     for epoch in range(start_epoch, num_epochs + 1):
         epoch_loss = 0.0
