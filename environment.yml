@@ -2,12 +2,15 @@ name: network_inflation
 channels:
   - default
   - conda-forge
+  - pytorch
+  - nvidia
 dependencies:
   - python>=3.7
   - jupyter
   - matplotlib
-  - pytorch::pytorch=1.13.1
-  - pytorch::torchdata
-  - conda-forge::torchinfo
-  - pytorch::torchvision=0.14.1
+  - pytorch
+  - pytorch-cuda
+  - torchdata
+  - torchinfo
+  - torchvision
   - tqdm
