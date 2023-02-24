@@ -69,7 +69,7 @@ def load(module: nn.Module, name: str, epoch: int = None, storage_dir: Optional[
         return None
     save_path = Path(storage_dir) / f"{name}.{epoch:08}.pkl"
     print(f"Loading `{save_path}`")
-    module.load_state_dict(torch.load(save_path, map_location=device))
+    module.load_state_dict(torch.load(save_path))
     return epoch
 
 
