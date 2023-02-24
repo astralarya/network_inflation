@@ -51,11 +51,12 @@ def train(
     init_fn: Optional[Callable[[nn.Module], Any]] = model.reset,
     batch_size=256,
     num_epochs=10,
+    num_workers=2,
 ):
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
-        num_workers=2,
+        num_workers=num_workers,
         shuffle=True,
     )
     optimizer = optim.AdamW(network.parameters())
