@@ -9,15 +9,15 @@ $GCLOUD_DISK = "imagenet--$INSTANCE_NAME"
 $GCLOUD_DISK_SIZE = "150GB"
 $GCLOUD_SNAPSHOT = "imagenet-1k"
 
-gcloud compute disks create "$GCLOUD_DISK" `
-    "--zone=$GCLOUD_ZONE" `
-    "--size=$GCLOUD_DISK_SIZE" `
-    "--source-snapshot=$GCLOUD_SNAPSHOT"
-
 gcloud compute tpus tpu-vm create "$INSTANCE_NAME" `
     "--zone=$GCLOUD_ZONE" `
     "--accelerator-type=$TPU_TYPE" `
     "--version=$TPU_VERSION"
+
+gcloud compute disks create "$GCLOUD_DISK" `
+    "--zone=$GCLOUD_ZONE" `
+    "--size=$GCLOUD_DISK_SIZE" `
+    "--source-snapshot=$GCLOUD_SNAPSHOT"
 
 gcloud alpha compute tpus tpu-vm attach-disk "$INSTANCE_NAME" `
     "--zone=$GCLOUD_ZONE" `
