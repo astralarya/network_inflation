@@ -24,4 +24,9 @@ gcloud alpha compute tpus tpu-vm attach-disk "$INSTANCE_NAME" `
     "--disk=$GCLOUD_DISK" `
     --mode=read-only
 
-#  gcloud compute tpus tpu ssh "$INSTANCE_NAME" "--zone=$GCLOUD_ZONE" --ssh-flag="-4 -L 9001:localhost:9001"
+gcloud compute tpus tpu-vm ssh "$INSTANCE_NAME" `
+    "--zone=$GCLOUD_ZONE"
+
+# gcloud compute tpus tpu-vm ssh "$INSTANCE_NAME" `
+#     "--zone=$GCLOUD_ZONE" `
+#     --ssh-flag="-4 -L 9001:localhost:9001"
