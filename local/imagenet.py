@@ -136,7 +136,7 @@ def run_val(
         val_epoch(network, name, data, epoch, batch_size=batch_size)
 
 
-def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetFolder, batch_size=64, num_workers=8):
+def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetFolder, batch_size=256, num_workers=8):
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
