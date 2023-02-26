@@ -6,7 +6,7 @@ INSTANCES=(
     "us-central1-f/tpu-1"
     "us-central1-f/tpu-2"
     "us-central1-f/tpu-3"
-    "us-central1-f/tpu-4"
+    #"us-central1-f/tpu-4"
     "europe-west4-a/tpu-eu-1"
 )
 
