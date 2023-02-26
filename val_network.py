@@ -6,7 +6,7 @@ from local import resnet
 
 
 parser = argparse.ArgumentParser(
-    prog="ResNet training script"
+    prog="ResNet validation script"
 )
 parser.add_argument('name')
 parser.add_argument('--network', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
