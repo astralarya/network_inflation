@@ -60,6 +60,7 @@ def train(
         shuffle=True,
     )
     optimizer = optim.AdamW(network.parameters())
+    softmax = nn.Softmax(dim=1)
     criterion = nn.CrossEntropyLoss().to(device=device)
 
     state = {
@@ -77,9 +78,11 @@ def train(
     for epoch in range(save_epoch + 1, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            outputs = softmax(network(inputs))
+            loss = criterion(outputs, labels)
             optimizer.zero_grad()
-            outputs = network(inputs.to(device=device))
-            loss = criterion(outputs, labels.to(device=device))
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item() / total
@@ -89,21 +92,24 @@ def train(
 
 
 def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
-    data_loader = torch.utils.data.DataLoader2(
-        data,
-        batch_size=batch_size,
-    )
-
     with torch.no_grad():
+        data_loader = torch.utils.data.DataLoader2(
+            data,
+            batch_size=batch_size,
+        )
+        softmax = nn.Softmax(dim=2)
+
+        total = len(data_loader.dataset)
+        print(f"Iterating {total} samples")
+
         network.eval()
         network.to(device=device)
         accuracy = 0.0
-        total = len(data_loader.dataset)
-        print(f"Iterating {total} samples")
         for inputs, labels in tqdm(data_loader):
             bs, ncrops, c, h, w = inputs.shape
             outputs = network(inputs.to(device=device).view(-1, c, h, w))
-            outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
+            outputs = softmax(outputs.view(bs, ncrops, -1))
+            outputs = outputs.mean(1).max(dim=1).indices.flatten()
             labels = labels.to(device=device)
             accuracy += (outputs == labels).sum() / total
             device_step()
@@ -142,6 +148,7 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
         batch_size=batch_size,
         num_workers=num_workers,
     )
+    softmax = nn.Softmax(dim=1)
     criterion = nn.CrossEntropyLoss().to(device=device)
 
 
@@ -156,8 +163,8 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
         print(f"Iterating {total} samples")
         for inputs, _ in tqdm(data_loader):
             inputs = inputs.to(device=device)
-            outputs0 = network0(inputs)
-            outputs1 = network1(inputs)
+            outputs0 = softmax(network0(inputs))
+            outputs1 = softmax(network1(inputs))
             loss = criterion(outputs0, outputs1)
             total_loss += loss.item() / total
             device_step()
