@@ -141,7 +141,6 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
         data,
         batch_size=batch_size,
         num_workers=num_workers,
-        shuffle=True,
     )
     criterion = nn.CrossEntropyLoss().to(device=device)
 
