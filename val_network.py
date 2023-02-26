@@ -23,5 +23,5 @@ if network is None:
 
 val_data = imagenet.val_data("/mnt/imagenet/imagenet-1k/val/")
 
-imagenet.val(network, name, val_data, batch_size=args.batch_size)
+imagenet.run_val(network, name, val_data, batch_size=args.batch_size)
 
