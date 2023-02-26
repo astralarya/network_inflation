@@ -27,4 +27,6 @@ print(f"Device: {device}")
 def _device_step():
     if device_type == "xla":
         return xla.mark_step
+    else:
+        return lambda: None
 device_step = _device_step()
