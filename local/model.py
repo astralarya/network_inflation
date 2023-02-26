@@ -77,7 +77,10 @@ def load(module: nn.Module, name: str, epoch: int = None):
 
 
 def load_state(
-    modules: Mapping[Optional[str], nn.Module], name: str, epoch: int = None
+    modules: Mapping[Optional[str], nn.Module],
+    name: str,
+    epoch: int = None,
+    init_fn: Optional[Callable[[nn.Module], Any]] = None,
 ):
     if None in modules:
         epoch = get_epoch(name, epoch)
@@ -88,9 +91,11 @@ def load_state(
     if epoch is not None:
         print(f"Resuming from epoch {epoch}")
     else:
+        if init_fn is not None and None in modules:
+            init_fn(modules[None])
         print("Saving initial state as epoch 0")
         save_state(modules, name, 0)
-    return epoch
+    return 0 if epoch is None else epoch
 
 
 def reset(module: nn.Module):

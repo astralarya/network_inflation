@@ -66,10 +66,7 @@ def train(
         None: network,
         "optim": optimizer,
     }
-    save_epoch = model.load_state(state, name)
-    start_epoch = 1 if save_epoch is None else save_epoch + 1
-    if save_epoch is None and init_fn is not None:
-        init_fn(network)
+    save_epoch = model.load_state(state, name, init_fn)
 
     total = len(data_loader.dataset)
     print(f"Iterating {total} samples")
@@ -77,7 +74,7 @@ def train(
     network.train()
     network.to(device=device)
 
-    for epoch in range(start_epoch, num_epochs + 1):
+    for epoch in range(save_epoch + 1, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
             optimizer.zero_grad()
