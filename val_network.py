@@ -27,5 +27,5 @@ val_data = imagenet.val_data("/mnt/imagenet/imagenet-1k/val/")
 if args.epoch == "all":
     imagenet.run_val(network, name, val_data, batch_size=args.batch_size)
 elif type(args.epoch) == "int":
-    imagenet.val_epoch(network, name, val_data, epoch, batch_size=args.batch_size)
+    imagenet.val_epoch(network, name, val_data, args.epoch, batch_size=args.batch_size)
 
