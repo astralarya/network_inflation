@@ -66,7 +66,7 @@ def train(
         None: network,
         "optim": optimizer,
     }
-    save_epoch = model.load_state(state, name, init_fn)
+    save_epoch = model.load_state(state, name, init_fn=init_fn)
 
     total = len(data_loader.dataset)
     print(f"Iterating {total} samples")
