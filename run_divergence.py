@@ -26,11 +26,11 @@ if network1 is None:
 
 train_data = imagenet.train_data("/mnt/imagenet/imagenet-1k/train/")
 
-print(f"Self-divergence: {args.network0}")
-imagenet.divergence(network0, network0, train_data)
-
 print(f"Self-divergence: {args.network1}")
 imagenet.divergence(network1, network1, train_data)
+
+print(f"Self-divergence: {args.network0}")
+imagenet.divergence(network0, network0, train_data)
 
 print(f"Divergence: {args.network0} - {args.network1}")
 imagenet.divergence(network1, network1, train_data)
