@@ -24,5 +24,12 @@ if network is None:
 
 train_data = imagenet.train_data("/mnt/imagenet/imagenet-1k/train/")
 
-imagenet.train(network, name, train_data, batch_size=args.batch_size, num_workers=args.num_workers, init_fn=model.reset)
+imagenet.train(
+    network,
+    name,
+    train_data,
+    batch_size=args.batch_size,
+    num_workers=args.num_workers,
+    init_fn=model.reset
+)
 
