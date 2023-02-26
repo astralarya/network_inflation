@@ -1,39 +1,39 @@
-from enum import Enum
-from typing import Mapping
+from itertools import zip_longest
 
 import torch
 import torch.nn as nn
+from torchvision.models import ResNet
 
 from . import model
 
 
-class InflateAction(Enum):
-    SET_ZERO = Enum.auto()
-
-
 @torch.no_grad()
-def inflate(network0: nn.Module, network1: nn.Module, mapping: Mapping[str, str]):
-    """Initialize network1 via inflating network0
+def inflate_resnet(network0: ResNet, network1: ResNet):
+    """Initialize ResNet network1 via inflating ResNet network0
 
     Args:
         network0: Network to inflate.  Not mutated.
         network1: Network to initialize.  Mutated.
     """
 
-    def action(input: InflateAction, output: str):
-        match input:
-            case InflateAction.SET_ZERO:
-                network1.get_parameter(output).zero_()
-
     # Random initialization
     model.reset(network1)
 
-    for output, input in mapping.items():
-        if isinstance(input, str):
-            # Copy parameters
-            network1.get_parameter(output).copy_(network0.get_parameter(input))
-        elif isinstance(input, InflateAction):
-            action(input, output)
+    for child in ["conv1", "bn1", "fc"]:
+        copy(network0.get_submodule(child), network1.get_submodule(child))
+    
+    for layer in ["layer1", "layer2", "layer3", "layer4"]:
+        children0 = network0.get_submodule(layer).children()
+        children1 = network1.get_submodule(layer).children()
+
+        for child0, child1 in zip_longest(children0, children1):
+            if child1 is None:
+                raise Exception("Inflate destination is smaller than source!")
+            elif child0 is None:
+                child1.get_parameter("conv3.weight").zero_()
+                child1.get_parameter("bn3.bias").zero_()
+            else:
+                copy(child0, child1)
 
 
 @torch.no_grad()
