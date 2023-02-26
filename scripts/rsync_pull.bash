@@ -25,6 +25,5 @@ do
         "--format=get(networkEndpoints[0].accessConfig.externalIp)" \
     )"
     echo "Rsync $item ($address)..."
-    mkdir -p "$OUTPUT_DIR/$zone/$instance"
-    rsync -aP "$RSYNC_USER@$address:$SOURCE_DIR/" "$OUTPUT_DIR/$zone/$instance"
+    rsync -aP --mkpath "$RSYNC_USER@$address:$SOURCE_DIR/" "$OUTPUT_DIR/$zone/$instance"
 done
