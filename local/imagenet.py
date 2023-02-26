@@ -108,6 +108,7 @@ def val(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
             outputs = model(inputs.to(device=device).view(-1, c, h, w))
             outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
             labels = labels.to(device=device)
+            device_step()
             accuracy += (outputs == labels).sum() / total
         print(f"Top1 accuracy: {accuracy}")
         return accuracy
