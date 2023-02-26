@@ -2,7 +2,7 @@ import copy
 import glob
 import os
 from pathlib import Path
-from typing import Mapping, Optional
+from typing import Callable, Mapping, Optional
 
 import torch
 import torch.nn as nn
