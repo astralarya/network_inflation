@@ -27,7 +27,7 @@ def train_data(data_root: str):
     )
 
 
-def eval_data(data_root: str):
+def val_data(data_root: str):
     return datasets.ImageFolder(
         data_root,
         transform=transforms.Compose(
@@ -91,7 +91,7 @@ def train(
         model.save_state(state, name, epoch, log=f"{epoch}\t{epoch_loss}\n")
 
 
-def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
+def val(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
@@ -113,13 +113,26 @@ def eval(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
         return accuracy
 
 
-def run_eval(
-    module: nn.Module, name: str, epoch: Optional[int], data: datasets.DatasetFolder
+def val_epoch(
+    module: nn.Module,
+    name: str,
+    data: datasets.DatasetFolder,
+    epoch: Optional[int] = None,
+    batch_size=256,
 ):
-    if epoch is None or model.load(module, name, epoch, storage_dir=storage_dir) is not None:
+    if epoch is None or model.load(module, name, epoch) is not None:
         model.write_record(
             name,
             "eval",
-            f"{epoch}\t{eval(module, data)}",
-            storage_dir=storage_dir
+            f"{epoch}\t{val(module, data, batch_size=batch_size)}",
         )
+
+
+def run_val(
+    module: nn.Module,
+    name: str,
+    data: datasets.DatasetFolder,
+    batch_size=256,
+):
+    for epoch in model.list_epochs(name):
+        val_epoch(module, name, data, epoch, batch_size=batch_size)

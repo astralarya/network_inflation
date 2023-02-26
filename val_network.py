@@ -21,7 +21,7 @@ if network is None:
     exit(1)
 
 
-eval_data = imagenet.eval_data("/mnt/imagenet/imagenet-1k/val/")
+val_data = imagenet.val_data("/mnt/imagenet/imagenet-1k/val/")
 
-imagenet.eval(network, name, eval_data, batch_size=args.batch_size)
+imagenet.val(network, name, val_data, batch_size=args.batch_size)
 
