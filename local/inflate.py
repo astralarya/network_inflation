@@ -15,10 +15,12 @@ def resnet(network0: ResNet, network1: ResNet):
         network0: Network to inflate.  Not mutated.
         network1: Network to initialize.  Mutated.
     """
+    print(f"Initializing via inflation")
 
     # Random initialization
     model.reset(network1)
 
+    # Copy and mask
     for child in ["conv1", "bn1", "fc"]:
         copy(network0.get_submodule(child), network1.get_submodule(child))
     
