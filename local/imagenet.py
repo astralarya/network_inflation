@@ -155,7 +155,6 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
         total_loss = 0.0
         total = len(data_loader.dataset)
         print(f"Iterating {total} samples")
-        i = 0
         for inputs, _ in tqdm(data_loader):
             inputs = inputs.to(device=device)
             outputs0 = network0(inputs)
@@ -163,9 +162,6 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
             loss = criterion(outputs0, outputs1)
             total_loss += loss.item() / total
             device_step()
-            i+=1
-            if i > 10:
-                break
         print(f"Divergence: {total_loss}")
         return total_loss
 
