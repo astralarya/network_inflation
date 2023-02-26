@@ -8,7 +8,7 @@ from . import model
 
 
 @torch.no_grad()
-def inflate_resnet(network0: ResNet, network1: ResNet):
+def resnet(network0: ResNet, network1: ResNet):
     """Initialize ResNet network1 via inflating ResNet network0
 
     Args:

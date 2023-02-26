@@ -82,55 +82,90 @@ def train(
             loss = criterion(outputs, labels.to(device=device))
             loss.backward()
             optimizer.step()
-            device_step()
             epoch_loss += loss.item() / total
+            device_step()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
         model.save_state(state, name, epoch, log=f"{epoch}\t{epoch_loss}\n")
 
 
-def val(model: nn.Module, data: datasets.DatasetFolder, batch_size=64):
+def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
     )
 
     with torch.no_grad():
-        model.eval()
-        model.to(device=device)
+        network.eval()
+        network.to(device=device)
         accuracy = 0.0
         total = len(data_loader.dataset)
         print(f"Iterating {total} samples")
         for inputs, labels in tqdm(data_loader):
             bs, ncrops, c, h, w = inputs.shape
-            outputs = model(inputs.to(device=device).view(-1, c, h, w))
+            outputs = network(inputs.to(device=device).view(-1, c, h, w))
             outputs = outputs.view(bs, ncrops, -1).mean(1).max(dim=1).indices.flatten()
             labels = labels.to(device=device)
-            device_step()
             accuracy += (outputs == labels).sum() / total
+            device_step()
         print(f"Top1 accuracy: {accuracy}")
         return accuracy
 
 
 def val_epoch(
-    module: nn.Module,
+    network: nn.Module,
     name: str,
     data: datasets.DatasetFolder,
     epoch: Optional[int] = None,
     batch_size=256,
 ):
-    if epoch is None or model.load(module, name, epoch) is not None:
+    if epoch is None or model.load(network, name, epoch) is not None:
         model.write_record(
             name,
             "eval",
-            f"{epoch}\t{val(module, data, batch_size=batch_size)}",
+            f"{epoch}\t{val(network, data, batch_size=batch_size)}",
         )
 
 
 def run_val(
-    module: nn.Module,
+    network: nn.Module,
     name: str,
     data: datasets.DatasetFolder,
     batch_size=256,
 ):
     for epoch in model.list_epochs(name):
-        val_epoch(module, name, data, epoch, batch_size=batch_size)
+        val_epoch(network, name, data, epoch, batch_size=batch_size)
+
+
+def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetFolder, batch_size=64, num_workers=8):
+    data_loader = torch.utils.data.DataLoader2(
+        data,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        shuffle=True,
+    )
+    criterion = nn.CrossEntropyLoss().to(device=device)
+
+
+    with torch.no_grad():
+        network0.eval()
+        network0.to(device=device)
+        network1.eval()
+        network1.to(device=device)
+
+        total_loss = 0.0
+        total = len(data_loader.dataset)
+        print(f"Iterating {total} samples")
+        i = 0
+        for inputs, _ in tqdm(data_loader):
+            inputs = inputs.to(device=device)
+            outputs0 = network0(inputs)
+            outputs1 = network1(inputs)
+            loss = criterion(outputs0, outputs1)
+            total_loss += loss.item() / total
+            device_step()
+            i+=1
+            if i > 10:
+                break
+        print(f"Divergence: {total_loss}")
+        return total_loss
+
