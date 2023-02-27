@@ -19,7 +19,7 @@ from local import resnet
 
 name = args.name
 network = getattr(resnet, args.network, lambda: None)()
-inflate_source = getattr(resnet, args.network, lambda: None)()
+inflate_source = getattr(resnet, args.inflate, lambda: None)()
 
 if network is None:
     print(f"Unknown network: {args.network}")
