@@ -25,6 +25,10 @@ if network is None:
     print(f"Unknown network: {args.network}")
     exit(1)
 
+if args.inflate is not None and inflate_source is None:
+    print(f"Unknown network: {args.inflate}")
+    exit(1)
+
 
 val_data = imagenet.val_data("/mnt/imagenet/imagenet-1k/val/")
 
