@@ -32,6 +32,10 @@ if network is None:
     print(f"Unknown network: {args.network}")
     exit(1)
 
+def reset_fn(x):
+    print(f"Resetting network ({args.network})")
+    model.reset(x)
+
 def inflate_fn(x):
     inflate_source = getattr(resnet, args.inflate, lambda: None)()
     if inflate_source is None:
@@ -42,7 +46,7 @@ def inflate_fn(x):
 
 train_data = imagenet.train_data(args.imagenet_path / "train")
 
-init_fn=model.reset if args.inflate is None else inflate_fn
+init_fn=reset_fn if args.inflate is None else inflate_fn
 imagenet.train(
     network,
     args.model_dir / name,
