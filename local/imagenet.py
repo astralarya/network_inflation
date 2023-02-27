@@ -104,17 +104,24 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
 
         network.eval()
         network.to(device=device)
-        accuracy = 0.0
+        top1_accuracy = 0.0
+        top5_accuracy = 0.0
         for inputs, labels in tqdm(data_loader):
             bs, ncrops, c, h, w = inputs.shape
             outputs = network(inputs.to(device=device).view(-1, c, h, w))
             outputs = softmax(outputs.view(bs, ncrops, -1))
-            outputs = outputs.mean(1).max(dim=1).indices.flatten()
+            top1_outputs = outputs.mean(1).max(dim=1).indices.flatten()
+            top5_outputs = outputs.mean(1).topk(dim=1).indices.flatten()
             labels = labels.to(device=device)
-            accuracy += (outputs == labels).sum() / total
+            top1_accuracy += (top1_outputs == labels).sum() / total
+            top5_accuracy += (top5_outputs == labels.expand(5, -1, -1)).max(dim=1).sum(dim=1) / total
             device_step()
-        print(f"Top1 accuracy: {accuracy}")
-        return accuracy
+        print(f"Top1 accuracy: {top1_accuracy}")
+        print(f"Top5 accuracy: {top5_accuracy}")
+        return {
+            1: top1_accuracy,
+            5: top5_accuracy,
+        }
 
 
 def val_epoch(
