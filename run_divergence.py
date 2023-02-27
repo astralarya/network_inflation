@@ -7,8 +7,8 @@ from local import resnet
 parser = argparse.ArgumentParser(
     prog="ResNet divergence script"
 )
-parser.add_argument('--network0', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
-parser.add_argument('--network1', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
+parser.add_argument('network0', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'], required=True)
+parser.add_argument('network1', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'], required=True)
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--num_workers', default=8, type=int)
 args = parser.parse_args()
