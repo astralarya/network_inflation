@@ -136,10 +136,10 @@ def val_epoch(
     network: nn.Module,
     name: str,
     data: datasets.DatasetFolder,
-    epoch: Optional[int] = None,
+    epoch: Optional[int|str] = None,
     batch_size=256,
 ):
-    if epoch is None or model.load(network, name, epoch) is not None:
+    if type(epoch) is not "int" or model.load(network, name, epoch) is not None:
         accuracy = val(network, data, batch_size=batch_size)
         model.write_record(
             name,
@@ -180,8 +180,6 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
             inputs = inputs.to(device)
             outputs0 = network0(inputs)
             outputs1 = network1(inputs)
-            print(outputs0[0])
-            print(outputs1[0])
             loss = criterion(outputs0, softmax(outputs1))
             total_loss += loss.item() / total
             device_step()
