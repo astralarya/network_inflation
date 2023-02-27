@@ -4,8 +4,8 @@ parser = argparse.ArgumentParser(
     prog="ResNet validation script"
 )
 parser.add_argument('name')
-parser.add_argument('--inflate', choices=['resnet50', 'resnet101'])
 parser.add_argument('--network', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
+parser.add_argument('--inflate', choices=['resnet50', 'resnet101'])
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--epoch', default="all", type=lambda x: x if x in ["pre", "init", "all"] else int(x))
 args = parser.parse_args()
