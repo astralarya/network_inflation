@@ -33,7 +33,7 @@ if network is None:
     exit(1)
 
 def reset_fn(x):
-    print(f"Resetting network ({args.network})")
+    print(f"Reset network ({args.network})")
     model.reset(x)
 
 def inflate_fn(x):

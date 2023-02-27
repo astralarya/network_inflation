@@ -45,7 +45,7 @@ if args.epoch == "pre":
     else:
         print("Using pretrained weights")
 elif args.epoch == "init":
-    print("Resetting network")
+    print("Reset network")
     model.reset(network)
 
 if args.epoch == "all":
