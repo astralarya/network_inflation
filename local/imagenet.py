@@ -140,10 +140,11 @@ def val_epoch(
     batch_size=256,
 ):
     if epoch is None or model.load(network, name, epoch) is not None:
+        accuracy = val(network, data, batch_size=batch_size)
         model.write_record(
             name,
             "eval",
-            f"{epoch}\t{val(network, data, batch_size=batch_size)}",
+            f"{epoch}\t{accuracy[1]}\t{accuracy[5]}",
         )
 
 
@@ -177,9 +178,11 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
         print(f"Iterating {total} samples")
         for inputs, _ in tqdm(data_loader):
             inputs = inputs.to(device)
-            outputs0 = softmax(network0(inputs))
-            outputs1 = softmax(network1(inputs))
-            loss = criterion(outputs0, outputs1)
+            outputs0 = network0(inputs)
+            outputs1 = network1(inputs)
+            print(outputs0[0])
+            print(outputs1[0])
+            loss = criterion(outputs0, softmax(outputs1))
             total_loss += loss.item() / total
             device_step()
         print(f"Divergence: {total_loss}")
