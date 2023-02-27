@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 from os import environ
 
 import torch
@@ -135,7 +135,7 @@ def val_epoch(
     network: nn.Module,
     name: str,
     data: datasets.DatasetFolder,
-    epoch: Optional[int|str] = None,
+    epoch: Optional[Union[int, str]] = None,
     batch_size=256,
 ):
     if type(epoch) != "int" or model.load(network, name, epoch) is not None:
