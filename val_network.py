@@ -21,8 +21,6 @@ from local import resnet
 
 
 name = args.network
-if args.finetune is True:
-    name = f"{name}--finetune"
 if args.inflate is not None:
     name = f"{name}--inflate-{args.inflate}"
 
