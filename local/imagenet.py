@@ -11,7 +11,7 @@ from . import model as model
 from .device import device, device_step
 
 
-def train_data(data_root: str):
+def train_data(data_root: Optional[str] = None):
     data_root = environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k") + "/train/" if data_root is None else data_root
     return datasets.ImageFolder(
         data_root,
@@ -99,6 +99,7 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
         data_loader = torch.utils.data.DataLoader2(
             data,
             batch_size=batch_size,
+            shuffle=True,
         )
         softmax = nn.Softmax(dim=2)
 
@@ -110,15 +111,19 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
         top1_accuracy = 0.0
         top5_accuracy = 0.0
         for inputs, labels in tqdm(data_loader):
+            inputs = inputs.to(device=device)
+            labels = labels.to(device=device)
             bs, ncrops, c, h, w = inputs.shape
-            outputs = network(inputs.to(device=device).view(-1, c, h, w))
+            k = 5
+            outputs = network(inputs.view(-1, c, h, w))
             outputs = softmax(outputs.view(bs, ncrops, -1))
             top1_outputs = outputs.mean(1).max(dim=1).indices.flatten()
-            top5_outputs = outputs.mean(1).topk(dim=1).indices.flatten()
-            labels = labels.to(device=device)
             top1_accuracy += (top1_outputs == labels).sum() / total
-            top5_accuracy += (top5_outputs == labels.expand(5, -1, -1)).max(dim=1).sum(dim=1) / total
+            top5_outputs = outputs.mean(1).topk(k, dim=1).indices.view(bs, k)
+            top5_accuracy += (top5_outputs == labels.repeat(1, k).view(bs, k).squeeze(0)).max(dim=1).values.sum() / total
             device_step()
+            print(f"Top1 accuracy: {top1_accuracy}")
+            print(f"Top5 accuracy: {top5_accuracy}")
         print(f"Top1 accuracy: {top1_accuracy}")
         print(f"Top5 accuracy: {top5_accuracy}")
         return {
