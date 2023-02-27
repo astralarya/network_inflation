@@ -15,8 +15,6 @@ def resnet(network0: ResNet, network1: ResNet):
         network0: Network to inflate.  Not mutated.
         network1: Network to initialize.  Mutated.
     """
-    print(f"Initializing via inflation")
-
     # Random initialization
     model.reset(network1)
 
