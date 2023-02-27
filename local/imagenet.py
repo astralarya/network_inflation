@@ -101,13 +101,14 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
             batch_size=batch_size,
             shuffle=True,
         )
-        softmax = nn.Softmax(dim=2)
 
         total = len(data_loader.dataset)
         print(f"Iterating {total} samples")
 
+        softmax = nn.Softmax(dim=2).to(device)
         network.eval()
-        network.to(device=device)
+        network.to(device)
+
         top1_accuracy = 0.0
         top5_accuracy = 0.0
         for inputs, labels in tqdm(data_loader):
