@@ -33,20 +33,22 @@ if args.inflate is not None and inflate_source is None:
 val_data = imagenet.val_data()
 
 print(f"Validating network {args.network}")
+epoch = None
 if args.epoch == "pre":
     if args.inflate is not None:
         inflate.resnet(inflate_source, network)
     else:
         print("Using pretrained")
-    imagenet.run_val(network, name, val_data, batch_size=args.batch_size)
 elif args.epoch == "init":
     print("Resetting model")
     model.reset(network)
-    imagenet.run_val(network, name, val_data, batch_size=args.batch_size)
-elif args.epoch == "all":
+elif type(args.epoch) == "int":
+    epoch = args.epoch
+
+if args.epoch == "all":
     print("Validating all epochs")
     imagenet.run_val(network, name, val_data, batch_size=args.batch_size)
-elif type(args.epoch) == "int":
+else:
     print(f"Validating epoch {args.epoch}")
-    imagenet.val_epoch(network, name, val_data, args.epoch, batch_size=args.batch_size)
+    imagenet.val_epoch(network, name, val_data, epoch, batch_size=args.batch_size)
 
