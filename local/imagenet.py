@@ -112,10 +112,11 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
         top1_accuracy = 0.0
         top5_accuracy = 0.0
         for inputs, labels in tqdm(data_loader):
-            inputs = inputs.to(device=device)
-            labels = labels.to(device=device)
+            inputs = inputs.to(device)
+            labels = labels.to(device)
             bs, ncrops, c, h, w = inputs.shape
             k = 5
+
             outputs = network(inputs.view(-1, c, h, w))
             outputs = softmax(outputs.view(bs, ncrops, -1))
             top1_outputs = outputs.mean(1).max(dim=1).indices.flatten()
