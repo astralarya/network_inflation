@@ -1,9 +1,5 @@
 import argparse
 
-from local import inflate
-from local import imagenet
-from local import resnet
-
 parser = argparse.ArgumentParser(
     prog="ResNet divergence script"
 )
@@ -12,6 +8,12 @@ parser.add_argument('network1', choices=['resnet18', 'resnet34', 'resnet50', 're
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--num_workers', default=8, type=int)
 args = parser.parse_args()
+
+
+from local import inflate
+from local import imagenet
+from local import resnet
+
 
 network0 = getattr(resnet, args.network0, lambda: None)()
 network1 = getattr(resnet, args.network1, lambda: None)()

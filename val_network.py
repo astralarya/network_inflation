@@ -1,10 +1,5 @@
 import argparse
 
-from local import imagenet
-from local import model
-from local import resnet
-
-
 parser = argparse.ArgumentParser(
     prog="ResNet validation script"
 )
@@ -13,6 +8,12 @@ parser.add_argument('--network', choices=['resnet18', 'resnet34', 'resnet50', 'r
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--epoch', default="all", type=lambda x: x if x in ["none", "all"] else int(x))
 args = parser.parse_args()
+
+
+from local import imagenet
+from local import model
+from local import resnet
+
 
 name = args.name
 network = getattr(resnet, args.network, lambda: None)()

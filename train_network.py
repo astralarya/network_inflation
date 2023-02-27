@@ -1,11 +1,5 @@
 import argparse
 
-from local import inflate
-from local import imagenet
-from local import model
-from local import resnet
-
-
 parser = argparse.ArgumentParser(
     prog="ResNet training script"
 )
@@ -15,6 +9,13 @@ parser.add_argument('--inflate', choices=['resnet50', 'resnet101'])
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--num_workers', default=8, type=int)
 args = parser.parse_args()
+
+
+from local import inflate
+from local import imagenet
+from local import model
+from local import resnet
+
 
 name = args.name
 network = getattr(resnet, args.network, lambda: None)()
