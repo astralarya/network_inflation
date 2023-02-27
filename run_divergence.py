@@ -1,4 +1,5 @@
 import argparse
+from os import environ
 
 parser = argparse.ArgumentParser(
     prog="ResNet divergence script"
@@ -26,7 +27,7 @@ if network1 is None:
     exit(1)
 
 
-train_data = imagenet.train_data("/mnt/imagenet/imagenet-1k/train/")
+train_data = imagenet.train_data(environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k") + "/val/")
 
 print(f"Self-divergence: {args.network1}")
 imagenet.divergence(network1, network1, train_data)
