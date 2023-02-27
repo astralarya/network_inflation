@@ -1,5 +1,4 @@
 import argparse
-from os import environ
 
 parser = argparse.ArgumentParser(
     prog="ResNet validation script"
@@ -31,7 +30,7 @@ if args.inflate is not None and inflate_source is None:
     exit(1)
 
 
-val_data = imagenet.val_data(environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k") + "/val/")
+val_data = imagenet.val_data()
 
 print(f"Validating network {args.network}")
 if args.epoch == "pre":

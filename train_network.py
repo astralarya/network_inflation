@@ -1,5 +1,4 @@
 import argparse
-from os import environ
 
 parser = argparse.ArgumentParser(
     prog="ResNet training script"
@@ -31,7 +30,7 @@ if args.inflate is not None and inflate_source is None:
     exit(1)
 
 
-train_data = imagenet.train_data(environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k") + "/val/")
+train_data = imagenet.train_data()
 
 imagenet.train(
     network,
