@@ -8,7 +8,8 @@ sudo apt-get install -y screen wget bzip2 git libxml2-dev
 wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
 bash Anaconda3-2022.10-Linux-x86_64.sh -b -p $HOME/anaconda3
 rm Anaconda3-2022.10-Linux-x86_64.sh
-eval "$($HOME/anaconda3/bin/conda shell.bash hook)"
+echo 'eval "$($HOME/anaconda3/bin/conda shell.bash hook)"' >> ~/.bashrc
+source ~/.bashrc
 conda update -y conda
 
 
