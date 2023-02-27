@@ -98,7 +98,6 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
         data_loader = torch.utils.data.DataLoader2(
             data,
             batch_size=batch_size,
-            shuffle=True,
         )
 
         total = len(data_loader.dataset)
