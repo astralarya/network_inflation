@@ -165,8 +165,8 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
     )
 
     with torch.no_grad():
-        softmax = nn.Softmax(dim=1).to(device)
-        criterion = nn.CrossEntropyLoss().to(device)
+        log_softmax = nn.LogSoftmax(dim=1).to(device)
+        criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device)
         network0.eval()
         network0.to(device)
         network1.eval()
@@ -179,7 +179,7 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
             inputs = inputs.to(device)
             outputs0 = network0(inputs)
             outputs1 = network1(inputs)
-            loss = criterion(outputs0, softmax(outputs1))
+            loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
             total_loss += loss.item() / total
             device_step()
         print(f"Divergence: {total_loss}")
