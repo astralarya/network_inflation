@@ -47,6 +47,7 @@ if args.inflate0 is not None:
     if args.inflate0 is not None and inflate_source0 is None:
         print(f"Unknown network: {args.inflate0}")
         exit(1)
+    print(f"Inflating network0 ({args.network0}) from {args.inflate0}")
     inflate.resnet(inflate_source0, network0)
     name0 = f"{name0}-inflate{args.inflate0}"
 if args.inflate1 is not None:
@@ -54,6 +55,7 @@ if args.inflate1 is not None:
     if args.inflate1 is not None and inflate_source1 is None:
         print(f"Unknown network: {args.inflate1}")
         exit(1)
+    print(f"Inflating network1 ({args.network1}) from {args.inflate1}")
     inflate.resnet(inflate_source1, network1)
     name1 = f"{name1}-inflate{args.inflate1}"
 
