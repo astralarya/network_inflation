@@ -137,7 +137,7 @@ def val_epoch(
     epoch: Optional[Union[int, str]] = None,
     batch_size=256,
 ):
-    if type(epoch) != "int" or model.load(network, name, epoch) is not None:
+    if type(epoch) != int or model.load(network, name, epoch) is not None:
         accuracy = val(network, data, batch_size=batch_size)
         model.write_record(
             name,
