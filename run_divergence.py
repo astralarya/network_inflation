@@ -49,7 +49,7 @@ if args.inflate0 is not None:
         exit(1)
     print(f"Inflating network0 ({args.network0}) from {args.inflate0}")
     inflate.resnet(inflate_source0, network0)
-    name0 = f"{name0}-inflate{args.inflate0}"
+    name0 = f"{name0}--inflate-{args.inflate0}"
 if args.inflate1 is not None:
     inflate_source1 = getattr(resnet, args.inflate1, lambda: None)()
     if args.inflate1 is not None and inflate_source1 is None:
@@ -57,7 +57,7 @@ if args.inflate1 is not None:
         exit(1)
     print(f"Inflating network1 ({args.network1}) from {args.inflate1}")
     inflate.resnet(inflate_source1, network1)
-    name1 = f"{name1}-inflate{args.inflate1}"
+    name1 = f"{name1}--inflate-{args.inflate1}"
 
 
 train_data = imagenet.train_data()
