@@ -1,21 +1,11 @@
-Mara@t1v-n-fd863902-w-0:~/network_inflation$ python3 ./run_divergence.py resnet50 resnet152
+Mara@t1v-n-fd863902-w-0:~/network_inflation$ python3 ./run_divergence.py resnet50 resnet152 --inflate1 resnet50
 Device: xla:1
 Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
 Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
-Self-divergence: resnet152
-Iterating 1281167 samples
-100%|███████████████████████████████████████████████████████████████████████████████| 5005/5005 [59:10<00:00,  1.41it/s]
-Divergence: 0.023736618384618022
-Self-divergence: resnet50
-Iterating 1281167 samples
-100%|███████████████████████████████████████████████████████████████████████████████| 5005/5005 [25:07<00:00,  3.32it/s]
-Divergence: 0.023929756234108628
-Divergence: resnet50 - resnet152
-Iterating 1281167 samples
-100%|███████████████████████████████████████████████████████████████████████████████| 5005/5005 [58:40<00:00,  1.42it/s]
-Divergence: 0.023737217455944645
-Divergence: resnet50 - inflated(resnet50, resnet152)
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Inflating network1 (resnet152) from resnet50
 Initializing via inflation
+Divergence: resnet50 <-> resnet152--inflate-resnet50
 Iterating 1281167 samples
-100%|█████████████████████████████████████████████████████████████████████████████| 5005/5005 [1:22:36<00:00,  1.01it/s]
-Divergence: 0.026988003235768217
+100%|█████████████████████████████████████████████████████████████████████████████████████| 5005/5005 [59:11<00:00,  1.41it/s]
+Divergence: 0.0
