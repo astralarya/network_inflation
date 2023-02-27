@@ -1,6 +1,6 @@
 # Run on local dev
 
-INSTANCE_NAME="tpu-5-eu"
+INSTANCE_NAME="tpu-eu-2"
 
 GCLOUD_ZONE="europe-west4-a"
 TPU_TYPE="v3-8"
