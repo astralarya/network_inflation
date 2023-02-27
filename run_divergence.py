@@ -1,4 +1,6 @@
 import argparse
+from os import environ
+from pathlib import Path
 
 parser = argparse.ArgumentParser(
     prog="ResNet divergence script"
@@ -11,6 +13,7 @@ parser.add_argument('--inflate0', choices=['resnet50', 'resnet101'])
 parser.add_argument('--inflate1', choices=['resnet50', 'resnet101'])
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--num_workers', default=8, type=int)
+parser.add_argument('--imagenet_path', default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"), type=Path)
 args = parser.parse_args()
 
 
@@ -60,7 +63,7 @@ if args.inflate1 is not None:
     name1 = f"{name1}--inflate-{args.inflate1}"
 
 
-train_data = imagenet.train_data()
+train_data = imagenet.train_data(args.imagenet_path / "train")
 
 print(f"Divergence: {name0} <-> {name1}")
 imagenet.divergence(network1, network1, train_data)

@@ -1,5 +1,4 @@
 from typing import Any, Callable, Optional, Union
-from os import environ
 
 import torch
 import torch.nn as nn
@@ -11,8 +10,7 @@ from . import model as model
 from .device import device, device_step
 
 
-def train_data(data_root: Optional[str] = None):
-    data_root = environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k") + "/train/" if data_root is None else data_root
+def train_data(data_root: str):
     return datasets.ImageFolder(
         data_root,
         transform=transforms.Compose(
@@ -29,8 +27,7 @@ def train_data(data_root: Optional[str] = None):
     )
 
 
-def val_data(data_root: Optional[str] = None):
-    data_root = environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k") + "/val/" if data_root is None else data_root
+def val_data(data_root: str):
     return datasets.ImageFolder(
         data_root,
         transform=transforms.Compose(

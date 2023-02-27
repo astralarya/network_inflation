@@ -1,4 +1,6 @@
 import argparse
+from os import environ
+from pathlib import Path
 
 parser = argparse.ArgumentParser(
     prog="ResNet validation script"
@@ -8,6 +10,7 @@ parser.add_argument('--network', choices=['resnet18', 'resnet34', 'resnet50', 'r
 parser.add_argument('--inflate', choices=['resnet50', 'resnet101'])
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--epoch', default="pre", type=lambda x: x if x in ["pre", "init", "all"] else int(x))
+parser.add_argument('--imagenet_path', default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"), type=Path)
 args = parser.parse_args()
 
 
@@ -30,7 +33,7 @@ if args.inflate is not None and inflate_source is None:
     exit(1)
 
 
-val_data = imagenet.val_data()
+val_data = imagenet.val_data(args.imagenet_path / "val")
 
 print(f"Validating network {args.network}")
 if args.epoch == "pre":
