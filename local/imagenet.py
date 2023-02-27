@@ -157,6 +157,7 @@ def run_val(
         val_epoch(network, name, data, epoch, batch_size=batch_size)
 
 
+@torch.no_grad()
 def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetFolder, batch_size=256, num_workers=8):
     data_loader = torch.utils.data.DataLoader2(
         data,
@@ -164,24 +165,23 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
         num_workers=num_workers,
     )
 
-    with torch.no_grad():
-        log_softmax = nn.LogSoftmax(dim=1).to(device)
-        criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device)
-        network0.eval()
-        network0.to(device)
-        network1.eval()
-        network1.to(device)
+    log_softmax = nn.LogSoftmax(dim=1).to(device)
+    criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device)
+    network0.eval()
+    network0.to(device)
+    network1.eval()
+    network1.to(device)
 
-        total_loss = 0.0
-        total = len(data_loader.dataset)
-        print(f"Iterating {total} samples")
-        for inputs, _ in tqdm(data_loader):
-            inputs = inputs.to(device)
-            outputs0 = network0(inputs)
-            outputs1 = network1(inputs)
-            loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
-            total_loss += loss.item() / total
-            device_step()
-        print(f"Divergence: {total_loss}")
-        return total_loss
+    total_loss = 0.0
+    total = len(data_loader.dataset)
+    print(f"Iterating {total} samples")
+    for inputs, _ in tqdm(data_loader):
+        inputs = inputs.to(device)
+        outputs0 = network0(inputs)
+        outputs1 = network1(inputs)
+        loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
+        total_loss += loss.item() / total
+        device_step()
+    print(f"Divergence: {total_loss}")
+    return total_loss
 
