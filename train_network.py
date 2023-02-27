@@ -5,6 +5,7 @@ parser = argparse.ArgumentParser(
     prog="ResNet training script"
 )
 parser.add_argument('network', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
+parser.add_argument('--finetune', action="store_true")
 parser.add_argument('--inflate', choices=['resnet50', 'resnet101'])
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--num_workers', default=8, type=int)
@@ -19,6 +20,8 @@ from local import resnet
 
 
 name = args.network
+if args.finetune is True:
+    name = f"{name}--finetune"
 if args.inflate is not None:
     name = f"{name}--inflate-{args.inflate}"
 
@@ -44,7 +47,7 @@ imagenet.train(
     train_data,
     batch_size=args.batch_size,
     num_workers=args.num_workers,
-    init_fn=init_fn,
+    init_fn=init_fn if args.finetune is False else None,
 
 )
 
