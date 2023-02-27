@@ -76,7 +76,15 @@ def train(
 
     for epoch in range(save_epoch + 1, num_epochs + 1):
         epoch_loss = 0.0
+        # DELETE
+        i = 0
+        # END DELETE
         for inputs, labels in tqdm(data_loader):
+            # DELETE
+            i += 1
+            if i > 10:
+                break
+            # END DELETE
             inputs = inputs.to(device)
             labels = labels.to(device)
             outputs = network(inputs)

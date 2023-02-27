@@ -20,9 +20,9 @@ Path(default_dir).mkdir(exist_ok=True)
 
 def get_epoch(name: str, epoch: int = None):
     if epoch is not None:
-        save_paths = glob.glob(f"{name}.{epoch:08}.pkl")
+        save_paths = glob.glob(f"{name}/{epoch:08}.pkl")
     else:
-        save_paths = glob.glob(f"{name}.{'[0-9]'*8}.pkl")
+        save_paths = glob.glob(f"{name}/{'[0-9]'*8}.pkl")
         save_paths.sort(reverse=True)
     save_path = next(iter(save_paths), None)
     return (
@@ -33,10 +33,10 @@ def get_epoch(name: str, epoch: int = None):
 
 
 def list_epochs(name: str):
-    save_paths = glob.glob(f"{name}.{'[0-9]'*8}.pkl")
+    save_paths = glob.glob(f"{name}/{'[0-9]'*8}.pkl")
     save_paths.sort()
     return [
-        int(save_path[len(f"{name}."):].split(".")[0])
+        int(save_path[len(f"{name}/"):].split(".")[0])
         for save_path in save_paths
     ]
 
@@ -48,11 +48,12 @@ def write_log(name: str, data: Optional[str] = None):
 
 
 def write_record(name: str, part: str, data: Optional[str] = None):
-    write_log(f"{name}.__{part}__", data)
+    write_log(f"{name}/__{part}__", data)
 
 
 def save(module: nn.Module, name: str, epoch: int):
-    save_path = Path(f"{name}.{epoch:08}.pkl")
+    Path(name).mkdir(parents=True, exist_ok=True)
+    save_path = Path(f"{name}/{epoch:08}.pkl")
     with save_path.open("wb") as save_file:
         print(f"Saving `{save_path}`")
         (xla.save if xla is not None else torch.save)(module.state_dict(), save_file)
@@ -63,14 +64,14 @@ def save_state(
 ):
     write_log(name, log)
     for key, value in modules.items():
-        save(value, name if key is None else f"{name}.__{key}__", epoch)
+        save(value, name if key is None else f"{name}/__{key}__", epoch)
 
 
 def load(module: nn.Module, name: str, epoch: int = None):
     epoch = get_epoch(name, epoch)
     if epoch is None:
         return None
-    save_path = Path(f"{name}.{epoch:08}.pkl")
+    save_path = Path(f"{name}/{epoch:08}.pkl")
     print(f"Loading `{save_path}`")
     module.load_state_dict(torch.load(save_path))
     return epoch
@@ -85,9 +86,9 @@ def load_state(
     if None in modules:
         epoch = get_epoch(name, epoch)
     for key, value in modules.items():
-        load_epoch = load(value, name if key is None else f"{name}.__{key}__", epoch)
+        load_epoch = load(value, name if key is None else f"{name}/__{key}__", epoch)
         if epoch is not None and load_epoch != epoch:
-            raise Exception(f"Missing state `{name}.__{key}__.{epoch}.pkl`")
+            raise Exception(f"Missing state `{name}/__{key}__/{epoch}.pkl`")
     if epoch is not None:
         print(f"Resuming from epoch {epoch}")
     else:
@@ -110,15 +111,3 @@ def reset(module: nn.Module):
 
 def clone(module: nn.Module):
     return copy.deepcopy(module)
-
-
-def clean(name: str):
-    save_paths = [
-        *glob.glob(f"{name}.{'[0-9]'*8}.pkl"),
-        *glob.glob(f"{name}.__*__.{'[0-9]'*8}.pkl"),
-        *glob.glob(f"{name}.log"),
-        *glob.glob(f"{name}.__*__.log"),
-    ]
-    for path in save_paths:
-        print(f"Deleting `{path}`")
-        os.remove(path)
