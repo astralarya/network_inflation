@@ -63,7 +63,6 @@ def train(
         shuffle=True,
     )
     optimizer = optim.AdamW(network.parameters())
-    softmax = nn.Softmax(dim=1).to(device)
     criterion = nn.CrossEntropyLoss().to(device)
 
     state = {
@@ -83,7 +82,7 @@ def train(
         for inputs, labels in tqdm(data_loader):
             inputs = inputs.to(device)
             labels = labels.to(device)
-            outputs = softmax(network(inputs))
+            outputs = network(inputs)
             loss = criterion(outputs, labels)
             optimizer.zero_grad()
             loss.backward()
@@ -119,13 +118,12 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
 
             outputs = network(inputs.view(-1, c, h, w))
             outputs = softmax(outputs.view(bs, ncrops, -1))
-            top1_outputs = outputs.mean(1).max(dim=1).indices.flatten()
+
+            top1_outputs = outputs.mean(dim=1).max(dim=1).indices.flatten()
             top1_accuracy += (top1_outputs == labels).sum() / total
-            top5_outputs = outputs.mean(1).topk(k, dim=1).indices.view(bs, k)
-            top5_accuracy += (top5_outputs == labels.repeat(1, k).view(bs, k).squeeze(0)).max(dim=1).values.sum() / total
+            top5_outputs = outputs.mean(dim=1).topk(k, dim=1).indices.view(bs, k)
+            top5_accuracy += (top5_outputs == labels.repeat(k).view(k, -1).transpose(0, 1)).max(dim=1).values.sum() / total
             device_step()
-            print(f"Top1 accuracy: {top1_accuracy}")
-            print(f"Top5 accuracy: {top5_accuracy}")
         print(f"Top1 accuracy: {top1_accuracy}")
         print(f"Top5 accuracy: {top5_accuracy}")
         return {
