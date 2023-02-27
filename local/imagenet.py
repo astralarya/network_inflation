@@ -163,21 +163,20 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
         batch_size=batch_size,
         num_workers=num_workers,
     )
-    softmax = nn.Softmax(dim=1)
-    criterion = nn.CrossEntropyLoss().to(device=device)
-
 
     with torch.no_grad():
+        softmax = nn.Softmax(dim=1).to(device)
+        criterion = nn.CrossEntropyLoss().to(device)
         network0.eval()
-        network0.to(device=device)
+        network0.to(device)
         network1.eval()
-        network1.to(device=device)
+        network1.to(device)
 
         total_loss = 0.0
         total = len(data_loader.dataset)
         print(f"Iterating {total} samples")
         for inputs, _ in tqdm(data_loader):
-            inputs = inputs.to(device=device)
+            inputs = inputs.to(device)
             outputs0 = softmax(network0(inputs))
             outputs1 = softmax(network1(inputs))
             loss = criterion(outputs0, outputs1)
