@@ -75,7 +75,7 @@ def load(name: str, epoch: int = None, device=None):
     if epoch is None:
         return (None, None)
     save_path = Path(f"{name}/{epoch:08}.pkl")
-    print(f"Loading `{save_path}`... ", flush=True, end="")
+    print(f"Loading `{save_path}` to {device}... ", flush=True, end="")
     state = torch.load(save_path, map_location=device)
     print("DONE")
     return (epoch, state)
