@@ -11,8 +11,8 @@ from .device import device, device_step
 
 
 def train_data(data_root: str):
-    print(f"Loading train data `{data_root}`")
-    return datasets.ImageFolder(
+    print(f"Loading train data `{data_root}`", flush=True, end="")
+    r = datasets.ImageFolder(
         data_root,
         transform=transforms.Compose(
             [
@@ -26,11 +26,13 @@ def train_data(data_root: str):
             ]
         ),
     )
+    print("DONE")
+    return r
 
 
 def val_data(data_root: str):
-    print(f"Loading val data `{data_root}`")
-    return datasets.ImageFolder(
+    print(f"Loading val data `{data_root}`", flush=True, end="")
+    r = datasets.ImageFolder(
         data_root,
         transform=transforms.Compose(
             [
@@ -44,6 +46,8 @@ def val_data(data_root: str):
             ]
         ),
     )
+    print("DONE")
+    return r
 
 
 def train(
