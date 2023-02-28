@@ -139,9 +139,8 @@ def val_epoch(
 ):
     if type(epoch) != int or model.load(network, name, epoch) is not None:
         accuracy = val(network, data, batch_size=batch_size)
-        model.write_record(
-            name,
-            "eval",
+        model.write_log(
+            f"{name}.__eval__",
             f"{epoch}\t{accuracy[1]}\t{accuracy[5]}",
         )
 

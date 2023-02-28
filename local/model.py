@@ -47,10 +47,6 @@ def write_log(name: str, data: Optional[str] = None):
             logfile.write(data)
 
 
-def write_record(name: str, part: str, data: Optional[str] = None):
-    write_log(f"{name}/__{part}__", data)
-
-
 def save(module: nn.Module, name: str, epoch: int):
     Path(name).mkdir(parents=True, exist_ok=True)
     save_path = Path(f"{name}/{epoch:08}.pkl")
