@@ -48,20 +48,20 @@ def write_log(name: str, data: Optional[str] = None):
             logfile.write(data)
 
 
-def port_state(state: Any):
+def state_to(state: Any, device: torch.device):
     if type(state) == dict or type(state) == OrderedDict:
         r = type(state)()
         for key, val in state.items():
-            r[key] = port_state(val)
+            r[key] = state_to(val, device)
         return r
     elif type(state) == torch.Tensor:
-        return state.detach().clone().to(cpu)
+        return state.detach().clone().to(device)
     else:
         return state
 
 
 def save(name: str, epoch: int, state: Any):
-    state = port_state(state)
+    state = state_to(state, cpu)
     Path(name).mkdir(parents=True, exist_ok=True)
     save_path = Path(f"{name}/{epoch:08}.pkl")
     with save_path.open("wb") as save_file:
@@ -76,7 +76,11 @@ def load(name: str, epoch: int = None, device=None):
         return (None, None)
     save_path = Path(f"{name}/{epoch:08}.pkl")
     print(f"Loading `{save_path}` to {device}... ", flush=True, end="")
-    state = torch.load(save_path, map_location=device)
+    try:
+        state = torch.load(save_path, map_location=device)
+    except RuntimeError:
+        state = torch.load(save_path, map_location=cpu)
+        state = state_to(state, device)
     print("DONE")
     return (epoch, state)
 
