@@ -7,7 +7,7 @@ RSYNC_USER="$RSYNC_USER"
 GCLOUD_ZONE=$( dirname "$INSTANCE_ADDR" )
 INSTANCE_NAME=$( basename "$INSTANCE_ADDR" )
 
-DEST_DIR="network_inflation/$1"
+DEST_DIR="network_inflation/$SOURCE_DIR"
 
 
 address="$( \
