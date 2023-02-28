@@ -58,7 +58,11 @@ def train(
     num_epochs=2048,
     num_workers=8,
     init_fn: Optional[Callable[[nn.Module], Any]] = None,
+    force: bool = False,
 ):
+    args = {
+        'batch_size': 256
+    }
     network.to(device)
     data_loader = torch.utils.data.DataLoader2(
         data,
@@ -74,6 +78,11 @@ def train(
         print(f"Resuming from epoch {save_epoch}")
         network.load_state_dict(save_state['model'])
         optimizer.load_state_dict(save_state['optim'])
+        if not force:
+            for arg, arg_val in args.items():
+                save_arg = save_state["args"][arg]
+                if save_arg != arg_val:
+                    raise Exception(f"Mismatched {arg}: {save_arg} != {arg_val}\n  Override this error with --force")
     else:
         if init_fn is not None:
             init_fn(network)
@@ -82,6 +91,7 @@ def train(
             'loss': None,
             'model': network.state_dict(),
             'optim': optimizer.state_dict(),
+            'args': args,
         })
 
     total = len(data_loader.dataset)
