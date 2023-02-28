@@ -116,6 +116,7 @@ def train(
             'loss': epoch_loss,
             'model': network.state_dict(),
             'optim': optimizer.state_dict(),
+            'args': args,
         })
 
 
