@@ -12,6 +12,7 @@ parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--num_workers', default=8, type=int)
 parser.add_argument('--model_dir', default="models", type=Path)
 parser.add_argument('--imagenet_path', default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"), type=Path)
+parser.add_argument('--force', action="store_true")
 args = parser.parse_args()
 
 
@@ -54,6 +55,6 @@ imagenet.train(
     batch_size=args.batch_size,
     num_workers=args.num_workers,
     init_fn=init_fn if args.finetune is False else None,
-
+    force=args.force,
 )
 
