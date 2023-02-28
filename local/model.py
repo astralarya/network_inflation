@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import copy
 import glob
 import os
@@ -11,7 +12,7 @@ try:
 except ImportError:
     xla = None
 
-from .device import device, cpu
+from .device import cpu
 
 
 default_dir = "models"
@@ -47,52 +48,37 @@ def write_log(name: str, data: Optional[str] = None):
             logfile.write(data)
 
 
-def save(module: nn.Module, name: str, epoch: int):
+def port_state(state: Any):
+    if type(state) == dict or type(state) == OrderedDict:
+        r = type(state)()
+        for key, val in state.items():
+            r[key] = port_state(val)
+        return r
+    elif type(state) == torch.Tensor:
+        return state.detach().clone().to(cpu)
+    else:
+        return state
+
+
+def save(name: str, epoch: int, state: Any):
+    state = port_state(state)
     Path(name).mkdir(parents=True, exist_ok=True)
     save_path = Path(f"{name}/{epoch:08}.pkl")
     with save_path.open("wb") as save_file:
-        print(f"Saving `{save_path}`")
-        (xla.save if xla is not None else torch.save)(module.state_dict(), save_file)
+        print(f"Saving `{save_path}`... ", flush=True, end="")
+        torch.save(state, save_file)
+    print("DONE")
 
 
-def save_state(
-    modules: Mapping[Optional[str], nn.Module], name: str, epoch: int, log: str = None
-):
-    write_log(name, log)
-    for key, value in modules.items():
-        save(value, name if key is None else f"{name}/__{key}__", epoch)
-
-
-def load(module: nn.Module, name: str, epoch: int = None):
+def load(name: str, epoch: int = None, device=None):
     epoch = get_epoch(name, epoch)
     if epoch is None:
-        return None
+        return (None, None)
     save_path = Path(f"{name}/{epoch:08}.pkl")
-    print(f"Loading `{save_path}`")
-    module.load_state_dict(torch.load(save_path))
-    return epoch
-
-
-def load_state(
-    modules: Mapping[Optional[str], nn.Module],
-    name: str,
-    epoch: int = None,
-    init_fn: Optional[Callable[[nn.Module], Any]] = None,
-):
-    if None in modules:
-        epoch = get_epoch(name, epoch)
-    for key, value in modules.items():
-        load_epoch = load(value, name if key is None else f"{name}/__{key}__", epoch)
-        if epoch is not None and load_epoch != epoch:
-            raise Exception(f"Missing state `{name}/__{key}__/{epoch}.pkl`")
-    if epoch is not None:
-        print(f"Resuming from epoch {epoch}")
-    else:
-        if init_fn is not None and None in modules:
-            init_fn(modules[None])
-        print("Saving initial state as epoch 0")
-        save_state(modules, name, 0)
-    return 0 if epoch is None else epoch
+    print(f"Loading `{save_path}`... ", flush=True, end="")
+    state = torch.load(save_path, map_location=device)
+    print("DONE")
+    return (epoch, state)
 
 
 def reset(module: nn.Module):

@@ -55,6 +55,7 @@ def train(
     num_workers=8,
     init_fn: Optional[Callable[[nn.Module], Any]] = None,
 ):
+    network.to(device)
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
@@ -64,19 +65,27 @@ def train(
     optimizer = optim.AdamW(network.parameters())
     criterion = nn.CrossEntropyLoss().to(device)
 
-    state = {
-        None: network,
-        "optim": optimizer,
-    }
-    save_epoch = model.load_state(state, name, init_fn=init_fn)
+    save_epoch, save_state = model.load(name, device=device)
+    if save_epoch is not None:
+        print(f"Resuming from epoch {save_epoch}")
+        network.load_state_dict(save_state['model'])
+        optimizer.load_state_dict(save_state['optim'])
+    else:
+        if init_fn is not None:
+            init_fn(network)
+        print("Saving initial state as epoch 0")
+        model.save(name, 0, {
+            'loss': None,
+            'model': network.state_dict(),
+            'optim': optimizer.state_dict(),
+        })
 
     total = len(data_loader.dataset)
     print(f"Iterating {total} samples")
 
     network.train()
-    network.to(device)
 
-    for epoch in range(save_epoch + 1, num_epochs + 1):
+    for epoch in range(save_epoch + 1 if save_epoch else 1, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
             inputs = inputs.to(device)
@@ -89,7 +98,11 @@ def train(
             optimizer.step()
             device_step()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        model.save_state(state, name, epoch, log=f"{epoch}\t{epoch_loss}\n")
+        model.save(name, epoch, {
+            'loss': epoch_loss,
+            'model': network.state_dict(),
+            'optim': optimizer.state_dict(),
+        })
 
 
 def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
