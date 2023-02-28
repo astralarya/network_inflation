@@ -83,10 +83,10 @@ def train(
             labels = labels.to(device)
             outputs = network(inputs)
             loss = criterion(outputs, labels)
+            epoch_loss += loss.item() / total
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            epoch_loss += loss.item() / total
             device_step()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
         model.save_state(state, name, epoch, log=f"{epoch}\t{epoch_loss}\n")
