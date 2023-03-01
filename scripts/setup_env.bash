@@ -28,3 +28,4 @@ conda activate network_inflation
 pip install https://storage.googleapis.com/tpu-pytorch/wheels/tpuvm/torch_xla-1.13-cp38-cp38-linux_x86_64.whl
 
 # https://cloud.google.com/compute/docs/disks/add-persistent-disk
+# https://stackoverflow.com/questions/32703296/dyld-library-not-loaded-usr-local-lib-libjpeg-8-dylib-homebrew-php
