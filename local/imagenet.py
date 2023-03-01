@@ -169,7 +169,7 @@ def val_epoch(
         save_epoch, save_state = model.load(name, epoch)
         if save_epoch is None:
             raise Exception(f"Epoch not found for {name}: {epoch}")
-        network.load_state_dict(save_state["model"])
+        network.load_state_dict(save_state)
 
     accuracy = val(network, data, batch_size=batch_size)
     model.write_log(
