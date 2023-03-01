@@ -52,23 +52,29 @@ shutil.copy(
 )
 
 for split in ["train", "val"]:
+    split_total = 0
     for filename in get_files(split):
         print(f"Reading `{filename}`")
         with tarfile.open(filename, "r:gz") as tar:
             for member in tqdm(tar.getmembers()):
+                split_total += 1
                 name, label = transform_name(member.name)
                 label_dir = args.imagenet_path.joinpath(split, label)
                 label_dir.mkdir(exist_ok=True)
                 with tar.extractfile(member) as extract:
                     with label_dir.joinpath(name).open(mode="wb") as output:
                         output.write(extract.read())
+    print(f"Total {split}: {split_total}")
 
+test_total = 0
 for filename in get_files("test"):
     print(f"Reading `{filename}`")
     with tarfile.open(filename, "r:gz") as tar:
         for member in tqdm(tar.getmembers()):
+            test_total += 1
             with tar.extractfile(member) as extract:
                 with args.imagenet_path.joinpath("test", name).open(
                     mode="wb"
                 ) as output:
                     output.write(extract.read())
+print(f"Total test: {test_total}")
