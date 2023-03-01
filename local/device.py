@@ -105,7 +105,7 @@ def _spawn():
     if device_type == "xla":
         return xla_spawn
     else:
-        return lambda x, args: x(0, *args)
+        return lambda x, args, **_: x(0, *args)
 
 
 spawn = _spawn()
