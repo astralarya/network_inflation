@@ -10,7 +10,7 @@ parser.add_argument('--finetune', action="store_true")
 parser.add_argument('--inflate', choices=['resnet50', 'resnet101'])
 parser.add_argument('--batch_size', default=64, type=int)
 parser.add_argument('--num_workers', default=8, type=int)
-parser.add_argument('--model_dir', default="models", type=Path)
+parser.add_argument('--model_path', default="models", type=Path)
 parser.add_argument('--imagenet_path', default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"), type=Path)
 parser.add_argument('--force', action="store_true")
 args = parser.parse_args()
@@ -50,7 +50,7 @@ train_data = imagenet.train_data(args.imagenet_path / "train")
 init_fn=reset_fn if args.inflate is None else inflate_fn
 imagenet.train(
     network,
-    args.model_dir / name,
+    args.model_path / name,
     train_data,
     batch_size=args.batch_size,
     num_workers=args.num_workers,
