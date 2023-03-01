@@ -130,7 +130,8 @@ def _train(
             labels = labels.to(device.device)
             outputs = network(inputs)
             loss = criterion(outputs, labels)
-            epoch_loss += loss.item() / total
+            losses = device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
+            epoch_loss += losses / total
             optimizer.zero_grad()
             loss.backward()
             device.optim_step(optimizer)
@@ -146,6 +147,7 @@ def _train(
                     "args": args,
                 },
             )
+    device.rendezvous("end")
 
 
 def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):

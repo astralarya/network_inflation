@@ -83,3 +83,23 @@ def _spawn():
 
 
 spawn = _spawn()
+
+
+def _rendezvous():
+    if device_type == "xla":
+        return xla.rendezvous
+    else:
+        return lambda _, x=None: (x,)
+
+
+rendezvous = _rendezvous()
+
+
+def _mesh_reduce():
+    if device_type == "xla":
+        return xla.mesh_reduce
+    else:
+        return lambda _, data, reduce_fn: reduce_fn([data])
+
+
+mesh_reduce = _mesh_reduce()
