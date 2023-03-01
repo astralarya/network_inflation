@@ -21,7 +21,7 @@ def resnet(network0: ResNet, network1: ResNet):
     # Copy and mask
     for child in ["conv1", "bn1", "fc"]:
         copy(network0.get_submodule(child), network1.get_submodule(child))
-    
+
     for layer in ["layer1", "layer2", "layer3", "layer4"]:
         children0 = network0.get_submodule(layer).children()
         children1 = network1.get_submodule(layer).children()

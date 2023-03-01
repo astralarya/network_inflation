@@ -2,17 +2,21 @@ import argparse
 from os import environ
 from pathlib import Path
 
-parser = argparse.ArgumentParser(
-    prog="ResNet training script"
+parser = argparse.ArgumentParser(prog="ResNet training script")
+parser.add_argument(
+    "network", choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
 )
-parser.add_argument('network', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
-parser.add_argument('--finetune', action="store_true")
-parser.add_argument('--inflate', choices=['resnet50', 'resnet101'])
-parser.add_argument('--batch_size', default=64, type=int)
-parser.add_argument('--num_workers', default=8, type=int)
-parser.add_argument('--model_path', default="models", type=Path)
-parser.add_argument('--imagenet_path', default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"), type=Path)
-parser.add_argument('--force', action="store_true")
+parser.add_argument("--finetune", action="store_true")
+parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
+parser.add_argument("--batch_size", default=64, type=int)
+parser.add_argument("--num_workers", default=8, type=int)
+parser.add_argument("--model_path", default="models", type=Path)
+parser.add_argument(
+    "--imagenet_path",
+    default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),
+    type=Path,
+)
+parser.add_argument("--force", action="store_true")
 args = parser.parse_args()
 
 
@@ -33,9 +37,11 @@ if network is None:
     print(f"Unknown network: {args.network}")
     exit(1)
 
+
 def reset_fn(x):
     print(f"Reset network ({args.network})")
     model.reset(x)
+
 
 def inflate_fn(x):
     inflate_source = getattr(resnet, args.inflate, lambda: None)()
@@ -45,9 +51,10 @@ def inflate_fn(x):
     print(f"Inflating network ({args.network}) from {args.inflate}")
     inflate.resnet(inflate_source, x)
 
+
 train_data = imagenet.train_data(args.imagenet_path / "train")
 
-init_fn=reset_fn if args.inflate is None else inflate_fn
+init_fn = reset_fn if args.inflate is None else inflate_fn
 imagenet.train(
     network,
     args.model_path / name,
@@ -57,4 +64,3 @@ imagenet.train(
     init_fn=init_fn if args.finetune is False else None,
     force=args.force,
 )
-

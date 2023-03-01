@@ -60,9 +60,7 @@ def train(
     init_fn: Optional[Callable[[nn.Module], Any]] = None,
     force: bool = False,
 ):
-    args = {
-        'batch_size': 256
-    }
+    args = {"batch_size": 256}
     network.to(device)
     data_loader = torch.utils.data.DataLoader2(
         data,
@@ -76,23 +74,29 @@ def train(
     save_epoch, save_state = model.load(name, device=device)
     if save_epoch is not None:
         print(f"Resuming from epoch {save_epoch}")
-        network.load_state_dict(save_state['model'])
-        optimizer.load_state_dict(save_state['optim'])
+        network.load_state_dict(save_state["model"])
+        optimizer.load_state_dict(save_state["optim"])
         if not force:
             for arg, arg_val in args.items():
                 save_arg = save_state["args"][arg]
                 if save_arg != arg_val:
-                    raise Exception(f"Mismatched {arg}: {save_arg} != {arg_val}\n  Override this error with --force")
+                    raise Exception(
+                        f"Mismatched {arg}: {save_arg} != {arg_val}\n  Override this error with --force"
+                    )
     else:
         if init_fn is not None:
             init_fn(network)
         print("Saving initial state as epoch 0")
-        model.save(name, 0, {
-            'loss': None,
-            'model': network.state_dict(),
-            'optim': optimizer.state_dict(),
-            'args': args,
-        })
+        model.save(
+            name,
+            0,
+            {
+                "loss": None,
+                "model": network.state_dict(),
+                "optim": optimizer.state_dict(),
+                "args": args,
+            },
+        )
 
     total = len(data_loader.dataset)
     print(f"Iterating {total} samples")
@@ -112,12 +116,16 @@ def train(
             optimizer.step()
             device_step()
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        model.save(name, epoch, {
-            'loss': epoch_loss,
-            'model': network.state_dict(),
-            'optim': optimizer.state_dict(),
-            'args': args,
-        })
+        model.save(
+            name,
+            epoch,
+            {
+                "loss": epoch_loss,
+                "model": network.state_dict(),
+                "optim": optimizer.state_dict(),
+                "args": args,
+            },
+        )
 
 
 def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
@@ -148,7 +156,9 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
             top1_outputs = outputs.mean(dim=1).max(dim=1).indices.flatten()
             top1_accuracy += (top1_outputs == labels).sum() / total
             top5_outputs = outputs.mean(dim=1).topk(k, dim=1).indices.view(bs, k)
-            top5_accuracy += (top5_outputs == labels.repeat(k).view(k, -1).transpose(0, 1)).max(dim=1).values.sum() / total
+            top5_accuracy += (
+                top5_outputs == labels.repeat(k).view(k, -1).transpose(0, 1)
+            ).max(dim=1).values.sum() / total
             device_step()
         print(f"Top1 accuracy: {top1_accuracy}")
         print(f"Top5 accuracy: {top5_accuracy}")
@@ -189,7 +199,13 @@ def run_val(
 
 
 @torch.no_grad()
-def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetFolder, batch_size=256, num_workers=8):
+def divergence(
+    network0: nn.Module,
+    network1: nn.Module,
+    data: datasets.DatasetFolder,
+    batch_size=256,
+    num_workers=8,
+):
     data_loader = torch.utils.data.DataLoader2(
         data,
         batch_size=batch_size,
@@ -215,4 +231,3 @@ def divergence(network0: nn.Module, network1: nn.Module, data: datasets.DatasetF
         device_step()
     print(f"Divergence: {total_loss}")
     return total_loss
-

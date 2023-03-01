@@ -29,4 +29,6 @@ def _device_step():
         return xla.mark_step
     else:
         return lambda: None
+
+
 device_step = _device_step()

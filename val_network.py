@@ -2,15 +2,23 @@ import argparse
 from os import environ
 from pathlib import Path
 
-parser = argparse.ArgumentParser(
-    prog="ResNet validation script"
+parser = argparse.ArgumentParser(prog="ResNet validation script")
+parser.add_argument(
+    "network", choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
 )
-parser.add_argument('network', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
-parser.add_argument('--inflate', choices=['resnet50', 'resnet101'])
-parser.add_argument('--batch_size', default=64, type=int)
-parser.add_argument('--epoch', type=lambda x: x if x in ["pre", "init", "all"] else int(x), action="append")
-parser.add_argument('--model_path', default="models", type=Path)
-parser.add_argument('--imagenet_path', default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"), type=Path)
+parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
+parser.add_argument("--batch_size", default=64, type=int)
+parser.add_argument(
+    "--epoch",
+    type=lambda x: x if x in ["pre", "init", "all"] else int(x),
+    action="append",
+)
+parser.add_argument("--model_path", default="models", type=Path)
+parser.add_argument(
+    "--imagenet_path",
+    default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),
+    type=Path,
+)
 args = parser.parse_args()
 
 
@@ -50,8 +58,11 @@ for epoch in args.epoch if len(args.epoch) > 0 else ["pre"]:
 
     if epoch == "all":
         print("Validating all epochs")
-        imagenet.run_val(network, args.model_path / name, val_data, batch_size=args.batch_size)
+        imagenet.run_val(
+            network, args.model_path / name, val_data, batch_size=args.batch_size
+        )
     else:
         print(f"Validating epoch {epoch}")
-        imagenet.val_epoch(network, args.model_path / name, val_data, epoch, batch_size=args.batch_size)
-
+        imagenet.val_epoch(
+            network, args.model_path / name, val_data, epoch, batch_size=args.batch_size
+        )
