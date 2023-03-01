@@ -7,6 +7,7 @@ from typing import Any, Callable, Mapping, Optional
 
 import torch
 import torch.nn as nn
+
 try:
     import torch_xla.core.xla_model as xla
 except ImportError:
@@ -36,10 +37,7 @@ def get_epoch(name: str, epoch: int = None):
 def list_epochs(name: str):
     save_paths = glob.glob(f"{name}/{'[0-9]'*8}.pkl")
     save_paths.sort()
-    return [
-        int(save_path[len(f"{name}/"):].split(".")[0])
-        for save_path in save_paths
-    ]
+    return [int(save_path[len(f"{name}/") :].split(".")[0]) for save_path in save_paths]
 
 
 def write_log(name: str, data: Optional[str] = None):
@@ -75,7 +73,11 @@ def load(name: str, epoch: int = None, device=None):
     if epoch is None:
         return (None, None)
     save_path = Path(f"{name}/{epoch:08}.pkl")
-    print(f"Loading `{save_path}` to {device}... ", flush=True, end="")
+    print(
+        f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
+        flush=True,
+        end="",
+    )
     try:
         state = torch.load(save_path, map_location=device)
     except RuntimeError:
