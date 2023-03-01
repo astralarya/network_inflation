@@ -1,5 +1,7 @@
-if __name__ == "__main__":
+from local.device import spawn
 
+
+def main(_):
     import argparse
     from os import environ
     from pathlib import Path
@@ -62,3 +64,7 @@ if __name__ == "__main__":
         init_fn=init_fn if args.finetune is False else None,
         force=args.force,
     )
+
+
+if __name__ == "__main__":
+    spawn(main, ())

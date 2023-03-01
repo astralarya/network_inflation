@@ -60,33 +60,6 @@ def train(
     init_fn: Optional[Callable[[nn.Module], Any]] = None,
     force: bool = False,
 ):
-    device.spawn(
-        _train,
-        (
-            device.model(network),
-            name,
-            data,
-            batch_size,
-            num_epochs,
-            num_workers,
-            init_fn,
-            force,
-        ),
-    )
-
-
-def _train(
-    idx: int,
-    network: nn.Module,
-    name: str,
-    data: datasets.DatasetFolder,
-    batch_size=256,
-    num_epochs=2048,
-    num_workers=8,
-    init_fn: Optional[Callable[[nn.Module], Any]] = None,
-    force: bool = False,
-):
-    print(f"Worker {idx} spawned")
     args = {"batch_size": 256}
     network.to(device.device())
     data_loader = device.loader(
