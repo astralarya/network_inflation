@@ -165,12 +165,17 @@ def val_epoch(
     epoch: Optional[Union[int, str]] = None,
     batch_size=256,
 ):
-    if type(epoch) != int or model.load(network, name, epoch) is not None:
-        accuracy = val(network, data, batch_size=batch_size)
-        model.write_log(
-            f"{name}.__val__",
-            f"{epoch}\t{accuracy[1]}\t{accuracy[5]}",
-        )
+    if type(epoch) == int:
+        save_epoch, save_state = model.load(name, epoch)
+        if save_epoch is None:
+            raise Exception(f"Epoch not found for {name}: {epoch}")
+        network.load_state_dict(save_state["model"])
+
+    accuracy = val(network, data, batch_size=batch_size)
+    model.write_log(
+        f"{name}.__val__",
+        f"{epoch}\t{accuracy[1]}\t{accuracy[5]}",
+    )
 
 
 def run_val(
