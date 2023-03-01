@@ -7,7 +7,7 @@ from torchvision import datasets, transforms
 from tqdm import tqdm
 
 from . import model as model
-from .device import device, device_step
+import local.device as device
 
 
 def train_data(data_root: str):
@@ -60,18 +60,38 @@ def train(
     init_fn: Optional[Callable[[nn.Module], Any]] = None,
     force: bool = False,
 ):
+    device.spawn(
+        _train,
+        (network, name, data, batch_size, num_epochs, num_workers, init_fn, force),
+    )
+
+
+def _train(
+    idx: int,
+    network: nn.Module,
+    name: str,
+    data: datasets.DatasetFolder,
+    batch_size=256,
+    num_epochs=2048,
+    num_workers=8,
+    init_fn: Optional[Callable[[nn.Module], Any]] = None,
+    force: bool = False,
+):
+    print(f"Worker {idx} spawned")
     args = {"batch_size": 256}
-    network.to(device)
-    data_loader = torch.utils.data.DataLoader2(
-        data,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        shuffle=True,
+    network.to(device.device)
+    data_loader = device.loader(
+        torch.utils.data.DataLoader2(
+            data,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            shuffle=True,
+        )
     )
     optimizer = optim.AdamW(network.parameters())
-    criterion = nn.CrossEntropyLoss().to(device)
+    criterion = nn.CrossEntropyLoss().to(device.device)
 
-    save_epoch, save_state = model.load(name, device=device)
+    save_epoch, save_state = model.load(name, device=device.device)
     if save_epoch is not None:
         print(f"Resuming from epoch {save_epoch}")
         network.load_state_dict(save_state["model"])
@@ -106,26 +126,26 @@ def train(
     for epoch in range(save_epoch + 1 if save_epoch else 1, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
-            inputs = inputs.to(device)
-            labels = labels.to(device)
+            inputs = inputs.to(device.device)
+            labels = labels.to(device.device)
             outputs = network(inputs)
             loss = criterion(outputs, labels)
             epoch_loss += loss.item() / total
             optimizer.zero_grad()
             loss.backward()
-            optimizer.step()
-            device_step()
+            device.optim_step(optimizer)
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        model.save(
-            name,
-            epoch,
-            {
-                "loss": epoch_loss,
-                "model": network.state_dict(),
-                "optim": optimizer.state_dict(),
-                "args": args,
-            },
-        )
+        if device.is_main:
+            model.save(
+                name,
+                epoch,
+                {
+                    "loss": epoch_loss,
+                    "model": network.state_dict(),
+                    "optim": optimizer.state_dict(),
+                    "args": args,
+                },
+            )
 
 
 def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
@@ -138,15 +158,15 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
         total = len(data_loader.dataset)
         print(f"Iterating {total} samples")
 
-        softmax = nn.Softmax(dim=2).to(device)
+        softmax = nn.Softmax(dim=2).to(device.device)
         network.eval()
-        network.to(device)
+        network.to(device.device)
 
         top1_accuracy = 0.0
         top5_accuracy = 0.0
         for inputs, labels in tqdm(data_loader):
-            inputs = inputs.to(device)
-            labels = labels.to(device)
+            inputs = inputs.to(device.device)
+            labels = labels.to(device.device)
             bs, ncrops, c, h, w = inputs.shape
             k = 5
 
@@ -159,7 +179,7 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
             top5_accuracy += (
                 top5_outputs == labels.repeat(k).view(k, -1).transpose(0, 1)
             ).max(dim=1).values.sum() / total
-            device_step()
+            device.step()
         print(f"Top1 accuracy: {top1_accuracy}")
         print(f"Top5 accuracy: {top5_accuracy}")
         return {
@@ -212,22 +232,22 @@ def divergence(
         num_workers=num_workers,
     )
 
-    log_softmax = nn.LogSoftmax(dim=1).to(device)
-    criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device)
+    log_softmax = nn.LogSoftmax(dim=1).to(device.device)
+    criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device.device)
     network0.eval()
-    network0.to(device)
+    network0.to(device.device)
     network1.eval()
-    network1.to(device)
+    network1.to(device.device)
 
     total_loss = 0.0
     total = len(data_loader.dataset)
     print(f"Iterating {total} samples")
     for inputs, _ in tqdm(data_loader):
-        inputs = inputs.to(device)
+        inputs = inputs.to(device.device)
         outputs0 = network0(inputs)
         outputs1 = network1(inputs)
         loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
         total_loss += loss.item() / total
-        device_step()
+        device.step()
     print(f"Divergence: {total_loss}")
     return total_loss

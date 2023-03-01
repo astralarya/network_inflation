@@ -5,6 +5,17 @@ try:
 except ImportError:
     xla = None
 
+try:
+    from torch_xla.distributed.parallel_loader import MpDeviceLoader as XlaLoader
+except ImportError:
+    XlaLoader = None
+
+try:
+    from torch_xla.distributed.xla_multiprocessing import spawn as xla_spawn
+except ImportError:
+    xla_spawn = None
+
+
 device_type = None
 
 if torch.backends.mps.is_available():
@@ -24,11 +35,51 @@ cpu = "cpu"
 print(f"Device: {device}")
 
 
-def _device_step():
+def _step():
     if device_type == "xla":
         return xla.mark_step
     else:
         return lambda: None
 
 
-device_step = _device_step()
+step = _step()
+
+
+def _optim_step():
+    if device_type == "xla":
+        return xla.optimizer_step
+    else:
+        return lambda x: x.step()
+
+
+optim_step = _optim_step()
+
+
+def _loader():
+    if device_type == "xla":
+        return lambda x: XlaLoader(x, device)
+    else:
+        return lambda x: x
+
+
+loader = _loader()
+
+
+def _is_main():
+    if device_type == "xla":
+        return xla.is_master_ordinal()
+    else:
+        return True
+
+
+is_main = _is_main()
+
+
+def _spawn():
+    if device_type == "xla":
+        return xla_spawn
+    else:
+        return lambda x, args: x(0, *args)
+
+
+spawn = _spawn()
