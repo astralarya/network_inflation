@@ -79,7 +79,7 @@ def _train(
 ):
     print(f"Worker {idx} spawned")
     args = {"batch_size": 256}
-    network.to(device.device)
+    network.to(device.device())
     data_loader = device.loader(
         torch.utils.data.DataLoader2(
             data,
@@ -89,9 +89,9 @@ def _train(
         )
     )
     optimizer = optim.AdamW(network.parameters())
-    criterion = nn.CrossEntropyLoss().to(device.device)
+    criterion = nn.CrossEntropyLoss().to(device.device())
 
-    save_epoch, save_state = model.load(name, device=device.device)
+    save_epoch, save_state = model.load(name, device=device.device())
     if save_epoch is not None:
         print(f"Resuming from epoch {save_epoch}")
         network.load_state_dict(save_state["model"])
@@ -126,8 +126,8 @@ def _train(
     for epoch in range(save_epoch + 1 if save_epoch else 1, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
-            inputs = inputs.to(device.device)
-            labels = labels.to(device.device)
+            inputs = inputs.to(device.device())
+            labels = labels.to(device.device())
             outputs = network(inputs)
             loss = criterion(outputs, labels)
             losses = device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
@@ -160,15 +160,15 @@ def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
         total = len(data_loader.dataset)
         print(f"Iterating {total} samples")
 
-        softmax = nn.Softmax(dim=2).to(device.device)
+        softmax = nn.Softmax(dim=2).to(device.device())
         network.eval()
-        network.to(device.device)
+        network.to(device.device())
 
         top1_accuracy = 0.0
         top5_accuracy = 0.0
         for inputs, labels in tqdm(data_loader):
-            inputs = inputs.to(device.device)
-            labels = labels.to(device.device)
+            inputs = inputs.to(device.device())
+            labels = labels.to(device.device())
             bs, ncrops, c, h, w = inputs.shape
             k = 5
 
@@ -234,18 +234,18 @@ def divergence(
         num_workers=num_workers,
     )
 
-    log_softmax = nn.LogSoftmax(dim=1).to(device.device)
-    criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device.device)
+    log_softmax = nn.LogSoftmax(dim=1).to(device.device())
+    criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device.device())
     network0.eval()
-    network0.to(device.device)
+    network0.to(device.device())
     network1.eval()
-    network1.to(device.device)
+    network1.to(device.device())
 
     total_loss = 0.0
     total = len(data_loader.dataset)
     print(f"Iterating {total} samples")
     for inputs, _ in tqdm(data_loader):
-        inputs = inputs.to(device.device)
+        inputs = inputs.to(device.device())
         outputs0 = network0(inputs)
         outputs1 = network1(inputs)
         loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
