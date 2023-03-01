@@ -13,7 +13,7 @@ parser.add_argument("--finetune", action="store_true")
 parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
 parser.add_argument("--batch_size", default=64, type=int)
 parser.add_argument("--num_workers", default=4, type=int)
-parser.add_argument("--nprocs", default=4, type=int)
+parser.add_argument("--nprocs", default=8, type=int)
 parser.add_argument("--model_path", default="models", type=Path)
 parser.add_argument(
     "--imagenet_path",
