@@ -11,11 +11,12 @@ except ImportError:
     XlaLoader = None
 
 try:
-    from torch_xla.distributed.xla_multiprocessing import spawn as xla_spawn, MpModelWrapper as XlaModel
+    from torch_xla.distributed.xla_multiprocessing import (
+        spawn as xla_spawn,
+        MpModelWrapper as XlaModel,
+    )
 except ImportError:
     xla_spawn = None
-
-    torch_xla.distributed.xla_multiprocessing.
 
 
 _device = None
