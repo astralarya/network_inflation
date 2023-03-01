@@ -1,0 +1,108 @@
+Mara@t1v-n-fd863902-w-0:~/network_inflation$ python3 val_network.py resnet152 --epoch 0 --epoch 5 --epoch 10 --epoch 14
+Device: xla:1
+Loading val data `/mnt/imagenet/imagenet-1k/val`... DONE
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152
+Validating epoch 0
+Loading `models/resnet152/00000000.pkl`... DONE
+Iterating 50000 samples
+100%|█████████████████████████████████████████| 782/782 [18:52<00:00,  1.45s/it]
+Top1 accuracy: 0.0009999999310821295
+Top5 accuracy: 0.004780000075697899
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152
+Validating epoch 5
+Loading `models/resnet152/00000005.pkl`... DONE
+Iterating 50000 samples
+100%|█████████████████████████████████████████| 782/782 [11:40<00:00,  1.12it/s]
+Top1 accuracy: 0.0009999999310821295
+Top5 accuracy: 0.0050999997183680534
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152
+Validating epoch 10
+Loading `models/resnet152/00000010.pkl`... DONE
+Iterating 50000 samples
+100%|█████████████████████████████████████████| 782/782 [11:32<00:00,  1.13it/s]
+Top1 accuracy: 0.0009999999310821295
+Top5 accuracy: 0.004999999888241291
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152
+Validating epoch 14
+Loading `models/resnet152/00000014.pkl`... DONE
+Iterating 50000 samples
+100%|█████████████████████████████████████████| 782/782 [11:32<00:00,  1.13it/s]
+
+
+Mara@t1v-n-2b7ef659-w-0:~/network_inflation$ python3 val_network.py resnet152 --inflate resnet50 --epoch 0 --epoch 5 --epoch 10 --epoch 13
+Device: xla:1
+Loading val data `/mnt/imagenet/imagenet-1k/val`... DONE
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152--inflate-resnet50
+Validating epoch 0
+Loading `models/resnet152--inflate-resnet50/00000000.pkl`... DONE
+Iterating 50000 samples
+100%|█████████████████████████████████████████| 782/782 [11:53<00:00,  1.10it/s]
+Top1 accuracy: 0.0009999999310821295
+Top5 accuracy: 0.004999999422580004
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152--inflate-resnet50
+Validating epoch 5
+Loading `models/resnet152--inflate-resnet50/00000005.pkl`... DONE
+Iterating 50000 samples
+100%|█████████████████████████████████████████| 782/782 [11:41<00:00,  1.12it/s]
+Top1 accuracy: 0.7752401232719421
+Top5 accuracy: 0.9375197291374207
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152--inflate-resnet50
+Validating epoch 10
+Loading `models/resnet152--inflate-resnet50/00000010.pkl`... DONE
+Iterating 50000 samples
+100%|█████████████████████████████████████████| 782/782 [11:33<00:00,  1.13it/s]
+Top1 accuracy: 0.775640070438385
+Top5 accuracy: 0.9374000430107117
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152--inflate-resnet50
+Validating epoch 13
+Loading `models/resnet152--inflate-resnet50/00000013.pkl`... DONE
+Iterating 50000 samples
+100%|████████████████████████████████████████████████████████████████| 782/782 [11:33<00:00,  1.13it/s]
+Top1 accuracy: 0.7743195295333862
+Top5 accuracy: 0.9374401569366455
+
+Mara@t1v-n-9eb6954d-w-0:~/network_inflation$ python3 val_network.py resnet152 --inflate resnet101 --epoch 0 --epoch 5 --epoch 10 --epoch 14
+Device: xla:1
+Loading val data `/mnt/imagenet/imagenet-1k/val`... DONE
+Downloading: "https://github.com/pytorch/vision/zipball/v0.10.0" to /home/Mara/.cache/torch/hub/v0.10.0.zip
+Downloading: "https://download.pytorch.org/models/resnet152-394f9c45.pth" to /home/Mara/.cache/torch/hub/checkpoints/resnet152-394f9c45.pth
+100%|█████████████████████████████████████████| 230M/230M [00:00<00:00, 271MB/s]
+Validating model resnet152--inflate-resnet101
+Validating epoch 0
+Loading `models/resnet152--inflate-resnet101/00000000.pkl`... DONE
+Iterating 50000 samples
+100%|█████████████████████████████████████████| 782/782 [19:55<00:00,  1.53s/it]
+Top1 accuracy: 0.0009999999310821295
+Top5 accuracy: 0.004999999422580004
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152--inflate-resnet101
+Validating epoch 5
+Loading `models/resnet152--inflate-resnet101/00000005.pkl`... DONE
+Iterating 50000 samples
+100%|█████████████████████████████████████████| 782/782 [11:38<00:00,  1.12it/s]
+Top1 accuracy: 0.7890399098396301
+Top5 accuracy: 0.9440994262695312
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152--inflate-resnet101
+Validating epoch 10
+Loading `models/resnet152--inflate-resnet101/00000010.pkl`... DONE
+Iterating 50000 samples
+100%|████████████████████████████████████████████████████████████████| 782/782 [11:30<00:00,  1.13it/s]
+Top1 accuracy: 0.7895393371582031
+Top5 accuracy: 0.9441392421722412
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating model resnet152--inflate-resnet101
+Validating epoch 14
+Loading `models/resnet152--inflate-resnet101/00000014.pkl`... DONE
+Iterating 50000 samples
+100%|████████████████████████████████████████████████████████████████| 782/782 [11:31<00:00,  1.13it/s]
+Top1 accuracy: 0.7903398275375366
+Top5 accuracy: 0.9442997574806213
