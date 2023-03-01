@@ -73,7 +73,7 @@ optim_step = _optim_step()
 
 def _loader():
     if device_type == "xla":
-        return lambda x: XlaLoader(x, device)
+        return lambda x: XlaLoader(x, device())
     else:
         return lambda x: x
 
