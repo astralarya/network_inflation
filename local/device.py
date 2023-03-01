@@ -11,9 +11,11 @@ except ImportError:
     XlaLoader = None
 
 try:
-    from torch_xla.distributed.xla_multiprocessing import spawn as xla_spawn
+    from torch_xla.distributed.xla_multiprocessing import spawn as xla_spawn, MpModelWrapper as XlaModel
 except ImportError:
     xla_spawn = None
+
+    torch_xla.distributed.xla_multiprocessing.
 
 
 _device = None
@@ -74,6 +76,16 @@ def _loader():
 
 
 loader = _loader()
+
+
+def _model():
+    if device_type == "xla":
+        return lambda x: XlaModel(x)
+    else:
+        return lambda x: x
+
+
+model = _model()
 
 
 def _is_main():

@@ -62,7 +62,16 @@ def train(
 ):
     device.spawn(
         _train,
-        (network, name, data, batch_size, num_epochs, num_workers, init_fn, force),
+        (
+            device.model(network),
+            name,
+            data,
+            batch_size,
+            num_epochs,
+            num_workers,
+            init_fn,
+            force,
+        ),
     )
 
 
