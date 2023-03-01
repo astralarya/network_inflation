@@ -1,29 +1,30 @@
+import argparse
+from os import environ
+from pathlib import Path
+
 from local.device import spawn
 
+parser = argparse.ArgumentParser(prog="ResNet training script")
+parser.add_argument(
+    "network",
+    choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"],
+)
+parser.add_argument("--finetune", action="store_true")
+parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
+parser.add_argument("--batch_size", default=64, type=int)
+parser.add_argument("--num_workers", default=4, type=int)
+parser.add_argument("--nproc", default=4, type=int)
+parser.add_argument("--model_path", default="models", type=Path)
+parser.add_argument(
+    "--imagenet_path",
+    default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),
+    type=Path,
+)
+parser.add_argument("--force", action="store_true")
+args = parser.parse_args()
 
-def main(_):
-    import argparse
-    from os import environ
-    from pathlib import Path
 
-    parser = argparse.ArgumentParser(prog="ResNet training script")
-    parser.add_argument(
-        "network",
-        choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"],
-    )
-    parser.add_argument("--finetune", action="store_true")
-    parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
-    parser.add_argument("--batch_size", default=64, type=int)
-    parser.add_argument("--num_workers", default=8, type=int)
-    parser.add_argument("--model_path", default="models", type=Path)
-    parser.add_argument(
-        "--imagenet_path",
-        default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),
-        type=Path,
-    )
-    parser.add_argument("--force", action="store_true")
-    args = parser.parse_args()
-
+def main(idx: int):
     from local import inflate
     from local import imagenet
     from local import model
@@ -56,6 +57,7 @@ def main(_):
 
     init_fn = reset_fn if args.inflate is None else inflate_fn
     imagenet.train(
+        idx,
         network,
         args.model_path / name,
         train_data,
@@ -67,4 +69,4 @@ def main(_):
 
 
 if __name__ == "__main__":
-    spawn(main, ())
+    spawn(main, (), nproc=args.nproc)
