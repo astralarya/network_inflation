@@ -53,5 +53,5 @@ for epoch in args.epoch if len(args.epoch) > 0 else ["pre"]:
         imagenet.run_val(network, args.model_path / name, val_data, batch_size=args.batch_size)
     else:
         print(f"Validating epoch {epoch}")
-        imagenet.val_epoch(network, args.model_path / name, val_data, args.epoch, batch_size=args.batch_size)
+        imagenet.val_epoch(network, args.model_path / name, val_data, epoch, batch_size=args.batch_size)
 
