@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('network', choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'])
 parser.add_argument('--inflate', choices=['resnet50', 'resnet101'])
 parser.add_argument('--batch_size', default=64, type=int)
-parser.add_argument('--epoch', default="pre", type=lambda x: x if x in ["pre", "init", "all"] else int(x), action="append")
+parser.add_argument('--epoch', type=lambda x: x if x in ["pre", "init", "all"] else int(x), action="append")
 parser.add_argument('--model_dir', default="models", type=Path)
 parser.add_argument('--imagenet_path', default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"), type=Path)
 args = parser.parse_args()
@@ -27,7 +27,7 @@ if args.inflate is not None:
     name = f"{name}--inflate-{args.inflate}"
 
 
-for epoch in args.epoch:
+for epoch in args.epoch if len(args.epoch) > 0 else ["pre"]:
     network = getattr(resnet, args.network, lambda: None)()
     if network is None:
         print(f"Unknown network: {args.network}")
