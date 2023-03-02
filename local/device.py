@@ -153,5 +153,5 @@ mesh_reduce = _mesh_reduce()
 
 
 def sync_seed():
-    seed, *_ = rendezvous("seed", torch.seed() if is_main() else None)
+    seed = mesh_reduce("seed", torch.seed() if is_main() else None, lambda x: x[0])
     torch.manual_seed(seed)
