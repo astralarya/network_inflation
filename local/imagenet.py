@@ -3,6 +3,7 @@ from typing import Any, Callable, Optional, Union
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data.distributed import DistributedSampler
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
@@ -63,12 +64,20 @@ def train(
 ):
     args = {"batch_size": 256}
     network.to(device.device(idx))
+    train_sampler = (
+        torch.utils.data.distributed.DistributedSampler(
+            data, num_replicas=device.world_size(), rank=device.ordinal(), shuffle=True
+        )
+        if device.world_size() > 1
+        else None
+    )
     data_loader = device.loader(
         torch.utils.data.DataLoader2(
             data,
             batch_size=batch_size,
+            sampler=train_sampler,
             num_workers=num_workers,
-            shuffle=True,
+            shuffle=False if train_sampler else True,
         )
     )
     optimizer = optim.AdamW(network.parameters())

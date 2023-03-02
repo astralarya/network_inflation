@@ -101,6 +101,26 @@ def _is_main():
 is_main = _is_main()
 
 
+def _world_size():
+    if device_type == "xla":
+        return lambda: xla.get_ordinal()
+    else:
+        return lambda: 1
+
+
+world_size = _world_size()
+
+
+def _num_replicas():
+    if device_type == "xla":
+        return (lambda: xla.xrt_world_size(),)
+    else:
+        return lambda: 1
+
+
+_num_replicas = _num_replicas()
+
+
 def _spawn():
     if device_type == "xla":
         return xla_spawn
