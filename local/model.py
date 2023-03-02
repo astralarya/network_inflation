@@ -16,10 +16,6 @@ except ImportError:
 from .device import cpu
 
 
-default_dir = "models"
-Path(default_dir).mkdir(exist_ok=True)
-
-
 def get_epoch(name: str, epoch: int = None):
     if epoch is not None:
         save_paths = glob.glob(f"{name}/{epoch:08}.pkl")
