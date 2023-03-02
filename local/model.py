@@ -55,11 +55,10 @@ def state_to(state: Any, device: torch.device):
 
 
 def save(name: str, epoch: int, state: Any):
-    save_path = Path(f"{name}/{epoch:08}.pkl")
     if _device.is_main():
+        save_path = Path(f"{name}/{epoch:08}.pkl")
         print(f"Saving `{save_path}`... ", flush=True, end="")
-    state = state_to(state, _device.cpu)
-    if _device.is_main():
+        state = state_to(state, _device.cpu)
         Path(name).mkdir(parents=True, exist_ok=True)
         with save_path.open("wb") as save_file:
             torch.save(state, save_file)
