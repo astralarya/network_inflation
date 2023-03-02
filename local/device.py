@@ -93,9 +93,9 @@ model = _model()
 
 def _is_main():
     if device_type == "xla":
-        return xla.is_master_ordinal()
+        return lambda: xla.is_master_ordinal()
     else:
-        return True
+        return lambda: True
 
 
 is_main = _is_main()
