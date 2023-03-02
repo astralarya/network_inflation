@@ -26,6 +26,18 @@ args = parser.parse_args()
 
 
 def main(idx: int, _args: dict):
+    def reset_fn(x):
+        print(f"Reset network ({args.network})")
+        model.reset(x)
+
+    def inflate_fn(x):
+        inflate_source = getattr(resnet, args.inflate, lambda: None)()
+        if inflate_source is None:
+            print(f"Unknown network: {args.inflate}")
+            exit(1)
+        print(f"Inflating network ({args.network}) from {args.inflate}")
+        inflate.resnet(inflate_source, x)
+
     imagenet.train(
         _args["network"],
         _args["name"],
@@ -52,18 +64,6 @@ if __name__ == "__main__":
     if network is None:
         print(f"Unknown network: {args.network}")
         exit(1)
-
-    def reset_fn(x):
-        print(f"Reset network ({args.network})")
-        model.reset(x)
-
-    def inflate_fn(x):
-        inflate_source = getattr(resnet, args.inflate, lambda: None)()
-        if inflate_source is None:
-            print(f"Unknown network: {args.inflate}")
-            exit(1)
-        print(f"Inflating network ({args.network}) from {args.inflate}")
-        inflate.resnet(inflate_source, x)
 
     train_data = imagenet.train_data(args.imagenet_path / "train")
 
