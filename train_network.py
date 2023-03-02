@@ -74,6 +74,7 @@ if __name__ == "__main__":
 
     network = device.model(network)
 
+    print(f"Spawning {args.nprocs} processes")
     device.spawn(
         main,
         (
