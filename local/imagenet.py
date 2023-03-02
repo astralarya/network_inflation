@@ -86,7 +86,8 @@ def train(
 
     save_epoch, save_state = model.load(name, device=device.device())
     if save_epoch is not None:
-        print(f"Resuming from epoch {save_epoch}")
+        if device.is_main():
+            print(f"Resuming from epoch {save_epoch}")
         network.load_state_dict(save_state["model"])
         optimizer.load_state_dict(save_state["optim"])
         if not force:
