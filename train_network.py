@@ -2,7 +2,7 @@ import argparse
 from os import environ
 from pathlib import Path
 
-from local.device import spawn
+import local.device as device
 
 parser = argparse.ArgumentParser(prog="ResNet training script")
 parser.add_argument(
@@ -58,7 +58,7 @@ def main(idx: int):
     init_fn = reset_fn if args.inflate is None else inflate_fn
     imagenet.train(
         idx,
-        network,
+        device.model(network),
         args.model_path / name,
         train_data,
         batch_size=args.batch_size,
@@ -69,4 +69,4 @@ def main(idx: int):
 
 
 if __name__ == "__main__":
-    spawn(main, (), nprocs=args.nprocs)
+    device.spawn(main, (), nprocs=args.nprocs)
