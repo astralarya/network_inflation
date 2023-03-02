@@ -63,7 +63,7 @@ def save(name: str, epoch: int, state: Any):
         save_path = Path(f"{name}/{epoch:08}.pkl")
         with save_path.open("wb") as save_file:
             torch.save(state, save_file)
-    print("DONE")
+        print("DONE")
 
 
 def load(name: str, epoch: int = None, device: torch.device = None):
