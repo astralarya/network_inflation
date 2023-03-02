@@ -62,6 +62,8 @@ def train(
     force: bool = False,
 ):
     args = {"batch_size": 256}
+    total = len(data)
+
     network = network.to(device.device())
     train_sampler = (
         torch.utils.data.distributed.DistributedSampler(
@@ -110,12 +112,10 @@ def train(
                 },
             )
 
-    total = len(data)
-    if device.is_main():
-        print(f"Iterating {total} samples")
-
     network.train()
 
+    if device.is_main():
+        print(f"Iterating {total} samples")
     for epoch in range(save_epoch + 1 if save_epoch else 1, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader, disable=not device.is_main()):
