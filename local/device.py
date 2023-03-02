@@ -27,17 +27,17 @@ _device = None
 def device():
     global _device
     if _device:
-        return _device
+        return _device()
     else:
         if torch.backends.mps.is_available():
-            _device = torch.device("mps")
+            _device = lambda: torch.device("mps")
         elif xla is not None and xla.xla_device() is not None:
-            _device = xla.xla_device()
+            _device = xla.xla_device
         elif torch.cuda.is_available():
-            _device = torch.device(f"cuda:{torch.cuda.current_device()}")
+            _device = lambda: torch.device(f"cuda:{torch.cuda.current_device()}")
         if is_main():
             print(f"Device: {_device}")
-        return _device
+        return _device()
 
 
 device_type = None
