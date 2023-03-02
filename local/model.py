@@ -13,7 +13,7 @@ try:
 except ImportError:
     xla = None
 
-from . import device
+from . import device as _device
 
 
 def get_epoch(name: str, epoch: int = None):
@@ -55,8 +55,8 @@ def state_to(state: Any, device: torch.device):
 
 
 def save(name: str, epoch: int, state: Any):
-    if device.is_main():
-        state = state_to(state, device.cpu)
+    if _device.is_main():
+        state = state_to(state, _device.cpu)
         Path(name).mkdir(parents=True, exist_ok=True)
         save_path = Path(f"{name}/{epoch:08}.pkl")
         with save_path.open("wb") as save_file:
@@ -66,24 +66,24 @@ def save(name: str, epoch: int, state: Any):
 
 
 def load(name: str, epoch: int = None, device=None):
+    epoch = get_epoch(name, epoch)
+    if epoch is None:
+        return (None, None)
+    save_path = Path(f"{name}/{epoch:08}.pkl")
     print(
         f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
         flush=True,
         end="",
     )
-    epoch = get_epoch(name, epoch)
-    if epoch is None:
-        return (None, None)
-    save_path = Path(f"{name}/{epoch:08}.pkl")
     state = None
-    if device.is_main():
+    if _device.is_main():
         try:
             state = torch.load(save_path, map_location=device)
         except RuntimeError:
-            state = torch.load(save_path, map_location=device.cpu)
-    states = device.rendezvous("load", state)
+            state = torch.load(save_path, map_location=_device.cpu)
+    states = _device.rendezvous("load", state)
     state = state_to(states[0], device)
-    if device.is_main():
+    if _device.is_main():
         print(state.keys())
         print("DONE")
     return (epoch, state)
