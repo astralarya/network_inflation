@@ -101,16 +101,16 @@ def train(
             device.optim_step(optimizer)
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        model.save(
-            name,
-            epoch,
-            {
-                "loss": epoch_loss,
-                "model": network.state_dict(),
-                "optim": optimizer.state_dict(),
-                "args": args,
-            },
-        )
+            model.save(
+                name,
+                epoch,
+                {
+                    "loss": epoch_loss,
+                    "model": network.state_dict(),
+                    "optim": optimizer.state_dict(),
+                    "args": args,
+                },
+            )
     device.rendezvous("end")
 
 
