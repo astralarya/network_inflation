@@ -99,9 +99,9 @@ def reset(module: nn.Module):
     module.apply(fn=reset)
 
     if _device.world_size() > 1:
-        y = module.state_dict() if _device.is_main() else None
-        y, *_ = _device.rendezvous("reset", y)
-        module.load_state_dict(y)
+        state = module.state_dict() if _device.is_main() else None
+        state = _device.mesh_reduce("reset", state, lambda x: x[0])
+        module.load_state_dict(state)
 
 
 def clone(module: nn.Module):
