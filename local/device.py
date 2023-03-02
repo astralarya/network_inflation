@@ -150,3 +150,8 @@ def _mesh_reduce():
 
 
 mesh_reduce = _mesh_reduce()
+
+
+def sync_seed():
+    seed, *_ = rendezvous("seed", torch.seed() if is_main() else None)
+    torch.manual_seed(seed)

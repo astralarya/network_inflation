@@ -26,6 +26,8 @@ args = parser.parse_args()
 
 
 def main(idx: int, _args: dict):
+    device.sync_seed()
+
     def reset_fn(x):
         if device.is_main():
             print(f"Reset network ({args.network})")
