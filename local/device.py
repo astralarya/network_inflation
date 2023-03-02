@@ -156,7 +156,7 @@ mesh_reduce = _mesh_reduce()
 def _sync_tensor():
     if device_type == "xla":
         return lambda x: xla.all_reduce(
-            "xm.REDUCE_SUM", x if is_main() else torch.zeros(x.shape, device=device())
+            xla.REDUCE_SUM, x if is_main() else torch.zeros(x.shape, device=device())
         )
     else:
         return lambda x: x
