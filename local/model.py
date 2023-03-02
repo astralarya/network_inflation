@@ -81,11 +81,11 @@ def load(name: str, epoch: int = None, device=None):
             state = torch.load(save_path, map_location=device)
         except RuntimeError:
             state = torch.load(save_path, map_location=_device.cpu)
-    states = _device.rendezvous("load", state)
-    state = state_to(states[0], device)
+    state = _device.mesh_reduce("load", state, lambda x: x[0])
     if _device.is_main():
         print(state.keys())
         print("DONE")
+    state = state_to(state, device)
     return (epoch, state)
 
 
