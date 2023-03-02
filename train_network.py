@@ -2,6 +2,7 @@ import argparse
 from os import environ
 from pathlib import Path
 
+from local import imagenet
 import local.device as device
 
 parser = argparse.ArgumentParser(prog="ResNet training script")
@@ -39,7 +40,6 @@ def main(idx: int):
 
 if __name__ == "__main__":
     from local import inflate
-    from local import imagenet
     from local import model
     from local import resnet
 
