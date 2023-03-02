@@ -35,9 +35,10 @@ def device():
             _device = xla.xla_device
         elif torch.cuda.is_available():
             _device = lambda: torch.device(f"cuda:{torch.cuda.current_device()}")
+        r = _device()
         if is_main():
-            print(f"Device: {_device}")
-        return _device()
+            print(f"Device: {r}")
+        return r
 
 
 device_type = None
