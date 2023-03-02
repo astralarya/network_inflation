@@ -43,14 +43,14 @@ def write_log(name: str, data: str):
 
 
 def state_to(state: Any, device: torch.device):
+    to = _device.to_cpu if device == _device.cpu else lambda x: x.to(device)
     if type(state) == dict or type(state) == OrderedDict:
         r = type(state)()
         for key, val in state.items():
             r[key] = state_to(val, device)
         return r
     elif type(state) == torch.Tensor:
-        r = state.to(device)
-        return r
+        return to(device)
     else:
         return state
 

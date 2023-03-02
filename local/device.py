@@ -53,6 +53,16 @@ elif xla is not None:
 cpu = torch.device("cpu")
 
 
+def _to_cpu():
+    if device_type == "xla":
+        return xla._maybe_convert_to_cpu
+    else:
+        return lambda x: x.to(cpu)
+
+
+to_cpu = _to_cpu()
+
+
 def _step():
     if device_type == "xla":
         return xla.mark_step
