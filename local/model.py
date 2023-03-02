@@ -37,10 +37,9 @@ def list_epochs(name: str):
 
 
 def write_log(name: str, data: str):
-    if _device.is_main():
-        Path(name).parent.mkdir(parents=True, exist_ok=True)
-        with Path(f"{name}.log").open("a") as logfile:
-            logfile.write(data)
+    Path(name).parent.mkdir(parents=True, exist_ok=True)
+    with Path(f"{name}.log").open("a") as logfile:
+        logfile.write(data)
 
 
 def state_to(state: Any, device: torch.device):
@@ -56,27 +55,14 @@ def state_to(state: Any, device: torch.device):
         return state
 
 
-def state_sync(state: Any):
-    if type(state) == dict or type(state) == OrderedDict:
-        r = type(state)()
-        for key, val in state.items():
-            r[key] = state_sync(val)
-        return r
-    elif type(state) == torch.Tensor:
-        return _device.sync_tensor(state)
-    else:
-        return _device.sync_item(state if _device.is_main() else None, lambda x: x[0])
-
-
 def save(name: str, epoch: int, state: Any):
-    if _device.is_main():
-        save_path = Path(f"{name}/{epoch:08}.pkl")
-        print(f"Saving `{save_path}`... ", flush=True, end="")
-        state = state_to(state, _device.cpu)
-        Path(name).mkdir(parents=True, exist_ok=True)
-        with save_path.open("wb") as save_file:
-            torch.save(state, save_file)
-        print("DONE")
+    save_path = Path(f"{name}/{epoch:08}.pkl")
+    print(f"Saving `{save_path}`... ", flush=True, end="")
+    state = state_to(state, _device.cpu)
+    Path(name).mkdir(parents=True, exist_ok=True)
+    with save_path.open("wb") as save_file:
+        torch.save(state, save_file)
+    print("DONE")
 
 
 def load(name: str, epoch: int = None, device: torch.device = None):
@@ -84,34 +70,28 @@ def load(name: str, epoch: int = None, device: torch.device = None):
     if epoch is None:
         return (None, None)
     save_path = Path(f"{name}/{epoch:08}.pkl")
-    if _device.is_main():
-        print(
-            f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
-            flush=True,
-            end="",
-        )
+    print(
+        f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
+        flush=True,
+        end="",
+    )
     try:
         state = torch.load(save_path, map_location=device)
     except RuntimeError:
         state = torch.load(save_path, map_location=_device.cpu)
         state = state_to(state, device)
-    if _device.is_main():
-        print("DONE")
+    print("DONE")
     return (epoch, state)
 
 
 def reset(module: nn.Module):
-    if _device.is_main():
+    @torch.no_grad()
+    def reset(module: nn.Module):
+        reset_parameters = getattr(module, "reset_parameters", None)
+        if callable(reset_parameters):
+            module.reset_parameters()
 
-        @torch.no_grad()
-        def reset(module: nn.Module):
-            reset_parameters = getattr(module, "reset_parameters", None)
-            if callable(reset_parameters):
-                module.reset_parameters()
-
-        module.apply(fn=reset)
-    state = state_sync(module.state_dict())
-    module.load_state_dict(state)
+    module.apply(fn=reset)
 
 
 def clone(module: nn.Module):
