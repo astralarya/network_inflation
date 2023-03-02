@@ -65,7 +65,7 @@ def save(name: str, epoch: int, state: Any):
         print("DONE")
 
 
-def load(name: str, epoch: int = None, device=None):
+def load(name: str, epoch: int = None, device: torch.device = None):
     epoch = get_epoch(name, epoch)
     if epoch is None:
         return (None, None)
@@ -81,11 +81,10 @@ def load(name: str, epoch: int = None, device=None):
             state = torch.load(save_path, map_location=device)
         except RuntimeError:
             state = torch.load(save_path, map_location=_device.cpu)
-    state = _device.mesh_reduce("load", state, lambda x: x[0])
+    state = state_to(_device.mesh_reduce("load", state, lambda x: x[0]), device)
     if _device.is_main():
         print(state.keys())
         print("DONE")
-    state = state_to(state, device)
     return (epoch, state)
 
 
