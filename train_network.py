@@ -91,10 +91,10 @@ if __name__ == "__main__":
             if inflate_source is None:
                 print(f"Unknown network: {args.inflate}")
                 exit(1)
-            print(f"Inflating network ({args.network}) from {args.inflate}")
+            print(f"Inflating network {args.network} from {args.inflate}")
             inflate.resnet(inflate_source, network)
         else:
-            print(f"Reset network ({args.network})")
+            print(f"Reset network {args.network}")
             model.reset(network)
 
         optimizer = optim.SGD(
