@@ -25,17 +25,8 @@ parser.add_argument("--force", action="store_true")
 args = parser.parse_args()
 
 
-def main(idx: int):
-    imagenet.train(
-        idx,
-        network,
-        args.model_path / name,
-        train_data,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        init_fn=init_fn if args.finetune is False else None,
-        force=args.force,
-    )
+def main(idx: int, fn):
+    fn()
 
 
 if __name__ == "__main__":
@@ -72,4 +63,17 @@ if __name__ == "__main__":
 
     network = device.model(network)
 
-    device.spawn(main, (), nprocs=args.nprocs)
+    device.spawn(
+        main,
+        lambda: imagenet.train(
+            idx,
+            network,
+            args.model_path / name,
+            train_data,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            init_fn=init_fn if args.finetune is False else None,
+            force=args.force,
+        ),
+        nprocs=args.nprocs,
+    )
