@@ -32,7 +32,7 @@ def device():
         if torch.backends.mps.is_available():
             _device = torch.device("mps")
         elif xla is not None and xla.xla_device() is not None:
-            _device = xla.xla_device(get_ordinal())
+            _device = xla.xla_device(ordinal())
         elif torch.cuda.is_available():
             _device = torch.device(f"cuda:{torch.cuda.current_device()}")
         print(f"Device: {_device}")
