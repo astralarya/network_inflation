@@ -50,7 +50,7 @@ def state_to(state: Any, device: torch.device):
             r[key] = state_to(val, device)
         return r
     elif type(state) == torch.Tensor:
-        return to(device)
+        return to(state)
     else:
         return state
 
