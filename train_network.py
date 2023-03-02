@@ -33,7 +33,7 @@ def main(idx: int, args):
         args["data"],
         batch_size=args["batch_size"],
         num_workers=args["num_workers"],
-        init_fn=args["init_fn"],
+        init_fn=reset_fn if args.inflate is None else inflate_fn,
         force=args["force"],
     )
 
@@ -68,8 +68,6 @@ if __name__ == "__main__":
 
     train_data = imagenet.train_data(args.imagenet_path / "train")
 
-    init_fn = reset_fn if args.inflate is None else inflate_fn
-
     network = device.model(network)
 
     device.spawn(
@@ -80,7 +78,6 @@ if __name__ == "__main__":
             "data": train_data,
             "batch_size": args.batch_size,
             "num_workers": args.num_workers,
-            "init_fn": init_fn if args.finetune is False else None,
             "force": args.force,
         },
         nprocs=args.nprocs,
