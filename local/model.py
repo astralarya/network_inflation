@@ -37,9 +37,10 @@ def list_epochs(name: str):
 
 
 def write_log(name: str, data: str):
-    Path(name).parent.mkdir(parents=True, exist_ok=True)
-    with Path(f"{name}.log").open("a") as logfile:
-        logfile.write(data)
+    if _device.is_main():
+        Path(name).parent.mkdir(parents=True, exist_ok=True)
+        with Path(f"{name}.log").open("a") as logfile:
+            logfile.write(data)
 
 
 def state_to(state: Any, device: torch.device):
