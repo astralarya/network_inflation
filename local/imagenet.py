@@ -99,18 +99,16 @@ def train(
     else:
         if init_fn is not None:
             init_fn(network)
-        if device.is_main():
-            print("Saving initial state as epoch 0")
-            model.save(
-                name,
-                0,
-                {
-                    "loss": None,
-                    "model": network.state_dict(),
-                    "optim": optimizer.state_dict(),
-                    "args": args,
-                },
-            )
+        model.save(
+            name,
+            0,
+            {
+                "loss": None,
+                "model": network.state_dict(),
+                "optim": optimizer.state_dict(),
+                "args": args,
+            },
+        )
 
     network.train()
 
@@ -130,16 +128,16 @@ def train(
             device.optim_step(optimizer)
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
-            model.save(
-                name,
-                epoch,
-                {
-                    "loss": epoch_loss,
-                    "model": network.state_dict(),
-                    "optim": optimizer.state_dict(),
-                    "args": args,
-                },
-            )
+        model.save(
+            name,
+            epoch,
+            {
+                "loss": epoch_loss,
+                "model": network.state_dict(),
+                "optim": optimizer.state_dict(),
+                "args": args,
+            },
+        )
     device.rendezvous("end")
 
 
