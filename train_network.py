@@ -14,7 +14,14 @@ parser.add_argument(
 )
 parser.add_argument("--finetune", action="store_true")
 parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
-parser.add_argument("--batch_size", default=64, type=int)
+parser.add_argument("--lr", default=0.01, type=float)
+parser.add_argument("--lr_step", default=10, type=int)
+parser.add_argument("--lr_gamma", default=0.5, type=float)
+parser.add_argument("--momentum", default=0.9, type=float)
+parser.add_argument("--dampening", default=0.0, type=float)
+parser.add_argument("--weight_decay", default=0.0001, type=float)
+parser.add_argument("--nesterov", default=True, type=bool)
+parser.add_argument("--batch_size", default=128, type=int)
 parser.add_argument("--num_workers", default=4, type=int)
 parser.add_argument("--nprocs", default=8, type=int)
 parser.add_argument("--model_path", default="models", type=Path)
@@ -34,6 +41,7 @@ def main(idx: int, _args: dict):
         name=_args["name"],
         network=_args["network"],
         optimizer=_args["optimizer"],
+        scheduler=_args["scheduler"],
         data=_args["data"],
         init_epoch=_args["init_epoch"],
         batch_size=_args["batch_size"],
@@ -62,9 +70,20 @@ if __name__ == "__main__":
     save_epoch, save_state = model.load(name)
     if save_epoch is not None:
         print(f"Resuming from epoch {save_epoch}")
-        optimizer = optim.AdamW(network.parameters())
+        optimizer = optim.SGD(
+            network.parameters(),
+            lr=args.lr,
+            momentum=args.momentum,
+            dampening=args.dampening,
+            weight_decay=args.weight_decay,
+            nesterov=args.nesterov,
+        )
+        scheduler = optim.lr_scheduler.StepLR(
+            optimizer=optimizer, step_size=args.lr_step, gamma=args.lr_gamma
+        )
         network.load_state_dict(save_state["model"])
-        optimizer.load_state_dict(save_state["optim"])
+        optimizer.load_state_dict(save_state["optimizer"])
+        scheduler.load_state_dict(save_state["scheduler"])
 
     else:
         if args.inflate:
@@ -78,14 +97,25 @@ if __name__ == "__main__":
             print(f"Reset network ({args.network})")
             model.reset(network)
 
-        optimizer = optim.AdamW(network.parameters())
+        optimizer = optim.SGD(
+            network.parameters(),
+            lr=args.lr,
+            momentum=args.momentum,
+            dampening=args.dampening,
+            weight_decay=args.weight_decay,
+            nesterov=args.nesterov,
+        )
+        scheduler = optim.lr_scheduler.StepLR(
+            optimizer=optimizer, step_size=args.lr_step, gamma=args.lr_gamma
+        )
         model.save(
             name,
             0,
             {
                 "loss": None,
                 "model": network.state_dict(),
-                "optim": optimizer.state_dict(),
+                "optimizer": optimizer.state_dict(),
+                "scheduler": scheduler.state_dict(),
                 "args": args,
             },
         )
@@ -98,6 +128,7 @@ if __name__ == "__main__":
             {
                 "network": network,
                 "optimizer": optimizer,
+                "scheduler": scheduler,
                 "name": name,
                 "data": train_data,
                 "init_epoch": save_epoch + 1 if save_epoch else 1,

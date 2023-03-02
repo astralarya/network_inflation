@@ -55,6 +55,7 @@ def train(
     name: str,
     network: nn.Module,
     optimizer: optim.Optimizer,
+    scheduler: optim.lr_scheduler._LRScheduler,
     data: datasets.DatasetFolder,
     init_epoch=1,
     batch_size=256,
@@ -99,6 +100,7 @@ def train(
             optimizer.zero_grad()
             loss.backward()
             device.optim_step(optimizer)
+            scheduler.step()
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
             model.save(
@@ -107,7 +109,8 @@ def train(
                 {
                     "loss": epoch_loss,
                     "model": network.state_dict(),
-                    "optim": optimizer.state_dict(),
+                    "optimizer": optimizer.state_dict(),
+                    "scheduler": scheduler.state_dict(),
                     "args": args,
                 },
             )
