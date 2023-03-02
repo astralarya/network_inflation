@@ -27,7 +27,8 @@ args = parser.parse_args()
 
 def main(idx: int, _args: dict):
     def reset_fn(x):
-        print(f"Reset network ({args.network})")
+        if device.is_main():
+            print(f"Reset network ({args.network})")
         model.reset(x)
 
     def inflate_fn(x):

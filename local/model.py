@@ -98,6 +98,11 @@ def reset(module: nn.Module):
 
     module.apply(fn=reset)
 
+    if _device.world_size() > 1:
+        y = module.state_dict() if _device.is_main() else None
+        y, *_ = _device.rendezvous("reset", y)
+        module.load_state_dict(y)
+
 
 def clone(module: nn.Module):
     return copy.deepcopy(module)
