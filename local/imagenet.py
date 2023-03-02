@@ -56,13 +56,13 @@ def train(
     network: nn.Module,
     optimizer: optim.Optimizer,
     data: datasets.DatasetFolder,
-    init_epoch=2048,
+    init_epoch=1,
     batch_size=256,
     num_epochs=2048,
     num_workers=4,
 ):
     network = network.to(device.device())
-    args = {"batch_size": batch_size}
+    args = {"batch_size": batch_size, "nprocs": device.world_size()}
     total = len(data)
 
     train_sampler = (
