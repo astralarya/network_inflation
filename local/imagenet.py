@@ -64,7 +64,6 @@ def train(
     args = {"batch_size": 256}
     total = len(data)
 
-    network = network.to(device.device())
     train_sampler = (
         torch.utils.data.distributed.DistributedSampler(
             data, num_replicas=device.world_size(), rank=device.ordinal(), shuffle=True
@@ -81,13 +80,14 @@ def train(
             shuffle=False if train_sampler else True,
         )
     )
-    optimizer = optim.AdamW(network.parameters())
     criterion = nn.CrossEntropyLoss().to(device.device())
 
     save_epoch, save_state = model.load(name, device=device.device())
     if save_epoch is not None:
         if device.is_main():
             print(f"Resuming from epoch {save_epoch}")
+        network = network.to(device.device())
+        optimizer = optim.AdamW(network.parameters())
         network.load_state_dict(save_state["model"])
         optimizer.load_state_dict(save_state["optim"])
         if not force:
@@ -100,6 +100,7 @@ def train(
     else:
         if init_fn is not None:
             init_fn(network)
+        optimizer = optim.AdamW(network.parameters())
         model.save(
             name,
             0,
@@ -110,6 +111,7 @@ def train(
                 "args": args,
             },
         )
+        network = network.to(device.device())
 
     network.train()
 
