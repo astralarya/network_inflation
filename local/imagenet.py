@@ -61,7 +61,7 @@ def train(
     init_fn: Optional[Callable[[nn.Module], Any]] = None,
     force: bool = False,
 ):
-    args = {"batch_size": 256}
+    args = {"batch_size": batch_size}
     total = len(data)
 
     train_sampler = (
