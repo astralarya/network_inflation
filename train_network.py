@@ -82,4 +82,5 @@ if __name__ == "__main__":
             },
         ),
         nprocs=args.nprocs,
+        start_method="fork",
     )
