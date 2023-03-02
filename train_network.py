@@ -72,13 +72,15 @@ if __name__ == "__main__":
 
     device.spawn(
         main,
-        {
-            "network": network,
-            "name": args.model_path / name,
-            "data": train_data,
-            "batch_size": args.batch_size,
-            "num_workers": args.num_workers,
-            "force": args.force,
-        },
+        (
+            {
+                "network": network,
+                "name": args.model_path / name,
+                "data": train_data,
+                "batch_size": args.batch_size,
+                "num_workers": args.num_workers,
+                "force": args.force,
+            },
+        ),
         nprocs=args.nprocs,
     )
