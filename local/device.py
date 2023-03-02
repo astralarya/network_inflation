@@ -153,6 +153,30 @@ def _mesh_reduce():
 mesh_reduce = _mesh_reduce()
 
 
+def _sync_tensor():
+    if device_type == "xla":
+        return lambda x: xla.all_reduce(
+            "xm.REDUCE_SUM", x if is_main() else torch.zeros(x.shape)
+        )
+    else:
+        return lambda x: x
+
+
+sync_tensor = _sync_tensor()
+
+
+def _sync_item():
+    if device_type == "xla":
+        return lambda label, x: mesh_reduce(
+            label, x if is_main() else None, lambda x: x[0]
+        )
+    else:
+        return lambda _, x: x
+
+
+sync_item = _sync_item()
+
+
 def sync_seed():
-    seed = mesh_reduce("seed", torch.seed() if is_main() else None, lambda x: x[0])
+    seed = sync_item("seed", torch.seed() if is_main() else None)
     torch.manual_seed(seed)

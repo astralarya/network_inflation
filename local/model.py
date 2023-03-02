@@ -61,10 +61,10 @@ def state_sync(state: Any):
         for key, val in state.items():
             r[key] = state_sync(val)
         return r
+    elif type(state) == torch.Tensor:
+        return _device.sync_tensor(state)
     else:
-        return _device.mesh_reduce(
-            "sync", state if _device.is_main() else None, lambda x: x[0]
-        )
+        return _device.sync_item(state if _device.is_main() else None, lambda x: x[0])
 
 
 def save(name: str, epoch: int, state: Any):
