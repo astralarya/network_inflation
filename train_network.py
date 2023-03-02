@@ -36,9 +36,11 @@ def main(idx: int, _args: dict):
     def inflate_fn(x):
         inflate_source = getattr(resnet, args.inflate, lambda: None)()
         if inflate_source is None:
-            print(f"Unknown network: {args.inflate}")
+            if device.is_main():
+                print(f"Unknown network: {args.inflate}")
             exit(1)
-        print(f"Inflating network ({args.network}) from {args.inflate}")
+        if device.is_main():
+            print(f"Inflating network ({args.network}) from {args.inflate}")
         inflate.resnet(inflate_source, x)
 
     imagenet.train(
