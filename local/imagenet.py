@@ -110,7 +110,7 @@ def train(
                 },
             )
 
-    total = len(data_loader.dataset)
+    total = len(data)
     print(f"Iterating {total} samples")
 
     network.train()
