@@ -46,7 +46,7 @@ if __name__ == "__main__":
     from local import model
     from local import resnet
 
-    name = args.network
+    name = args.model_path / args.network
     if args.finetune is True:
         name = f"{name}--finetune"
     if args.inflate is not None:
@@ -98,7 +98,7 @@ if __name__ == "__main__":
             {
                 "network": network,
                 "optimizer": optimizer,
-                "name": args.model_path / name,
+                "name": name,
                 "data": train_data,
                 "init_epoch": save_epoch + 1 if save_epoch else 1,
                 "batch_size": args.batch_size,
