@@ -49,7 +49,7 @@ def state_to(state: Any, device: torch.device):
             r[key] = state_to(val, device)
         return r
     elif type(state) == torch.Tensor:
-        r = state.to(device)
+        r = state.to(copy.copy(device))
         return r
     else:
         return state
