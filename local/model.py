@@ -79,23 +79,23 @@ def save(name: str, epoch: int, state: Any):
 
 
 def load(name: str, epoch: int = None, device: torch.device = None):
+    epoch = get_epoch(name, epoch)
+    if epoch is None:
+        return (None, None)
+    save_path = Path(f"{name}/{epoch:08}.pkl")
     if _device.is_main():
-        epoch = get_epoch(name, epoch)
-        if epoch is None:
-            return (None, None)
-        save_path = Path(f"{name}/{epoch:08}.pkl")
         print(
             f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
             flush=True,
             end="",
         )
-        try:
-            state = torch.load(save_path, map_location=device)
-        except RuntimeError:
-            state = torch.load(save_path, map_location=_device.cpu)
-            state = state_to(state, device)
+    try:
+        state = torch.load(save_path, map_location=device)
+    except RuntimeError:
+        state = torch.load(save_path, map_location=_device.cpu)
+        state = state_to(state, device)
+    if _device.is_main():
         print("DONE")
-    state = state_sync(state)
     return (epoch, state)
 
 
