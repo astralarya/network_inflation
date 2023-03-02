@@ -62,7 +62,7 @@ def train(
     force: bool = False,
 ):
     args = {"batch_size": 256}
-    network.to(device.device())
+    network = network.to(device.device())
     train_sampler = (
         torch.utils.data.distributed.DistributedSampler(
             data, num_replicas=device.world_size(), rank=device.ordinal(), shuffle=True
