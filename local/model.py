@@ -55,6 +55,18 @@ def state_to(state: Any, device: torch.device):
         return state
 
 
+def state_sync(state: Any):
+    if type(state) == dict or type(state) == OrderedDict:
+        r = type(state)()
+        for key, val in state.items():
+            r[key] = state_sync(val)
+        return r
+    else:
+        return _device.mesh_reduce(
+            "sync", state if _device.is_main() else None, lambda x: x[0]
+        )
+
+
 def save(name: str, epoch: int, state: Any):
     if _device.is_main():
         save_path = Path(f"{name}/{epoch:08}.pkl")
@@ -67,34 +79,38 @@ def save(name: str, epoch: int, state: Any):
 
 
 def load(name: str, epoch: int = None, device: torch.device = None):
-    epoch = get_epoch(name, epoch)
-    if epoch is None:
-        return (None, None)
-    save_path = Path(f"{name}/{epoch:08}.pkl")
     if _device.is_main():
+        epoch = get_epoch(name, epoch)
+        if epoch is None:
+            return (None, None)
+        save_path = Path(f"{name}/{epoch:08}.pkl")
         print(
             f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
             flush=True,
             end="",
         )
-    try:
-        state = torch.load(save_path, map_location=device)
-    except RuntimeError:
-        state = torch.load(save_path, map_location=_device.cpu)
-        state = state_to(state, device)
-    if _device.is_main():
+        try:
+            state = torch.load(save_path, map_location=device)
+        except RuntimeError:
+            state = torch.load(save_path, map_location=_device.cpu)
+            state = state_to(state, device)
         print("DONE")
+    state = state_sync(state)
     return (epoch, state)
 
 
 def reset(module: nn.Module):
-    @torch.no_grad()
-    def reset(module: nn.Module):
-        reset_parameters = getattr(module, "reset_parameters", None)
-        if callable(reset_parameters):
-            module.reset_parameters()
+    if _device.is_main():
 
-    module.apply(fn=reset)
+        @torch.no_grad()
+        def reset(module: nn.Module):
+            reset_parameters = getattr(module, "reset_parameters", None)
+            if callable(reset_parameters):
+                module.reset_parameters()
+
+        module.apply(fn=reset)
+    state = state_sync(module.state_dict())
+    module.load_state_dict(state)
 
 
 def clone(module: nn.Module):
