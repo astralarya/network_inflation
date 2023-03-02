@@ -24,6 +24,19 @@ parser.add_argument("--force", action="store_true")
 args = parser.parse_args()
 
 
+def main(idx: int):
+    imagenet.train(
+        idx,
+        network,
+        args.model_path / name,
+        train_data,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        init_fn=init_fn if args.finetune is False else None,
+        force=args.force,
+    )
+
+
 if __name__ == "__main__":
     from local import inflate
     from local import imagenet
@@ -58,17 +71,5 @@ if __name__ == "__main__":
     init_fn = reset_fn if args.inflate is None else inflate_fn
 
     network = device.model(network)
-
-    def main(idx: int):
-        imagenet.train(
-            idx,
-            network,
-            args.model_path / name,
-            train_data,
-            batch_size=args.batch_size,
-            num_workers=args.num_workers,
-            init_fn=init_fn if args.finetune is False else None,
-            force=args.force,
-        )
 
     device.spawn(main, (), nprocs=args.nprocs)
