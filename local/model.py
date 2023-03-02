@@ -70,20 +70,18 @@ def load(name: str, epoch: int = None, device: torch.device = None):
     if epoch is None:
         return (None, None)
     save_path = Path(f"{name}/{epoch:08}.pkl")
-    print(
-        f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
-        flush=True,
-        end="",
-    )
-    state = None
     if _device.is_main():
-        try:
-            state = torch.load(save_path, map_location=device)
-        except RuntimeError:
-            state = torch.load(save_path, map_location=_device.cpu)
-    state = state_to(_device.mesh_reduce("load", state, lambda x: x[0]), device)
+        print(
+            f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
+            flush=True,
+            end="",
+        )
+    try:
+        state = torch.load(save_path, map_location=device)
+    except RuntimeError:
+        state = torch.load(save_path, map_location=_device.cpu)
+        state = state_to(state, device)
     if _device.is_main():
-        print(state.keys())
         print("DONE")
     return (epoch, state)
 
@@ -96,15 +94,6 @@ def reset(module: nn.Module):
             module.reset_parameters()
 
     module.apply(fn=reset)
-
-    if _device.world_size() > 1:
-        state = (
-            state_to(module.state_dict(), _device.cpu) if _device.is_main() else None
-        )
-        state = state_to(
-            _device.mesh_reduce("reset", state, lambda x: x[0]), _device.device()
-        )
-        module.load_state_dict(state)
 
 
 def clone(module: nn.Module):
