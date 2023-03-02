@@ -57,10 +57,12 @@ if __name__ == "__main__":
 
     init_fn = reset_fn if args.inflate is None else inflate_fn
 
+    network = device.model(network)
+
     def main(idx: int):
         imagenet.train(
             idx,
-            device.model(network),
+            network,
             args.model_path / name,
             train_data,
             batch_size=args.batch_size,
