@@ -56,13 +56,14 @@ def state_to(state: Any, device: torch.device):
 
 def save(name: str, epoch: int, state: Any):
     if _device.is_main():
-        state = state_to(state, _device.cpu)
+        print(f"Saving `{save_path}`... ", flush=True, end="")
+    state = state_to(state, _device.cpu)
+    if _device.is_main():
         Path(name).mkdir(parents=True, exist_ok=True)
         save_path = Path(f"{name}/{epoch:08}.pkl")
         with save_path.open("wb") as save_file:
-            print(f"Saving `{save_path}`... ", flush=True, end="")
             torch.save(state, save_file)
-        print("DONE")
+    print("DONE")
 
 
 def load(name: str, epoch: int = None, device: torch.device = None):
