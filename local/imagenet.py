@@ -98,16 +98,17 @@ def train(
         if init_fn is not None:
             init_fn(network)
         print("Saving initial state as epoch 0")
-        model.save(
-            name,
-            0,
-            {
-                "loss": None,
-                "model": network.state_dict(),
-                "optim": optimizer.state_dict(),
-                "args": args,
-            },
-        )
+        if device.is_main():
+            model.save(
+                name,
+                0,
+                {
+                    "loss": None,
+                    "model": network.state_dict(),
+                    "optim": optimizer.state_dict(),
+                    "args": args,
+                },
+            )
 
     total = len(data_loader.dataset)
     print(f"Iterating {total} samples")
@@ -127,7 +128,7 @@ def train(
             loss.backward()
             device.optim_step(optimizer)
         print(f"[epoch {epoch}]: loss: {epoch_loss}")
-        if device.is_main:
+        if device.is_main():
             model.save(
                 name,
                 epoch,
