@@ -14,7 +14,7 @@ parser.add_argument(
 )
 parser.add_argument("--finetune", action="store_true")
 parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
-parser.add_argument("--lr", default=0.01, type=float)
+parser.add_argument("--lr", default=0.1, type=float)
 parser.add_argument("--lr_step", default=10, type=int)
 parser.add_argument("--lr_gamma", default=0.5, type=float)
 parser.add_argument("--momentum", default=0.9, type=float)
