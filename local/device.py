@@ -35,7 +35,8 @@ def device():
             _device = xla.xla_device()
         elif torch.cuda.is_available():
             _device = torch.device(f"cuda:{torch.cuda.current_device()}")
-        print(f"Device: {_device}")
+        if is_main():
+            print(f"Device: {_device}")
         return _device
 
 
