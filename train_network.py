@@ -25,15 +25,15 @@ parser.add_argument("--force", action="store_true")
 args = parser.parse_args()
 
 
-def main(idx: int, args):
+def main(idx: int, _args: dict):
     imagenet.train(
-        args["network"],
-        args["name"],
-        args["data"],
-        batch_size=args["batch_size"],
-        num_workers=args["num_workers"],
+        _args["network"],
+        _args["name"],
+        _args["data"],
+        batch_size=_args["batch_size"],
+        num_workers=_args["num_workers"],
         init_fn=reset_fn if args.inflate is None else inflate_fn,
-        force=args["force"],
+        force=_args["force"],
     )
 
 
