@@ -99,8 +99,12 @@ def reset(module: nn.Module):
     module.apply(fn=reset)
 
     if _device.world_size() > 1:
-        state = module.state_dict() if _device.is_main() else None
-        state = _device.mesh_reduce("reset", state, lambda x: x[0])
+        state = (
+            state_to(module.state_dict(), _device.cpu) if _device.is_main() else None
+        )
+        state = state_to(
+            _device.mesh_reduce("reset", state, lambda x: x[0]), _device.device()
+        )
         module.load_state_dict(state)
 
 
