@@ -3,7 +3,7 @@ import copy
 import glob
 import os
 from pathlib import Path
-from typing import Any, Callable, Mapping, Optional
+from typing import Any
 
 import torch
 import torch.nn as nn
@@ -36,10 +36,10 @@ def list_epochs(name: str):
     return [int(save_path[len(f"{name}/") :].split(".")[0]) for save_path in save_paths]
 
 
-def write_log(name: str, data: Optional[str] = None):
-    if data is not None:
-        with Path(f"{name}.log").open("a") as logfile:
-            logfile.write(data)
+def write_log(name: str, data: str):
+    Path(name).parent.mkdir(parents=True, exist_ok=True)
+    with Path(f"{name}.log").open("a") as logfile:
+        logfile.write(data)
 
 
 def state_to(state: Any, device: torch.device):
