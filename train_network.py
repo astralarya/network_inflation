@@ -2,6 +2,8 @@ import argparse
 from os import environ
 from pathlib import Path
 
+import torch.optim as optim
+
 from local import imagenet
 import local.device as device
 
@@ -28,29 +30,14 @@ args = parser.parse_args()
 def main(idx: int, _args: dict):
     device.sync_seed()
 
-    def reset_fn(x):
-        if device.is_main():
-            print(f"Reset network ({args.network})")
-        model.reset(x)
-
-    def inflate_fn(x):
-        inflate_source = getattr(resnet, args.inflate, lambda: None)()
-        if inflate_source is None:
-            if device.is_main():
-                print(f"Unknown network: {args.inflate}")
-            exit(1)
-        if device.is_main():
-            print(f"Inflating network ({args.network}) from {args.inflate}")
-        inflate.resnet(inflate_source, x)
-
     imagenet.train(
-        _args["network"],
-        _args["name"],
-        _args["data"],
+        name=_args["name"],
+        network=_args["network"],
+        optimizer=_args["optimizer"],
+        data=_args["data"],
+        init_epoch=_args["init_epoch"],
         batch_size=_args["batch_size"],
         num_workers=_args["num_workers"],
-        init_fn=reset_fn if args.inflate is None else inflate_fn,
-        force=_args["force"],
     )
 
 
@@ -72,6 +59,36 @@ if __name__ == "__main__":
 
     train_data = imagenet.train_data(args.imagenet_path / "train")
 
+    save_epoch, save_state = model.load(name)
+    if save_epoch is not None:
+        print(f"Resuming from epoch {save_epoch}")
+        optimizer = optim.AdamW(network.parameters())
+        network.load_state_dict(save_state["model"])
+        optimizer.load_state_dict(save_state["optim"])
+
+    else:
+        if args.inflate:
+            inflate_source = getattr(resnet, args.inflate, lambda: None)()
+            if inflate_source is None:
+                print(f"Unknown network: {args.inflate}")
+                exit(1)
+            print(f"Inflating network ({args.network}) from {args.inflate}")
+            inflate.resnet(inflate_source, network)
+        else:
+            print(f"Reset network ({args.network})")
+            model.reset(network)
+
+        optimizer = optim.AdamW(network.parameters())
+        model.save(
+            name,
+            0,
+            {
+                "loss": None,
+                "model": network.state_dict(),
+                "optim": optimizer.state_dict(),
+                "args": args,
+            },
+        )
     network = device.model(network)
 
     print(f"Spawning {args.nprocs} processes")
@@ -80,11 +97,12 @@ if __name__ == "__main__":
         (
             {
                 "network": network,
+                "optimizer": optimizer,
                 "name": args.model_path / name,
                 "data": train_data,
+                "init_epoch": save_epoch + 1 if save_epoch else 1,
                 "batch_size": args.batch_size,
                 "num_workers": args.num_workers,
-                "force": args.force,
             },
         ),
         nprocs=args.nprocs,

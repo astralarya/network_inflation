@@ -52,15 +52,16 @@ def val_data(data_root: str):
 
 
 def train(
-    network: nn.Module,
     name: str,
+    network: nn.Module,
+    optimizer: optim.Optimizer,
     data: datasets.DatasetFolder,
+    init_epoch=2048,
     batch_size=256,
     num_epochs=2048,
     num_workers=4,
-    init_fn: Optional[Callable[[nn.Module], Any]] = None,
-    force: bool = False,
 ):
+    network = network.to(device.device())
     args = {"batch_size": batch_size}
     total = len(data)
 
@@ -82,42 +83,11 @@ def train(
     )
     criterion = nn.CrossEntropyLoss().to(device.device())
 
-    save_epoch, save_state = model.load(name, device=device.device())
-    if save_epoch is not None:
-        if device.is_main():
-            print(f"Resuming from epoch {save_epoch}")
-        network = network.to(device.device())
-        optimizer = optim.AdamW(network.parameters())
-        network.load_state_dict(save_state["model"])
-        optimizer.load_state_dict(save_state["optim"])
-        if not force:
-            for arg, arg_val in args.items():
-                save_arg = save_state["args"][arg]
-                if save_arg != arg_val:
-                    raise Exception(
-                        f"Mismatched {arg}: {save_arg} != {arg_val}\n  Override this error with --force"
-                    )
-    else:
-        if init_fn is not None:
-            init_fn(network)
-        optimizer = optim.AdamW(network.parameters())
-        model.save(
-            name,
-            0,
-            {
-                "loss": None,
-                "model": network.state_dict(),
-                "optim": optimizer.state_dict(),
-                "args": args,
-            },
-        )
-        network = network.to(device.device())
-
     network.train()
 
     if device.is_main():
         print(f"Iterating {total} samples")
-    for epoch in range(save_epoch + 1 if save_epoch else 1, num_epochs + 1):
+    for epoch in range(init_epoch, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader, disable=not device.is_main()):
             inputs = inputs.to(device.device())
