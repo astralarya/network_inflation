@@ -97,8 +97,8 @@ def train(
     else:
         if init_fn is not None:
             init_fn(network)
-        print("Saving initial state as epoch 0")
         if device.is_main():
+            print("Saving initial state as epoch 0")
             model.save(
                 name,
                 0,
@@ -111,13 +111,14 @@ def train(
             )
 
     total = len(data)
-    print(f"Iterating {total} samples")
+    if device.is_main():
+        print(f"Iterating {total} samples")
 
     network.train()
 
     for epoch in range(save_epoch + 1 if save_epoch else 1, num_epochs + 1):
         epoch_loss = 0.0
-        for inputs, labels in tqdm(data_loader):
+        for inputs, labels in tqdm(data_loader, disable=not device.is_main()):
             inputs = inputs.to(device.device())
             labels = labels.to(device.device())
             outputs = network(inputs)
@@ -127,8 +128,8 @@ def train(
             optimizer.zero_grad()
             loss.backward()
             device.optim_step(optimizer)
-        print(f"[epoch {epoch}]: loss: {epoch_loss}")
         if device.is_main():
+            print(f"[epoch {epoch}]: loss: {epoch_loss}")
             model.save(
                 name,
                 epoch,
