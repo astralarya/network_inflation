@@ -24,7 +24,7 @@ except ImportError:
 _device = None
 
 
-def device(idx: Optional[int] = None):
+def device():
     global _device
     if _device:
         return _device
@@ -32,7 +32,7 @@ def device(idx: Optional[int] = None):
         if torch.backends.mps.is_available():
             _device = torch.device("mps")
         elif xla is not None and xla.xla_device() is not None:
-            _device = xla.xla_device(idx)
+            _device = xla.xla_device(get_ordinal())
         elif torch.cuda.is_available():
             _device = torch.device(f"cuda:{torch.cuda.current_device()}")
         print(f"Device: {_device}")
@@ -99,6 +99,16 @@ def _is_main():
 
 
 is_main = _is_main()
+
+
+def _get_ordinal():
+    if device_type == "xla":
+        return lambda: xla.get_ordinal()
+    else:
+        return lambda: 0
+
+
+get_ordinal = _get_ordinal()
 
 
 def _world_size():

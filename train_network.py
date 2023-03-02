@@ -27,7 +27,6 @@ args = parser.parse_args()
 
 def main(idx: int, args):
     imagenet.train(
-        idx,
         args["network"],
         args["name"],
         args["data"],

@@ -52,7 +52,6 @@ def val_data(data_root: str):
 
 
 def train(
-    idx: int,
     network: nn.Module,
     name: str,
     data: datasets.DatasetFolder,
@@ -63,7 +62,7 @@ def train(
     force: bool = False,
 ):
     args = {"batch_size": 256}
-    network.to(device.device(idx))
+    network.to(device.device())
     train_sampler = (
         torch.utils.data.distributed.DistributedSampler(
             data, num_replicas=device.world_size(), rank=device.ordinal(), shuffle=True
@@ -81,9 +80,9 @@ def train(
         )
     )
     optimizer = optim.AdamW(network.parameters())
-    criterion = nn.CrossEntropyLoss().to(device.device(idx))
+    criterion = nn.CrossEntropyLoss().to(device.device())
 
-    save_epoch, save_state = model.load(name, device=device.device(idx))
+    save_epoch, save_state = model.load(name, device=device.device())
     if save_epoch is not None:
         print(f"Resuming from epoch {save_epoch}")
         network.load_state_dict(save_state["model"])
@@ -118,8 +117,8 @@ def train(
     for epoch in range(save_epoch + 1 if save_epoch else 1, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader):
-            inputs = inputs.to(device.device(idx))
-            labels = labels.to(device.device(idx))
+            inputs = inputs.to(device.device())
+            labels = labels.to(device.device())
             outputs = network(inputs)
             loss = criterion(outputs, labels)
             losses = device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
