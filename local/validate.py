@@ -162,8 +162,8 @@ def _validate(
         )
 
         softmax = nn.Softmax(dim=2).to(device.device())
-        network.eval()
         network.to(device.device())
+        network.eval()
 
         total = len(data)
         if device.is_main():
