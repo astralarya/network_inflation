@@ -183,7 +183,6 @@ def _train(
 ):
     device.sync_seed()
 
-    network = network.to(device.device())
     args = {"batch_size": batch_size, "nprocs": device.world_size()}
 
     data_sampler = (
@@ -202,9 +201,10 @@ def _train(
             shuffle=False if data_sampler else True,
         )
     )
-    criterion = nn.CrossEntropyLoss().to(device.device())
 
+    network = network.to(device.device())
     network.train()
+    criterion = nn.CrossEntropyLoss().to(device.device())
 
     total = len(data)
     if device.is_main():
