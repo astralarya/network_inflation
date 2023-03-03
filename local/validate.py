@@ -62,14 +62,14 @@ def validate(
         model_name = f"{model_name}--inflate-{inflate}"
 
     for epoch in epoch if epoch else ["pre"]:
-        network = getattr(resnet, name, lambda: None)()
+        network = getattr(resnet, name, lambda: None)
         if network is None:
             print(f"Unknown network: {name}")
             exit(1)
 
         inflate_network = None
         if inflate is not None:
-            inflate_network = getattr(resnet, inflate, lambda: None)()
+            inflate_network = getattr(resnet, inflate, lambda: None)
             if inflate_network is None:
                 print(f"Unknown network: {inflate}")
                 exit(1)
@@ -81,11 +81,11 @@ def validate(
         else:
             print(f"Validating epoch {epoch}")
             val_epoch(
-                model_path / name,
-                network,
-                inflate_network,
-                val_data,
-                epoch,
+                name=model_path / name,
+                network=network,
+                inflate=inflate_network,
+                data=val_data,
+                epoch=epoch,
                 batch_size=batch_size,
                 num_workers=num_workers,
                 nprocs=nprocs,
