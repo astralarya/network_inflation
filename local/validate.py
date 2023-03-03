@@ -91,23 +91,19 @@ def val_epoch(
 ):
     network = getattr(resnet, network_name, lambda: None)()
     if network is None:
-        if device.is_main():
-            print(f"Unknown network: {name}")
+        print(f"Unknown network: {name}")
         exit(1)
 
     if inflate is not None:
         inflate_source = getattr(resnet, inflate, lambda: None)()
         if inflate_source is None:
-            if device.is_main():
-                print(f"Unknown network: {inflate}")
+            print(f"Unknown network: {inflate}")
             exit(1)
-        if device.is_main():
-            print(f"Inflating network ({name}) from {inflate}")
+        print(f"Inflating network ({name}) from {inflate}")
         _inflate.resnet(inflate_source, network)
 
     for epoch in epochs:
-        if device.is_main():
-            print(f"Validating epoch {epoch}")
+        print(f"Validating epoch {epoch}")
 
         if type(epoch) == int:
             save_epoch, save_state = model.load(name, epoch)
