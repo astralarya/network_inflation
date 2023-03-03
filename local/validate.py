@@ -167,7 +167,7 @@ def _validate(
             torch.utils.data.DataLoader2(
                 data,
                 batch_size=batch_size,
-                num_workers=4,
+                num_workers=num_workers,
                 sampler=data_sampler,
             )
         )
