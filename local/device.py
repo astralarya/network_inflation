@@ -143,6 +143,16 @@ def _spawn():
 spawn = _spawn()
 
 
+def _wait():
+    if device_type == "xla":
+        return xla.wait_device_ops
+    else:
+        return lambda _: None
+
+
+wait = _wait()
+
+
 def _rendezvous():
     if device_type == "xla":
         return xla.rendezvous
