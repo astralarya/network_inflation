@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Sequence, Union
 
 import torch
 import torch.nn as nn
@@ -34,7 +34,7 @@ def data(data_root: str):
 
 def validate(
     name: str,
-    epoch: Optional[Union[str, int]] = None,
+    epochs: Sequence[Union[str, int]],
     finetune: bool = False,
     inflate: Optional[str] = None,
     batch_size: int = 64,
@@ -43,6 +43,11 @@ def validate(
     model_path: Path = None,
     imagenet_path: Optional[Union[Path, str]] = None,
 ):
+    epochs = epochs if epochs else ["pre"]
+    for idx, epoch in enumerate(epochs):
+        if epoch == "all":
+            epochs[idx : idx + 1] = model.list_epochs(name)
+
     if model_path is None:
         model_path = Path("models")
     elif type(imagenet_path) == str:
@@ -61,59 +66,40 @@ def validate(
     if inflate is not None:
         model_name = f"{model_name}--inflate-{inflate}"
 
-    for epoch in epoch if epoch else ["pre"]:
-        network = getattr(resnet, name, lambda: None)()
-        if network is None:
-            print(f"Unknown network: {name}")
+    network = getattr(resnet, name, lambda: None)()
+    if network is None:
+        print(f"Unknown network: {name}")
+        exit(1)
+
+    if inflate is not None:
+        inflate_source = getattr(resnet, inflate, lambda: None)()
+        if inflate_source is None:
+            print(f"Unknown network: {inflate}")
             exit(1)
+        print(f"Inflating network ({name}) from {inflate}")
+        _inflate.resnet(inflate_source, network)
 
-        print(f"Validating model {name}")
-        if epoch == "pre":
-            if inflate is not None:
-                inflate_source = getattr(resnet, inflate, lambda: None)()
-                if inflate_source is None:
-                    print(f"Unknown network: {inflate}")
-                    exit(1)
-                print(f"Inflating network ({name}) from {inflate}")
-                _inflate.resnet(inflate_source, network)
-            else:
-                print("Using pretrained weights")
-        elif epoch == "init":
-            print(f"Reset network ({name})")
-            model.reset(network)
-
-        if epoch == "all":
-            print("Validating all epochs")
-            for epoch in model.list_epochs(model_name):
-                val_epoch(network, model_name, val_data, epoch, batch_size=batch_size)
-        else:
-            print(f"Validating epoch {epoch}")
-            val_epoch(
-                network,
-                model_path / name,
-                val_data,
-                epoch,
-                batch_size=batch_size,
-                num_workers=num_workers,
-                nprocs=nprocs,
-            )
+    print(f"Validating model {name}")
+    val_epoch(
+        network,
+        model_path / name,
+        val_data,
+        epochs,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        nprocs=nprocs,
+    )
 
 
 def val_epoch(
     network: nn.Module,
     name: str,
     data: datasets.DatasetFolder,
-    epoch: Optional[Union[int, str]] = None,
+    epochs: Optional[Union[int, str]] = None,
     batch_size: int = 64,
     num_workers: int = 4,
     nprocs: int = 8,
 ):
-    if type(epoch) == int:
-        save_epoch, save_state = model.load(name, epoch)
-        if save_epoch is None:
-            raise Exception(f"Epoch not found for {name}: {epoch}")
-        network.load_state_dict(save_state["model"])
-
     network = device.model(network)
 
     print(f"Spawning {nprocs} processes")
@@ -124,7 +110,7 @@ def val_epoch(
                 "network": network,
                 "name": name,
                 "data": data,
-                "epoch": epoch,
+                "epoch": epochs,
                 "batch_size": batch_size,
                 "num_workers": num_workers,
             },
@@ -139,7 +125,7 @@ def _worker(idx: int, _args: dict):
         name=_args["name"],
         network=_args["network"],
         data=_args["data"],
-        epoch=_args["epoch"],
+        epochs=_args["epochs"],
         batch_size=_args["batch_size"],
         num_workers=_args["num_workers"],
     )
@@ -149,36 +135,44 @@ def _validate(
     name: str,
     network: nn.Module,
     data: datasets.DatasetFolder,
-    epoch=1,
+    epochs: Sequence[Union[int, str]],
     batch_size=64,
     num_workers=4,
 ):
-    with torch.no_grad():
-        data_sampler = (
-            torch.utils.data.distributed.DistributedSampler(
-                data,
-                num_replicas=device.world_size(),
-                rank=device.ordinal(),
-            )
-            if device.world_size() > 1
-            else None
-        )
-        data_loader = device.loader(
-            torch.utils.data.DataLoader2(
-                data,
-                batch_size=batch_size,
-                num_workers=num_workers,
-                sampler=data_sampler,
-            )
-        )
+    if device.is_main():
+        print(f"Iterating {total} samples")
+    total = len(data)
 
-        network = network.to(device.device())
-        network.eval()
-        softmax = nn.Softmax(dim=2).to(device.device())
+    data_sampler = (
+        torch.utils.data.distributed.DistributedSampler(
+            data,
+            num_replicas=device.world_size(),
+            rank=device.ordinal(),
+        )
+        if device.world_size() > 1
+        else None
+    )
+    data_loader = device.loader(
+        torch.utils.data.DataLoader2(
+            data,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            sampler=data_sampler,
+        )
+    )
 
-        total = len(data)
+    network = network.to(device.device())
+    network.eval()
+    softmax = nn.Softmax(dim=2).to(device.device())
+
+    for epoch in epochs:
         if device.is_main():
-            print(f"Iterating {total} samples")
+            print(f"Validating epoch {epoch}")
+
+        save_epoch, save_state = model.load(name, epoch)
+        if save_epoch is None:
+            raise Exception(f"Epoch not found for {name}: {epoch}")
+        network.load_state_dict(save_state["model"])
 
         top1_accuracy = 0.0
         top5_accuracy = 0.0
@@ -213,7 +207,3 @@ def _validate(
                 f"{name}.__val__",
                 f"{epoch}\t{top1_accuracy}\t{top5_accuracy}",
             )
-        return {
-            1: top1_accuracy,
-            5: top5_accuracy,
-        }
