@@ -100,7 +100,7 @@ def val_epoch(
     num_workers: int = 4,
     nprocs: int = 8,
 ):
-    network = device.model(network)
+    network = network
 
     print(f"Spawning {nprocs} processes")
     device.spawn(
@@ -157,8 +157,6 @@ def _validate(
         )
     )
 
-    network = network.to(device.device())
-    network.eval()
     softmax = nn.Softmax(dim=2).to(device.device())
 
     total = len(data)
@@ -173,9 +171,9 @@ def _validate(
             save_epoch, save_state = model.load(name, epoch)
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
-            network.to(device.cpu)
             network.load_state_dict(save_state["model"])
-            network.to(device.device())
+            network.eval()
+        network = network.to(device.device())
 
         top1_accuracy = 0.0
         top5_accuracy = 0.0
