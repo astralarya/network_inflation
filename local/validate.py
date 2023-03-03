@@ -10,7 +10,6 @@ from local import model
 from local import device
 from local import inflate as _inflate
 from local import resnet
-from local import validate
 
 
 def data(data_root: str):
@@ -87,7 +86,7 @@ def validate(
                 val_epoch(network, model_name, val_data, epoch, batch_size=batch_size)
         else:
             print(f"Validating epoch {epoch}")
-            validate.val_epoch(
+            val_epoch(
                 network,
                 model_path / name,
                 val_data,
