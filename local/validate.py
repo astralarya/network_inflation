@@ -161,13 +161,13 @@ def _validate(
             )
         )
 
-        total = len(data_loader.dataset)
-        if device.is_main():
-            print(f"Iterating {total} samples")
-
         softmax = nn.Softmax(dim=2).to(device.device())
         network.eval()
         network.to(device.device())
+
+        total = len(data)
+        if device.is_main():
+            print(f"Iterating {total} samples")
 
         top1_accuracy = 0.0
         top5_accuracy = 0.0

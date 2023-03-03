@@ -185,7 +185,6 @@ def _train(
 
     network = network.to(device.device())
     args = {"batch_size": batch_size, "nprocs": device.world_size()}
-    total = len(data)
 
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
@@ -207,6 +206,7 @@ def _train(
 
     network.train()
 
+    total = len(data)
     if device.is_main():
         print(f"Iterating {total} samples")
     for epoch in range(init_epoch, num_epochs + 1):
