@@ -75,12 +75,12 @@ def save(name: str, epoch: int, state: Any):
 
 
 @torch.no_grad()
-def load(name: str, epoch: int = None, device: torch.device = None):
+def load(name: str, epoch: int = None, device: torch.device = None, print_output=True):
     epoch = get_epoch(name, epoch)
     if epoch is None:
         return (None, None)
     save_path = Path(f"{name}/{epoch:08}.pkl")
-    if _device.is_main():
+    if print_output:
         print(
             f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
             flush=True,
@@ -91,7 +91,7 @@ def load(name: str, epoch: int = None, device: torch.device = None):
     except RuntimeError:
         state = torch.load(save_path, map_location=_device.cpu)
         state = state_to(state, device)
-    if _device.is_main():
+    if print_output:
         print("DONE")
     return (epoch, state)
 

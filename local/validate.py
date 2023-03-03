@@ -123,7 +123,9 @@ def _validate(
             _inflate.resnet(inflate(), network)
 
         if type(epoch) == int:
-            save_epoch, save_state = model.load(name, epoch)
+            save_epoch, save_state = model.load(
+                name, epoch, print_output=device.is_main()
+            )
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
             network.load_state_dict(save_state["model"])
