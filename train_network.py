@@ -29,7 +29,6 @@ parser.add_argument(
     default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),
     type=Path,
 )
-parser.add_argument("--force", action="store_true")
 args = parser.parse_args()
 
 
