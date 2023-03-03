@@ -80,17 +80,19 @@ def load(name: str, epoch: int = None, device: torch.device = None):
     if epoch is None:
         return (None, None)
     save_path = Path(f"{name}/{epoch:08}.pkl")
-    print(
-        f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
-        flush=True,
-        end="",
-    )
+    if _device.is_main():
+        print(
+            f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
+            flush=True,
+            end="",
+        )
     try:
         state = torch.load(save_path, map_location=device)
     except RuntimeError:
         state = torch.load(save_path, map_location=_device.cpu)
         state = state_to(state, device)
-    print("DONE")
+    if _device.is_main():
+        print("DONE")
     return (epoch, state)
 
 
