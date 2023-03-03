@@ -79,7 +79,7 @@ def validate(
         _worker,
         (
             {
-                "name": name,
+                "name": model_name,
                 "network": network,
                 "inflate": inflate,
                 "data": val_data,
