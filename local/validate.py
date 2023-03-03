@@ -66,25 +66,12 @@ def validate(
     if inflate is not None:
         model_name = f"{model_name}--inflate-{inflate}"
 
-    network = getattr(resnet, name, lambda: None)()
-    if network is None:
-        print(f"Unknown network: {name}")
-        exit(1)
-
-    if inflate is not None:
-        inflate_source = getattr(resnet, inflate, lambda: None)()
-        if inflate_source is None:
-            print(f"Unknown network: {inflate}")
-            exit(1)
-        print(f"Inflating network ({name}) from {inflate}")
-        _inflate.resnet(inflate_source, network)
-
     print(f"Validating model {name}")
     val_epoch(
-        network,
         model_path / name,
         val_data,
         epochs,
+        inflate,
         batch_size=batch_size,
         num_workers=num_workers,
         nprocs=nprocs,
@@ -92,25 +79,23 @@ def validate(
 
 
 def val_epoch(
-    network: nn.Module,
     name: str,
     data: datasets.DatasetFolder,
     epochs: Optional[Union[int, str]] = None,
+    inflate: Optional[str] = None,
     batch_size: int = 64,
     num_workers: int = 4,
     nprocs: int = 8,
 ):
-    network = network
-
     print(f"Spawning {nprocs} processes")
     device.spawn(
         _worker,
         (
             {
-                "network": network,
                 "name": name,
                 "data": data,
                 "epochs": epochs,
+                "inflate": inflate,
                 "batch_size": batch_size,
                 "num_workers": num_workers,
             },
@@ -126,6 +111,7 @@ def _worker(idx: int, _args: dict):
         network=_args["network"],
         data=_args["data"],
         epochs=_args["epochs"],
+        inflate=_args["inflate"],
         batch_size=_args["batch_size"],
         num_workers=_args["num_workers"],
     )
@@ -136,9 +122,28 @@ def _validate(
     network: nn.Module,
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
+    inflate: Optional[str] = None,
     batch_size=64,
     num_workers=4,
 ):
+    device.sync_seed()
+
+    network = getattr(resnet, name, lambda: None)()
+    if network is None:
+        if device.is_main():
+            print(f"Unknown network: {name}")
+        exit(1)
+
+    if inflate is not None:
+        inflate_source = getattr(resnet, inflate, lambda: None)()
+        if inflate_source is None:
+            if device.is_main():
+                print(f"Unknown network: {inflate}")
+            exit(1)
+        if device.is_main():
+            print(f"Inflating network ({name}) from {inflate}")
+        _inflate.resnet(inflate_source, network)
+
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
             data,
