@@ -110,7 +110,7 @@ def val_epoch(
                 "network": network,
                 "name": name,
                 "data": data,
-                "epoch": epochs,
+                "epochs": epochs,
                 "batch_size": batch_size,
                 "num_workers": num_workers,
             },
