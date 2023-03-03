@@ -42,6 +42,7 @@ def write_log(name: str, data: str):
         logfile.write(data)
 
 
+@torch.no_grad()
 def state_to(state: Any, device: torch.device):
     to = _device.to_cpu if device == _device.cpu else lambda x: x.to(device)
     if type(state) == dict or type(state) == OrderedDict:
@@ -55,6 +56,7 @@ def state_to(state: Any, device: torch.device):
         return state
 
 
+@torch.no_grad()
 def save(name: str, epoch: int, state: Any):
     save_path = Path(f"{name}/{epoch:08}.pkl")
     print(f"Saving `{save_path}`... ", flush=True, end="")
@@ -65,6 +67,7 @@ def save(name: str, epoch: int, state: Any):
     print("DONE")
 
 
+@torch.no_grad()
 def load(name: str, epoch: int = None, device: torch.device = None):
     epoch = get_epoch(name, epoch)
     if epoch is None:
@@ -84,8 +87,8 @@ def load(name: str, epoch: int = None, device: torch.device = None):
     return (epoch, state)
 
 
+@torch.no_grad()
 def reset(module: nn.Module):
-    @torch.no_grad()
     def reset(module: nn.Module):
         reset_parameters = getattr(module, "reset_parameters", None)
         if callable(reset_parameters):
@@ -94,5 +97,6 @@ def reset(module: nn.Module):
     module.apply(fn=reset)
 
 
+@torch.no_grad()
 def clone(module: nn.Module):
     return copy.deepcopy(module)
