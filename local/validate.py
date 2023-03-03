@@ -77,11 +77,18 @@ def validate(
         if epoch == "all":
             print("Validating all epochs")
             for epoch in model.iter_epochs(model_name):
-                val_epoch(network, model_name, val_data, epoch, batch_size=batch_size)
+                val_epoch(
+                    name=model_name,
+                    network=network,
+                    inflate=inflate_network,
+                    data=val_data,
+                    epoch=epoch,
+                    batch_size=batch_size,
+                )
         else:
             print(f"Validating epoch {epoch}")
             val_epoch(
-                name=model_path / name,
+                name=model_name,
                 network=network,
                 inflate=inflate_network,
                 data=val_data,
