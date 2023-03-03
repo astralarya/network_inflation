@@ -148,16 +148,15 @@ def _validate(
     batch_size=64,
     num_workers=4,
 ):
-    def load():
-        if type(epoch) == int:
-            save_epoch, save_state = model.load(name, epoch, device.device())
-            if save_epoch is None:
-                raise Exception(f"Epoch not found for {name}: {epoch}")
-            network.load_state_dict(save_state["model"])
-            network.eval()
-            return device.model(network)
-
-    network = device.serial(load)
+    if type(epoch) == int:
+        network = network.to(device.cpu)
+        save_epoch, save_state = model.load(name, epoch, device.device())
+        if save_epoch is None:
+            raise Exception(f"Epoch not found for {name}: {epoch}")
+        network.load_state_dict(save_state["model"])
+    network.eval()
+    network = network.to(device.device())
+    softmax = nn.Softmax(dim=2).to(device.device())
 
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
@@ -176,9 +175,6 @@ def _validate(
             sampler=data_sampler,
         )
     )
-
-    network = network.to(device.device())
-    softmax = nn.Softmax(dim=2).to(device.device())
 
     total = len(data)
     if device.is_main():
