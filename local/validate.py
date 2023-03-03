@@ -154,8 +154,10 @@ def _validate(
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
             network.load_state_dict(save_state["model"])
+            network.eval()
+            return device.model(network)
 
-    device.serial(load)
+    network = device.serial(load)
 
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
@@ -175,7 +177,7 @@ def _validate(
         )
     )
 
-    network.eval()
+    network.to(device.device())
     softmax = nn.Softmax(dim=2).to(device.device())
 
     total = len(data)
