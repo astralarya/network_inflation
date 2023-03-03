@@ -108,13 +108,6 @@ def val_epoch(
     num_workers: int = 4,
     nprocs: int = 8,
 ):
-    if type(epoch) == int:
-        save_epoch, save_state = model.load(name, epoch)
-        if save_epoch is None:
-            raise Exception(f"Epoch not found for {name}: {epoch}")
-        network.load_state_dict(save_state["model"])
-
-    network = device.model(network)
 
     print(f"Spawning {nprocs} processes")
     device.spawn(
@@ -155,6 +148,17 @@ def _validate(
     batch_size=64,
     num_workers=4,
 ):
+    def load():
+        if type(epoch) == int:
+            save_epoch, save_state = model.load(name, epoch)
+            if save_epoch is None:
+                raise Exception(f"Epoch not found for {name}: {epoch}")
+            network.load_state_dict(save_state["model"])
+
+    device.serial(load)
+
+    network = device.model(network)
+
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
             data,
