@@ -53,7 +53,7 @@ def train(
     batch_size: int = 256,
     nprocs: int = 8,
     num_workers: int = 4,
-    model_path: Path = Path("models"),
+    model_path: Path = None,
     imagenet_path: Optional[Union[Path, str]] = None,
 ):
     if model_path is None:
