@@ -173,7 +173,9 @@ def _validate(
             save_epoch, save_state = model.load(name, epoch)
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
+            network.to(device.cpu)
             network.load_state_dict(save_state["model"])
+            network.to(device.device())
 
         top1_accuracy = 0.0
         top5_accuracy = 0.0
