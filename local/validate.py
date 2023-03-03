@@ -153,10 +153,12 @@ def _validate(
             if device.world_size() > 1
             else None
         )
-        data_loader = torch.utils.data.DataLoader2(
-            data,
-            batch_size=batch_size,
-            data_sampler=data_sampler,
+        data_loader = device.loader(
+            torch.utils.data.DataLoader2(
+                data,
+                batch_size=batch_size,
+                sampler=data_sampler,
+            )
         )
 
         total = len(data_loader.dataset)
