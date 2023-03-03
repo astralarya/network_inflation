@@ -7,7 +7,7 @@ from local import train
 
 parser = argparse.ArgumentParser(prog="ResNet training script")
 parser.add_argument(
-    "network",
+    "name",
     choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"],
 )
 parser.add_argument("--num_epochs", default=200, type=int)
