@@ -72,7 +72,7 @@ def train(
     if inflate is not None:
         model_name = f"{model_name}--inflate-{inflate}"
 
-    args = {"batch_size": batch_size, "nprocs": device.world_size()}
+    args = {"batch_size": batch_size}
 
     network = getattr(resnet, name, lambda: None)()
     if network is None:
