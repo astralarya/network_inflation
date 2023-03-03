@@ -209,6 +209,7 @@ def _train(
     total = len(data)
     if device.is_main():
         print(f"Iterating {total} samples")
+
     for epoch in range(init_epoch, num_epochs + 1):
         epoch_loss = 0.0
         for inputs, labels in tqdm(data_loader, disable=not device.is_main()):

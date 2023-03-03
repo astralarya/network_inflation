@@ -139,10 +139,6 @@ def _validate(
     batch_size=64,
     num_workers=4,
 ):
-    if device.is_main():
-        print(f"Iterating {total} samples")
-    total = len(data)
-
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
             data,
@@ -164,6 +160,10 @@ def _validate(
     network = network.to(device.device())
     network.eval()
     softmax = nn.Softmax(dim=2).to(device.device())
+
+    total = len(data)
+    if device.is_main():
+        print(f"Iterating {total} samples")
 
     for epoch in epochs:
         if device.is_main():
