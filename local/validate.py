@@ -115,7 +115,8 @@ def _validate(
     batch_size=64,
     num_workers=4,
 ):
-    for epoch in model.iter_epochs(name) if "all" in epochs else epochs:
+    epochs = model.iter_epochs(name) if "all" in epochs else epochs
+    for epoch in epochs:
         print(f"Validating epoch {epoch}")
 
         network = network()
