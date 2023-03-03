@@ -91,7 +91,6 @@ def validate(
         nprocs=nprocs,
         start_method="fork",
     )
-    device.wait()
 
 
 def _worker(idx: int, _args: dict):
@@ -188,3 +187,4 @@ def _validate(
                 f"{name}.__val__",
                 f"{epoch}\t{top1_accuracy}\t{top5_accuracy}\n",
             )
+    device.rendezvous("end")
