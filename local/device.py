@@ -144,21 +144,6 @@ def _spawn():
 spawn = _spawn()
 
 
-_serial_obj = None
-
-
-def _serial():
-    global _serial_obj
-    if device_type == "xla":
-        _serial_obj = XlaSerial()
-        return lambda x: _serial_obj.run(x)
-    else:
-        return lambda x: x()
-
-
-serial = _serial()
-
-
 def _wait():
     if device_type == "xla":
         return xla.wait_device_ops
