@@ -169,10 +169,11 @@ def _validate(
         if device.is_main():
             print(f"Validating epoch {epoch}")
 
-        save_epoch, save_state = model.load(name, epoch)
-        if save_epoch is None:
-            raise Exception(f"Epoch not found for {name}: {epoch}")
-        network.load_state_dict(save_state["model"])
+        if type(epoch) == int:
+            save_epoch, save_state = model.load(name, epoch)
+            if save_epoch is None:
+                raise Exception(f"Epoch not found for {name}: {epoch}")
+            network.load_state_dict(save_state["model"])
 
         top1_accuracy = 0.0
         top5_accuracy = 0.0
