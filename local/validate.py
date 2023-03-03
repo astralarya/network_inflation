@@ -69,9 +69,10 @@ def validate(
     print(f"Validating model {name}")
     val_epoch(
         model_path / name,
+        name,
         val_data,
         epochs,
-        inflate,
+        inflate=inflate,
         batch_size=batch_size,
         num_workers=num_workers,
         nprocs=nprocs,
@@ -80,6 +81,7 @@ def validate(
 
 def val_epoch(
     name: str,
+    network_name: str,
     data: datasets.DatasetFolder,
     epochs: Optional[Union[int, str]] = None,
     inflate: Optional[str] = None,
@@ -93,6 +95,7 @@ def val_epoch(
         (
             {
                 "name": name,
+                "network_name": network_name,
                 "data": data,
                 "epochs": epochs,
                 "inflate": inflate,
@@ -108,6 +111,7 @@ def val_epoch(
 def _worker(idx: int, _args: dict):
     _validate(
         name=_args["name"],
+        network_name=_args["network_name"],
         data=_args["data"],
         epochs=_args["epochs"],
         inflate=_args["inflate"],
@@ -118,6 +122,7 @@ def _worker(idx: int, _args: dict):
 
 def _validate(
     name: str,
+    network_name: str,
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
     inflate: Optional[str] = None,
@@ -126,7 +131,7 @@ def _validate(
 ):
     device.sync_seed()
 
-    network = getattr(resnet, name, lambda: None)()
+    network = getattr(resnet, network_name, lambda: None)()
     if network is None:
         if device.is_main():
             print(f"Unknown network: {name}")
