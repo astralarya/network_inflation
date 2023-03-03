@@ -81,7 +81,7 @@ def validate(
             {
                 "name": model_name,
                 "network": network,
-                "inflate": inflate,
+                "inflate": inflate_network,
                 "data": val_data,
                 "epochs": epochs,
                 "batch_size": batch_size,
