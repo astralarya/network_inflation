@@ -2,7 +2,6 @@ import argparse
 from os import environ
 from pathlib import Path
 
-
 from local import train
 
 parser = argparse.ArgumentParser(prog="ResNet training script")

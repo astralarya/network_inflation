@@ -2,9 +2,11 @@ import argparse
 from os import environ
 from pathlib import Path
 
+from local import validate
+
 parser = argparse.ArgumentParser(prog="ResNet validation script")
 parser.add_argument(
-    "network", choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
+    "name", choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
 )
 parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
 parser.add_argument("--batch_size", default=64, type=int)
@@ -22,47 +24,5 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-from local import inflate
-from local import validate
-from local import model
-from local import resnet
-
-
-val_data = validate.data(args.imagenet_path / "val")
-
-name = args.network
-if args.inflate is not None:
-    name = f"{name}--inflate-{args.inflate}"
-
-
-for epoch in args.epoch if len(args.epoch) > 0 else ["pre"]:
-    network = getattr(resnet, args.network, lambda: None)()
-    if network is None:
-        print(f"Unknown network: {args.network}")
-        exit(1)
-
-    print(f"Validating model {name}")
-    if epoch == "pre":
-        if args.inflate is not None:
-            inflate_source = getattr(resnet, args.inflate, lambda: None)()
-            if inflate_source is None:
-                print(f"Unknown network: {args.inflate}")
-                exit(1)
-            print(f"Inflating network ({args.network}) from {args.inflate}")
-            inflate.resnet(inflate_source, network)
-        else:
-            print("Using pretrained weights")
-    elif epoch == "init":
-        print(f"Reset network ({args.network})")
-        model.reset(network)
-
-    if epoch == "all":
-        print("Validating all epochs")
-        validate.run_val(
-            network, args.model_path / name, val_data, batch_size=args.batch_size
-        )
-    else:
-        print(f"Validating epoch {epoch}")
-        validate.val_epoch(
-            network, args.model_path / name, val_data, epoch, batch_size=args.batch_size
-        )
+if __name__ == "__main__":
+    validate.validate(**vars(args))

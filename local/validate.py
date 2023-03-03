@@ -1,12 +1,16 @@
-from typing import Any, Callable, Optional, Union
+from pathlib import Path
+from typing import Optional, Union
 
 import torch
 import torch.nn as nn
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
-from . import model as model
-import local.device as device
+from local import model
+from local import device
+from local import inflate as _inflate
+from local import resnet
+from local import validate
 
 
 def data(data_root: str):
@@ -29,7 +33,70 @@ def data(data_root: str):
     return r
 
 
-def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
+def validate(
+    name: str,
+    epoch: Optional[Union[str, int]] = None,
+    finetune: bool = False,
+    inflate: Optional[str] = None,
+    batch_size=64,
+    model_path: Path = None,
+    imagenet_path: Optional[Union[Path, str]] = None,
+):
+    if model_path is None:
+        model_path = Path("models")
+    elif type(imagenet_path) == str:
+        model_path = Path(model_path)
+
+    if imagenet_path is None:
+        imagenet_path = Path(environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"))
+    elif type(imagenet_path) == str:
+        imagenet_path = Path(imagenet_path)
+
+    val_data = data(imagenet_path / "val")
+
+    model_name = model_path / name
+    if finetune is True:
+        model_name = f"{model_name}--finetune"
+    if inflate is not None:
+        model_name = f"{model_name}--inflate-{inflate}"
+
+    for epoch in epoch if epoch else ["pre"]:
+        network = getattr(resnet, name, lambda: None)()
+        if network is None:
+            print(f"Unknown network: {name}")
+            exit(1)
+
+        print(f"Validating model {name}")
+        if epoch == "pre":
+            if inflate is not None:
+                inflate_source = getattr(resnet, inflate, lambda: None)()
+                if inflate_source is None:
+                    print(f"Unknown network: {inflate}")
+                    exit(1)
+                print(f"Inflating network ({name}) from {inflate}")
+                _inflate.resnet(inflate_source, network)
+            else:
+                print("Using pretrained weights")
+        elif epoch == "init":
+            print(f"Reset network ({name})")
+            model.reset(network)
+
+        if epoch == "all":
+            print("Validating all epochs")
+            for epoch in model.list_epochs(model_name):
+                val_epoch(network, model_name, val_data, epoch, batch_size=batch_size)
+        else:
+            print(f"Validating epoch {epoch}")
+            validate.val_epoch(
+                network,
+                model_path / name,
+                val_data,
+                epoch,
+                batch_size=batch_size,
+            )
+
+
+def _validate(network: nn.Module, data: datasets.DatasetFolder, batch_size=128):
     with torch.no_grad():
         data_loader = torch.utils.data.DataLoader2(
             data,
@@ -74,7 +141,7 @@ def val_epoch(
     name: str,
     data: datasets.DatasetFolder,
     epoch: Optional[Union[int, str]] = None,
-    batch_size=256,
+    batch_size=64,
 ):
     if type(epoch) == int:
         save_epoch, save_state = model.load(name, epoch)
@@ -82,18 +149,8 @@ def val_epoch(
             raise Exception(f"Epoch not found for {name}: {epoch}")
         network.load_state_dict(save_state["model"])
 
-    accuracy = val(network, data, batch_size=batch_size)
+    accuracy = _validate(network, data, batch_size=batch_size)
     model.write_log(
         f"{name}.__val__",
         f"{epoch}\t{accuracy[1]}\t{accuracy[5]}",
     )
-
-
-def run_val(
-    network: nn.Module,
-    name: str,
-    data: datasets.DatasetFolder,
-    batch_size=256,
-):
-    for epoch in model.list_epochs(name):
-        val_epoch(network, name, data, epoch, batch_size=batch_size)
