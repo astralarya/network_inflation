@@ -108,7 +108,6 @@ def val_epoch(
 def _worker(idx: int, _args: dict):
     _validate(
         name=_args["name"],
-        network=_args["network"],
         data=_args["data"],
         epochs=_args["epochs"],
         inflate=_args["inflate"],
@@ -119,7 +118,6 @@ def _worker(idx: int, _args: dict):
 
 def _validate(
     name: str,
-    network: nn.Module,
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
     inflate: Optional[str] = None,
