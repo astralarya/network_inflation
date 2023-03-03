@@ -14,8 +14,7 @@ parser.add_argument("--num_workers", default=4, type=int)
 parser.add_argument("--nprocs", default=8, type=int)
 parser.add_argument(
     "--epoch",
-    dest="epochs",
-    type=lambda x: x if x in ["pre", "all"] else int(x),
+    type=lambda x: x if x in ["pre", "init", "all"] else int(x),
     action="append",
 )
 parser.add_argument("--model_path", default="models", type=Path)
