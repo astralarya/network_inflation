@@ -187,7 +187,7 @@ def _loop(
     args = {"batch_size": batch_size, "nprocs": device.world_size()}
     total = len(data)
 
-    train_sampler = (
+    data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
             data, num_replicas=device.world_size(), rank=device.ordinal(), shuffle=True
         )
@@ -198,9 +198,9 @@ def _loop(
         torch.utils.data.DataLoader2(
             data,
             batch_size=batch_size,
-            sampler=train_sampler,
+            sampler=data_sampler,
             num_workers=num_workers,
-            shuffle=False if train_sampler else True,
+            shuffle=False if data_sampler else True,
         )
     )
     criterion = nn.CrossEntropyLoss().to(device.device())
