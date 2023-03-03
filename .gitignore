@@ -2,6 +2,7 @@
 data
 models
 remotes
+remotes-*/
 
 
 # Byte-compiled / optimized / DLL files
