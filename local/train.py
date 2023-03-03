@@ -196,8 +196,8 @@ def _train(
         torch.utils.data.DataLoader2(
             data,
             batch_size=batch_size,
-            sampler=data_sampler,
             num_workers=num_workers,
+            sampler=data_sampler,
             shuffle=False if data_sampler else True,
         )
     )

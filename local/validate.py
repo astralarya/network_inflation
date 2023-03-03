@@ -37,7 +37,8 @@ def validate(
     epoch: Optional[Union[str, int]] = None,
     finetune: bool = False,
     inflate: Optional[str] = None,
-    batch_size=64,
+    batch_size: int = 64,
+    num_workers: int = 8,
     nprocs: int = 8,
     model_path: Path = None,
     imagenet_path: Optional[Union[Path, str]] = None,
@@ -93,6 +94,7 @@ def validate(
                 val_data,
                 epoch,
                 batch_size=batch_size,
+                num_workers=num_workers,
                 nprocs=nprocs,
             )
 
@@ -102,7 +104,8 @@ def val_epoch(
     name: str,
     data: datasets.DatasetFolder,
     epoch: Optional[Union[int, str]] = None,
-    batch_size=64,
+    batch_size: int = 64,
+    num_workers: int = 4,
     nprocs: int = 8,
 ):
     if type(epoch) == int:
@@ -123,6 +126,7 @@ def val_epoch(
                 "data": data,
                 "epoch": epoch,
                 "batch_size": batch_size,
+                "num_workers": num_workers,
             },
         ),
         nprocs=nprocs,
@@ -137,11 +141,17 @@ def _worker(idx: int, _args: dict):
         data=_args["data"],
         epoch=_args["epoch"],
         batch_size=_args["batch_size"],
+        num_workers=_args["num_workers"],
     )
 
 
 def _validate(
-    name: str, network: nn.Module, data: datasets.DatasetFolder, epoch=1, batch_size=64
+    name: str,
+    network: nn.Module,
+    data: datasets.DatasetFolder,
+    epoch=1,
+    batch_size=64,
+    num_workers=4,
 ):
     with torch.no_grad():
         data_sampler = (
@@ -157,6 +167,7 @@ def _validate(
             torch.utils.data.DataLoader2(
                 data,
                 batch_size=batch_size,
+                num_workers=4,
                 sampler=data_sampler,
             )
         )
