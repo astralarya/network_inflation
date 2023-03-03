@@ -150,7 +150,7 @@ def _validate(
 ):
     if type(epoch) == int:
         network = network.to(device.cpu)
-        save_epoch, save_state = model.load(name, epoch, device.device())
+        save_epoch, save_state = model.load(name, epoch)
         if save_epoch is None:
             raise Exception(f"Epoch not found for {name}: {epoch}")
         network.load_state_dict(save_state["model"])
