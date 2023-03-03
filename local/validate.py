@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Union
+from typing import Callable, Optional, Union
 
 import torch
 import torch.nn as nn
@@ -67,20 +67,12 @@ def validate(
             print(f"Unknown network: {name}")
             exit(1)
 
-        print(f"Validating model {name}")
-        if epoch == "pre":
-            if inflate is not None:
-                inflate_source = getattr(resnet, inflate, lambda: None)()
-                if inflate_source is None:
-                    print(f"Unknown network: {inflate}")
-                    exit(1)
-                print(f"Inflating network ({name}) from {inflate}")
-                _inflate.resnet(inflate_source, network)
-            else:
-                print("Using pretrained weights")
-        elif epoch == "init":
-            print(f"Reset network ({name})")
-            model.reset(network)
+        inflate_network = None
+        if inflate is not None:
+            inflate_network = getattr(resnet, inflate, lambda: None)()
+            if inflate_network is None:
+                print(f"Unknown network: {inflate}")
+                exit(1)
 
         if epoch == "all":
             print("Validating all epochs")
@@ -89,8 +81,9 @@ def validate(
         else:
             print(f"Validating epoch {epoch}")
             val_epoch(
-                network,
                 model_path / name,
+                network,
+                inflate_network,
                 val_data,
                 epoch,
                 batch_size=batch_size,
@@ -100,8 +93,9 @@ def validate(
 
 
 def val_epoch(
-    network: nn.Module,
     name: str,
+    network: Optional[Callable[[], nn.Module]],
+    inflate: Optional[Callable[[], nn.Module]],
     data: datasets.DatasetFolder,
     epoch: Optional[Union[int, str]] = None,
     batch_size: int = 64,
@@ -114,8 +108,9 @@ def val_epoch(
         _worker,
         (
             {
-                "network": network,
                 "name": name,
+                "network": network,
+                "inflate": inflate,
                 "data": data,
                 "epoch": epoch,
                 "batch_size": batch_size,
@@ -132,6 +127,7 @@ def _worker(idx: int, _args: dict):
     _validate(
         name=_args["name"],
         network=_args["network"],
+        inflate=_args["inflate"],
         data=_args["data"],
         epoch=_args["epoch"],
         batch_size=_args["batch_size"],
@@ -142,14 +138,18 @@ def _worker(idx: int, _args: dict):
 @torch.no_grad()
 def _validate(
     name: str,
-    network: nn.Module,
+    network: Optional[Callable[[], nn.Module]],
+    inflate: Optional[Callable[[], nn.Module]],
     data: datasets.DatasetFolder,
     epoch=1,
     batch_size=64,
     num_workers=4,
 ):
+    network = network()
+    if inflate is not None:
+        _inflate.resnet(inflate(), network)
+
     if type(epoch) == int:
-        network = network.to(device.cpu)
         save_epoch, save_state = model.load(name, epoch)
         if save_epoch is None:
             raise Exception(f"Epoch not found for {name}: {epoch}")
