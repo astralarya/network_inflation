@@ -157,7 +157,7 @@ def train(
 
 
 def _worker(idx: int, _args: dict):
-    _loop(
+    _train(
         name=_args["name"],
         network=_args["network"],
         optimizer=_args["optimizer"],
@@ -170,7 +170,7 @@ def _worker(idx: int, _args: dict):
     )
 
 
-def _loop(
+def _train(
     name: str,
     network: nn.Module,
     optimizer: optim.Optimizer,
