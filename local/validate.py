@@ -157,8 +157,6 @@ def _validate(
 
     device.serial(load)
 
-    network = device.model(network)
-
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
             data,
@@ -177,8 +175,8 @@ def _validate(
         )
     )
 
-    network = network.to(device.device())
     network.eval()
+    network = network.to(device.device())
     softmax = nn.Softmax(dim=2).to(device.device())
 
     total = len(data)
