@@ -11,26 +11,6 @@ from . import model as model
 import local.device as device
 
 
-def train_data(data_root: str):
-    print(f"Loading train data `{data_root}`... ", flush=True, end="")
-    r = datasets.ImageFolder(
-        data_root,
-        transform=transforms.Compose(
-            [
-                transforms.Resize(256),
-                transforms.RandomHorizontalFlip(),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
-            ]
-        ),
-    )
-    print("DONE")
-    return r
-
-
 def val_data(data_root: str):
     print(f"Loading val data `{data_root}`... ", flush=True, end="")
     r = datasets.ImageFolder(
@@ -49,72 +29,6 @@ def val_data(data_root: str):
     )
     print("DONE")
     return r
-
-
-def train(
-    name: str,
-    network: nn.Module,
-    optimizer: optim.Optimizer,
-    scheduler: optim.lr_scheduler._LRScheduler,
-    data: datasets.DatasetFolder,
-    init_epoch=1,
-    batch_size=256,
-    num_epochs=2048,
-    num_workers=4,
-):
-    network = network.to(device.device())
-    args = {"batch_size": batch_size, "nprocs": device.world_size()}
-    total = len(data)
-
-    train_sampler = (
-        torch.utils.data.distributed.DistributedSampler(
-            data, num_replicas=device.world_size(), rank=device.ordinal(), shuffle=True
-        )
-        if device.world_size() > 1
-        else None
-    )
-    data_loader = device.loader(
-        torch.utils.data.DataLoader2(
-            data,
-            batch_size=batch_size,
-            sampler=train_sampler,
-            num_workers=num_workers,
-            shuffle=False if train_sampler else True,
-        )
-    )
-    criterion = nn.CrossEntropyLoss().to(device.device())
-
-    network.train()
-
-    if device.is_main():
-        print(f"Iterating {total} samples")
-    for epoch in range(init_epoch, num_epochs + 1):
-        epoch_loss = 0.0
-        for inputs, labels in tqdm(data_loader, disable=not device.is_main()):
-            inputs = inputs.to(device.device())
-            labels = labels.to(device.device())
-            outputs = network(inputs)
-            loss = criterion(outputs, labels)
-            losses = device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
-            epoch_loss += losses / total
-            optimizer.zero_grad()
-            loss.backward()
-            device.optim_step(optimizer)
-            scheduler.step()
-        if device.is_main():
-            print(f"[epoch {epoch}]: loss: {epoch_loss}")
-            model.save(
-                name,
-                epoch,
-                {
-                    "loss": epoch_loss,
-                    "model": network.state_dict(),
-                    "optimizer": optimizer.state_dict(),
-                    "scheduler": scheduler.state_dict(),
-                    "args": args,
-                },
-            )
-    device.rendezvous("end")
 
 
 def val(network: nn.Module, data: datasets.DatasetFolder, batch_size=64):
