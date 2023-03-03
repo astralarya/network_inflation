@@ -18,11 +18,12 @@ from . import device as _device
 
 def get_epoch(name: str, epoch: int = None):
     if epoch is not None:
-        save_paths = glob.glob(f"{name}/{epoch:08}.pkl")
+        save_path = Path(f"{name}/{epoch:08}.pkl")
+        save_path = save_path if save_path.exists() else None
     else:
         save_paths = glob.glob(f"{name}/{'[0-9]'*8}.pkl")
         save_paths.sort(reverse=True)
-    save_path = next(iter(save_paths), None)
+        save_path = next(iter(save_paths), None)
     return (
         int(save_path[len(f"{name}.") :].split(".")[0])
         if save_path is not None
@@ -33,7 +34,7 @@ def get_epoch(name: str, epoch: int = None):
 def iter_epochs(name: str):
     i = 0
     p = Path(f"{name}/{i:08}.pkl")
-    while p:
+    while p.exists():
         yield i
         i += 1
         p = Path(f"{name}/{i:08}.pkl")
