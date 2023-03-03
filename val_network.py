@@ -10,6 +10,7 @@ parser.add_argument(
 )
 parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
 parser.add_argument("--batch_size", default=64, type=int)
+parser.add_argument("--nprocs", default=8, type=int)
 parser.add_argument(
     "--epoch",
     type=lambda x: x if x in ["pre", "init", "all"] else int(x),

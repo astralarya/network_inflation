@@ -38,6 +38,7 @@ def validate(
     finetune: bool = False,
     inflate: Optional[str] = None,
     batch_size=64,
+    nprocs: int = 8,
     model_path: Path = None,
     imagenet_path: Optional[Union[Path, str]] = None,
 ):
@@ -92,18 +93,75 @@ def validate(
                 val_data,
                 epoch,
                 batch_size=batch_size,
+                nprocs=nprocs,
             )
 
 
-def _validate(network: nn.Module, data: datasets.DatasetFolder, batch_size=128):
+def val_epoch(
+    network: nn.Module,
+    name: str,
+    data: datasets.DatasetFolder,
+    epoch: Optional[Union[int, str]] = None,
+    batch_size=64,
+    nprocs: int = 8,
+):
+    if type(epoch) == int:
+        save_epoch, save_state = model.load(name, epoch)
+        if save_epoch is None:
+            raise Exception(f"Epoch not found for {name}: {epoch}")
+        network.load_state_dict(save_state["model"])
+
+    network = device.model(network)
+
+    print(f"Spawning {nprocs} processes")
+    device.spawn(
+        _worker,
+        (
+            {
+                "network": network,
+                "name": name,
+                "data": data,
+                "epoch": epoch,
+                "batch_size": batch_size,
+            }
+        ),
+        nprocs=nprocs,
+        start_method="fork",
+    )
+
+
+def _worker(idx: int, _args: dict):
+    _validate(
+        name=_args["name"],
+        network=_args["network"],
+        data=_args["data"],
+        epoch=_args["epoch"],
+        batch_size=_args["batch_size"],
+    )
+
+
+def _validate(
+    name: str, network: nn.Module, data: datasets.DatasetFolder, epoch=1, batch_size=64
+):
     with torch.no_grad():
+        data_sampler = (
+            torch.utils.data.distributed.DistributedSampler(
+                data,
+                num_replicas=device.world_size(),
+                rank=device.ordinal(),
+            )
+            if device.world_size() > 1
+            else None
+        )
         data_loader = torch.utils.data.DataLoader2(
             data,
             batch_size=batch_size,
+            data_sampler=data_sampler,
         )
 
         total = len(data_loader.dataset)
-        print(f"Iterating {total} samples")
+        if device.is_main():
+            print(f"Iterating {total} samples")
 
         softmax = nn.Softmax(dim=2).to(device.device())
         network.eval()
@@ -121,35 +179,28 @@ def _validate(network: nn.Module, data: datasets.DatasetFolder, batch_size=128):
             outputs = softmax(outputs.view(bs, ncrops, -1))
 
             top1_outputs = outputs.mean(dim=1).max(dim=1).indices.flatten()
-            top1_accuracy += (top1_outputs == labels).sum() / total
+            top1_part = (top1_outputs == labels).sum() / total
+            top1_accuracy += device.mesh_reduce(
+                "top1_accuracy", top1_part.item(), lambda x: sum(x)
+            )
+
             top5_outputs = outputs.mean(dim=1).topk(k, dim=1).indices.view(bs, k)
-            top5_accuracy += (
+            top5_part = (
                 top5_outputs == labels.repeat(k).view(k, -1).transpose(0, 1)
             ).max(dim=1).values.sum() / total
+            top5_accuracy += device.mesh_reduce(
+                "top5_accuracy", top5_part.item(), lambda x: sum(x)
+            )
+
             device.step()
-        print(f"Top1 accuracy: {top1_accuracy}")
-        print(f"Top5 accuracy: {top5_accuracy}")
+        if device.is_main():
+            print(f"Top1 accuracy: {top1_accuracy}")
+            print(f"Top5 accuracy: {top5_accuracy}")
+            model.write_log(
+                f"{name}.__val__",
+                f"{epoch}\t{top1_accuracy}\t{top5_accuracy}",
+            )
         return {
             1: top1_accuracy,
             5: top5_accuracy,
         }
-
-
-def val_epoch(
-    network: nn.Module,
-    name: str,
-    data: datasets.DatasetFolder,
-    epoch: Optional[Union[int, str]] = None,
-    batch_size=64,
-):
-    if type(epoch) == int:
-        save_epoch, save_state = model.load(name, epoch)
-        if save_epoch is None:
-            raise Exception(f"Epoch not found for {name}: {epoch}")
-        network.load_state_dict(save_state["model"])
-
-    accuracy = _validate(network, data, batch_size=batch_size)
-    model.write_log(
-        f"{name}.__val__",
-        f"{epoch}\t{accuracy[1]}\t{accuracy[5]}",
-    )
