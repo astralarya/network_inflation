@@ -24,9 +24,10 @@ args = parser.parse_args()
 
 
 from local import inflate
-from local import imagenet
 from local import model
 from local import resnet
+from local import stats
+from local import train
 
 
 network0 = getattr(resnet, args.network0, lambda: None)()
@@ -69,7 +70,7 @@ if args.inflate1 is not None:
     name1 = f"{name1}--inflate-{args.inflate1}"
 
 
-train_data = imagenet.train_data(args.imagenet_path / "train")
+train_data = train.data(args.imagenet_path / "train")
 
 print(f"Divergence: {name0} <-> {name1}")
-imagenet.divergence(network1, network1, train_data)
+stats.divergence(network1, network1, train_data)

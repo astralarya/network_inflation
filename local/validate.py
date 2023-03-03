@@ -2,8 +2,6 @@ from typing import Any, Callable, Optional, Union
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data.distributed import DistributedSampler
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
@@ -11,7 +9,7 @@ from . import model as model
 import local.device as device
 
 
-def val_data(data_root: str):
+def data(data_root: str):
     print(f"Loading val data `{data_root}`... ", flush=True, end="")
     r = datasets.ImageFolder(
         data_root,
@@ -99,38 +97,3 @@ def run_val(
 ):
     for epoch in model.list_epochs(name):
         val_epoch(network, name, data, epoch, batch_size=batch_size)
-
-
-@torch.no_grad()
-def divergence(
-    network0: nn.Module,
-    network1: nn.Module,
-    data: datasets.DatasetFolder,
-    batch_size=256,
-    num_workers=8,
-):
-    data_loader = torch.utils.data.DataLoader2(
-        data,
-        batch_size=batch_size,
-        num_workers=num_workers,
-    )
-
-    log_softmax = nn.LogSoftmax(dim=1).to(device.device())
-    criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device.device())
-    network0.eval()
-    network0.to(device.device())
-    network1.eval()
-    network1.to(device.device())
-
-    total_loss = 0.0
-    total = len(data_loader.dataset)
-    print(f"Iterating {total} samples")
-    for inputs, _ in tqdm(data_loader):
-        inputs = inputs.to(device.device())
-        outputs0 = network0(inputs)
-        outputs1 = network1(inputs)
-        loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
-        total_loss += loss.item() / total
-        device.step()
-    print(f"Divergence: {total_loss}")
-    return total_loss

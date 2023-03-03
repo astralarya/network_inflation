@@ -23,12 +23,12 @@ args = parser.parse_args()
 
 
 from local import inflate
-from local import imagenet
+from local import validate
 from local import model
 from local import resnet
 
 
-val_data = imagenet.val_data(args.imagenet_path / "val")
+val_data = validate.data(args.imagenet_path / "val")
 
 name = args.network
 if args.inflate is not None:
@@ -58,11 +58,11 @@ for epoch in args.epoch if len(args.epoch) > 0 else ["pre"]:
 
     if epoch == "all":
         print("Validating all epochs")
-        imagenet.run_val(
+        validate.run_val(
             network, args.model_path / name, val_data, batch_size=args.batch_size
         )
     else:
         print(f"Validating epoch {epoch}")
-        imagenet.val_epoch(
+        validate.val_epoch(
             network, args.model_path / name, val_data, epoch, batch_size=args.batch_size
         )
