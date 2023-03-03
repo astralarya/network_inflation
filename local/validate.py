@@ -187,7 +187,7 @@ def _validate(
 
     top1_accuracy = 0.0
     top5_accuracy = 0.0
-    for inputs, labels in tqdm(data_loader):
+    for inputs, labels in tqdm(data_loader, disable=not device.is_main()):
         inputs = inputs.to(device.device())
         labels = labels.to(device.device())
         bs, ncrops, c, h, w = inputs.shape
