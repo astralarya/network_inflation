@@ -13,7 +13,8 @@ parser.add_argument("--batch_size", default=64, type=int)
 parser.add_argument("--num_workers", default=4, type=int)
 parser.add_argument("--nprocs", default=8, type=int)
 parser.add_argument(
-    "--epochs",
+    "--epoch",
+    dest="epochs",
     type=lambda x: x if x in ["pre", "all"] else int(x),
     action="append",
 )
