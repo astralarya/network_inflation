@@ -132,6 +132,7 @@ def val_epoch(
         nprocs=nprocs,
         start_method="fork",
     )
+    device.wait()
 
 
 def _worker(idx: int, _args: dict):
@@ -211,7 +212,7 @@ def _validate(
             print(f"Top5 accuracy: {top5_accuracy}")
             model.write_log(
                 f"{name}.__val__",
-                f"{epoch}\t{top1_accuracy}\t{top5_accuracy}",
+                f"{epoch}\t{top1_accuracy}\t{top5_accuracy}\n",
             )
         return {
             1: top1_accuracy,
