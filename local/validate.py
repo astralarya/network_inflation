@@ -178,38 +178,39 @@ def _validate(
     if device.is_main():
         print(f"Iterating {total} samples")
 
-        network = network.to(device.device())
+    network = network.to(device.device())
 
-        top1_accuracy = 0.0
-        top5_accuracy = 0.0
-        for inputs, labels in tqdm(data_loader):
-            inputs = inputs.to(device.device())
-            labels = labels.to(device.device())
-            bs, ncrops, c, h, w = inputs.shape
-            k = 5
+    top1_accuracy = 0.0
+    top5_accuracy = 0.0
+    for inputs, labels in tqdm(data_loader):
+        inputs = inputs.to(device.device())
+        labels = labels.to(device.device())
+        bs, ncrops, c, h, w = inputs.shape
+        k = 5
 
-            outputs = network(inputs.view(-1, c, h, w))
-            outputs = softmax(outputs.view(bs, ncrops, -1))
+        outputs = network(inputs.view(-1, c, h, w))
+        outputs = softmax(outputs.view(bs, ncrops, -1))
 
-            top1_outputs = outputs.mean(dim=1).max(dim=1).indices.flatten()
-            top1_part = (top1_outputs == labels).sum() / total
-            top1_accuracy += device.mesh_reduce(
-                "top1_accuracy", top1_part.item(), lambda x: sum(x)
-            )
+        top1_outputs = outputs.mean(dim=1).max(dim=1).indices.flatten()
+        top1_part = (top1_outputs == labels).sum() / total
+        top1_accuracy += device.mesh_reduce(
+            "top1_accuracy", top1_part.item(), lambda x: sum(x)
+        )
 
-            top5_outputs = outputs.mean(dim=1).topk(k, dim=1).indices.view(bs, k)
-            top5_part = (
-                top5_outputs == labels.repeat(k).view(k, -1).transpose(0, 1)
-            ).max(dim=1).values.sum() / total
-            top5_accuracy += device.mesh_reduce(
-                "top5_accuracy", top5_part.item(), lambda x: sum(x)
-            )
+        top5_outputs = outputs.mean(dim=1).topk(k, dim=1).indices.view(bs, k)
+        top5_part = (top5_outputs == labels.repeat(k).view(k, -1).transpose(0, 1)).max(
+            dim=1
+        ).values.sum() / total
+        top5_accuracy += device.mesh_reduce(
+            "top5_accuracy", top5_part.item(), lambda x: sum(x)
+        )
 
-            device.step()
-        if device.is_main():
-            print(f"Top1 accuracy: {top1_accuracy}")
-            print(f"Top5 accuracy: {top5_accuracy}")
-            model.write_log(
-                f"{name}.__val__",
-                f"{epoch}\t{top1_accuracy}\t{top5_accuracy}",
-            )
+        device.step()
+
+    if device.is_main():
+        print(f"Top1 accuracy: {top1_accuracy}")
+        print(f"Top5 accuracy: {top5_accuracy}")
+        model.write_log(
+            f"{name}.__val__",
+            f"{epoch}\t{top1_accuracy}\t{top5_accuracy}",
+        )
