@@ -10,6 +10,12 @@ conda activate network_inflation
 python -m ipykernel install --user --name=network_inflation
 ```
 
+OR
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Fetch Imagenet
 
 This repo expects Imagenet data structured for
@@ -29,7 +35,17 @@ cd imagenet-1k
 git lfs pull
 ```
 
-Then unpack the data
-(replace `<REPO_PATH>` with the path to the `imagenet-1k` repo):
+Then unpack the data:
 
-`python setup_imagenet.py <REPO_PATH>`
+```bash
+python setup_imagenet.py <REPO_PATH> --imagenet-path=<OUTPUT_DIR>
+```
+
+`<REPO_PATH>` is the path to the `imagenet-1k` repo and
+`<OUTPUT_DIR>` is the path to create the ImageFolder directories
+
+
+## Train Networks
+
+The `train_network.py` script starts a new training run,
+optionally with inflation.
