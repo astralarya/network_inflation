@@ -171,7 +171,9 @@ def _validate(
             save_epoch, save_state = model.load(name, epoch)
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
-            network.load_state_dict(model.state_to(save_state["model"]))
+            network.load_state_dict(
+                model.state_to(save_state["model"], device=device.device())
+            )
             network.eval()
         network = network.to(device.device())
 
