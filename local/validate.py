@@ -145,8 +145,6 @@ def _validate(
     batch_size=64,
     num_workers=4,
 ):
-    device.sync_seed()
-
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
             data,
@@ -171,8 +169,6 @@ def _validate(
     total = len(data)
     if device.is_main():
         print(f"Iterating {total} samples")
-
-    network = network.to(device.device())
 
     top1_accuracy = 0.0
     top5_accuracy = 0.0
