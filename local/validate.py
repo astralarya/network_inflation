@@ -89,48 +89,6 @@ def val_epoch(
     num_workers: int = 4,
     nprocs: int = 8,
 ):
-    print(f"Spawning {nprocs} processes")
-    device.spawn(
-        _worker,
-        (
-            {
-                "name": name,
-                "network_name": network_name,
-                "data": data,
-                "epochs": epochs,
-                "inflate": inflate,
-                "batch_size": batch_size,
-                "num_workers": num_workers,
-            },
-        ),
-        nprocs=nprocs,
-        start_method="fork",
-    )
-
-
-def _worker(idx: int, _args: dict):
-    _validate(
-        name=_args["name"],
-        network_name=_args["network_name"],
-        data=_args["data"],
-        epochs=_args["epochs"],
-        inflate=_args["inflate"],
-        batch_size=_args["batch_size"],
-        num_workers=_args["num_workers"],
-    )
-
-
-def _validate(
-    name: str,
-    network_name: str,
-    data: datasets.DatasetFolder,
-    epochs: Sequence[Union[int, str]],
-    inflate: Optional[str] = None,
-    batch_size=64,
-    num_workers=4,
-):
-    device.sync_seed()
-
     network = getattr(resnet, network_name, lambda: None)()
     if network is None:
         if device.is_main():
@@ -146,6 +104,54 @@ def _validate(
         if device.is_main():
             print(f"Inflating network ({name}) from {inflate}")
         _inflate.resnet(inflate_source, network)
+
+    for epoch in epochs:
+        if device.is_main():
+            print(f"Validating epoch {epoch}")
+
+        if type(epoch) == int:
+            save_epoch, save_state = model.load(name, epoch)
+            if save_epoch is None:
+                raise Exception(f"Epoch not found for {name}: {epoch}")
+            network.load_state_dict(
+                model.state_to(save_state["model"], device=device.device())
+            )
+            network.eval()
+
+        network = device.model(network)
+
+        print(f"Spawning {nprocs} processes")
+        device.spawn(
+            _worker,
+            (
+                {
+                    "network": network,
+                    "data": data,
+                    "batch_size": batch_size,
+                    "num_workers": num_workers,
+                },
+            ),
+            nprocs=nprocs,
+            start_method="fork",
+        )
+
+
+def _worker(idx: int, _args: dict):
+    _validate(
+        network=_args["network"],
+        data=_args["data"],
+        batch_size=_args["batch_size"],
+        num_workers=_args["num_workers"],
+    )
+
+
+def _validate(
+    network: nn.Module,
+    data: datasets.DatasetFolder,
+    batch_size=64,
+    num_workers=4,
+):
+    device.sync_seed()
 
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
@@ -166,23 +172,12 @@ def _validate(
     )
 
     softmax = nn.Softmax(dim=2).to(device.device())
+    network = network.to(device.device())
 
     total = len(data)
     if device.is_main():
         print(f"Iterating {total} samples")
 
-    for epoch in epochs:
-        if device.is_main():
-            print(f"Validating epoch {epoch}")
-
-        if type(epoch) == int:
-            save_epoch, save_state = model.load(name, epoch)
-            if save_epoch is None:
-                raise Exception(f"Epoch not found for {name}: {epoch}")
-            network.load_state_dict(
-                model.state_to(save_state["model"], device=device.device())
-            )
-            network.eval()
         network = network.to(device.device())
 
         top1_accuracy = 0.0
