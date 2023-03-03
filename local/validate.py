@@ -109,9 +109,7 @@ def val_epoch(
             save_epoch, save_state = model.load(name, epoch)
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
-            network.load_state_dict(
-                model.state_to(save_state["model"], device=device.device())
-            )
+            network.load_state_dict(save_state["model"])
             network.eval()
 
         network = device.model(network)
