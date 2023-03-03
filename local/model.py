@@ -30,10 +30,13 @@ def get_epoch(name: str, epoch: int = None):
     )
 
 
-def list_epochs(name: str):
-    save_paths = glob.glob(f"{name}/{'[0-9]'*8}.pkl")
-    save_paths.sort()
-    return [int(save_path[len(f"{name}/") :].split(".")[0]) for save_path in save_paths]
+def iter_epochs(name: str):
+    i = 0
+    p = Path(f"{name}/{i:08}.pkl")
+    while p:
+        yield i
+        i += 1
+        p = Path(f"{name}/{i:08}.pkl")
 
 
 def write_log(name: str, data: str):
