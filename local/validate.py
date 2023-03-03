@@ -123,7 +123,7 @@ def val_epoch(
                 "data": data,
                 "epoch": epoch,
                 "batch_size": batch_size,
-            }
+            },
         ),
         nprocs=nprocs,
         start_method="fork",
