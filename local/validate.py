@@ -117,7 +117,8 @@ def _validate(
 ):
     epochs = model.iter_epochs(name) if "all" in epochs else epochs
     for epoch in epochs:
-        print(f"Validating epoch {epoch}")
+        if device.is_main():
+            print(f"Validating epoch {epoch}")
 
         network = network()
         if inflate is not None:
