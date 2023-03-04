@@ -84,7 +84,6 @@ def validate(
             {
                 "name": model_name,
                 "network": device.model(network),
-                "network_type": type(network),
                 "data": val_data,
                 "epochs": epochs,
                 "batch_size": batch_size,
@@ -100,7 +99,6 @@ def _worker(idx: int, _args: dict):
     _validate(
         name=_args["name"],
         network=_args["network"],
-        network_type=_args["network_type"],
         data=_args["data"],
         epochs=_args["epochs"],
         batch_size=_args["batch_size"],
@@ -112,7 +110,6 @@ def _worker(idx: int, _args: dict):
 def _validate(
     name: str,
     network: nn.Module,
-    network_type: Callable[[], nn.Module],
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
     batch_size=64,
@@ -129,7 +126,7 @@ def _validate(
             )
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
-            network = network_type()
+            network = network.to(device.cpu)
             network.load_state_dict(save_state["model"])
 
         network = network.to(device.device())
