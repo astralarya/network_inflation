@@ -9,7 +9,6 @@ from tqdm import tqdm
 
 from local import model
 from local import device
-from local import inflate as _inflate
 from local import resnet
 
 
@@ -62,28 +61,14 @@ def validate(
     if inflate is not None:
         model_name = f"{model_name}--inflate-{inflate}"
 
-    network_pre = getattr(resnet, name, lambda: None)
-    network_type = getattr(resnet, f"{name}_type", lambda: None)
-    if network_pre is None:
-        print(f"Unknown network: {name}")
-        exit(1)
-
-    inflate_network = None
-    if inflate is not None:
-        inflate_network = getattr(resnet, inflate, lambda: None)
-        if inflate_network is None:
-            print(f"Unknown network: {inflate}")
-            exit(1)
-        network_pre = lambda: _inflate.resnet(inflate_network(), network_type())
-
     print(f"Spawning {nprocs} processes")
     device.spawn(
         _worker,
         (
             {
                 "name": model_name,
-                "network_pre": network_pre,
-                "network_type": network_type,
+                "network_spec": (name, inflate, not finetune),
+                "network_type": resnet.network_type(name),
                 "data": val_data,
                 "epochs": epochs,
                 "batch_size": batch_size,
@@ -98,7 +83,7 @@ def validate(
 def _worker(idx: int, _args: dict):
     _validate(
         name=_args["name"],
-        network_pre=_args["network_pre"],
+        network_spec=_args["network_spec"],
         network_type=_args["network_type"],
         data=_args["data"],
         epochs=_args["epochs"],
@@ -110,7 +95,7 @@ def _worker(idx: int, _args: dict):
 @torch.no_grad()
 def _validate(
     name: str,
-    network_pre: Callable[[], nn.Module],
+    network_spec: Callable[[], nn.Module],
     network_type: Callable[[], nn.Module],
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
@@ -131,7 +116,7 @@ def _validate(
             network = network_type()
             network.load_state_dict(save_state["model"])
         else:
-            network = network_pre()
+            network = resnet.network_load(*network_spec)
         network.eval()
 
         network = network.to(device.device())
