@@ -21,3 +21,9 @@ resnet152 = lambda: load(
     "resnet152",
     weights=resnet.ResNet152_Weights.IMAGENET1K_V1,
 )
+
+resnet18_type = resnet.resnet18
+resnet34_type = resnet.resnet34
+resnet50_type = resnet.resnet50
+resnet101_type = resnet.resnet101
+resnet152_type = resnet.resnet152

@@ -63,6 +63,7 @@ def validate(
         model_name = f"{model_name}--inflate-{inflate}"
 
     network = getattr(resnet, name, lambda: None)
+    network_type = getattr(resnet, f"{name}_type", lambda: None)
     if network is None:
         print(f"Unknown network: {name}")
         exit(1)
@@ -84,7 +85,7 @@ def validate(
             {
                 "name": model_name,
                 "network": device.model(network),
-                "network_type": type(network),
+                "network_type": network_type,
                 "data": val_data,
                 "epochs": epochs,
                 "batch_size": batch_size,
