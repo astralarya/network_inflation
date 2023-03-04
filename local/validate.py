@@ -66,6 +66,8 @@ def validate(
     if network is None:
         print(f"Unknown network: {name}")
         exit(1)
+    network = network()
+    network.eval()
 
     inflate_network = None
     if inflate is not None:
@@ -73,6 +75,7 @@ def validate(
         if inflate_network is None:
             print(f"Unknown network: {inflate}")
             exit(1)
+        _inflate.resnet(inflate(), network)
 
     print(f"Spawning {nprocs} processes")
     device.spawn(
@@ -80,8 +83,8 @@ def validate(
         (
             {
                 "name": model_name,
-                "network": network,
-                "inflate": inflate_network,
+                "network": device.model(network),
+                "network_type": type(network),
                 "data": val_data,
                 "epochs": epochs,
                 "batch_size": batch_size,
@@ -97,7 +100,7 @@ def _worker(idx: int, _args: dict):
     _validate(
         name=_args["name"],
         network=_args["network"],
-        inflate=_args["inflate"],
+        network_type=_args["network_type"],
         data=_args["data"],
         epochs=_args["epochs"],
         batch_size=_args["batch_size"],
@@ -108,8 +111,8 @@ def _worker(idx: int, _args: dict):
 @torch.no_grad()
 def _validate(
     name: str,
-    network: Optional[Callable[[], nn.Module]],
-    inflate: Optional[Callable[[], nn.Module]],
+    network: nn.Module,
+    network_type: Callable[[], nn.Module],
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
     batch_size=64,
@@ -120,19 +123,15 @@ def _validate(
         if device.is_main():
             print(f"Validating epoch {epoch}")
 
-        network = network()
-        if inflate is not None:
-            _inflate.resnet(inflate(), network)
-
         if type(epoch) == int:
             save_epoch, save_state = model.load(
                 name, epoch, print_output=device.is_main()
             )
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
+            network = network_type()
             network.load_state_dict(save_state["model"])
 
-        network.eval()
         network = network.to(device.device())
         softmax = nn.Softmax(dim=2).to(device.device())
 
