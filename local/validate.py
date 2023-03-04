@@ -75,7 +75,7 @@ def validate(
         if inflate_network is None:
             print(f"Unknown network: {inflate}")
             exit(1)
-        _inflate.resnet(inflate(), network)
+        _inflate.resnet(inflate_network(), network)
 
     print(f"Spawning {nprocs} processes")
     device.spawn(
