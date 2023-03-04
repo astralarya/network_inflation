@@ -74,10 +74,7 @@ def train(
 
     args = {"batch_size": batch_size}
 
-    network = getattr(resnet, name, lambda: None)()
-    if network is None:
-        print(f"Unknown network: {name}")
-        exit(1)
+    network = resnet.network_load(name, inflate, reset=not finetune)
 
     train_data = data(imagenet_path / "train")
 
@@ -100,17 +97,6 @@ def train(
         scheduler.load_state_dict(save_state["scheduler"])
 
     else:
-        if inflate:
-            inflate_source = getattr(resnet, inflate, lambda: None)()
-            if inflate_source is None:
-                print(f"Unknown network: {inflate}")
-                exit(1)
-            print(f"Inflating network: {name} from {inflate}")
-            _inflate.resnet(inflate_source, network)
-        else:
-            print(f"Reset network: {name}")
-            model.reset(network)
-
         optimizer = optim.SGD(
             network.parameters(),
             lr=lr,
