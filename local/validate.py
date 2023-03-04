@@ -62,13 +62,11 @@ def validate(
     if inflate is not None:
         model_name = f"{model_name}--inflate-{inflate}"
 
-    network = getattr(resnet, name, lambda: None)
+    network_pre = getattr(resnet, name, lambda: None)
     network_type = getattr(resnet, f"{name}_type", lambda: None)
-    if network is None:
+    if network_pre is None:
         print(f"Unknown network: {name}")
         exit(1)
-    network = network()
-    network.eval()
 
     inflate_network = None
     if inflate is not None:
@@ -76,7 +74,7 @@ def validate(
         if inflate_network is None:
             print(f"Unknown network: {inflate}")
             exit(1)
-        _inflate.resnet(inflate_network(), network)
+        network_pre = lambda: _inflate.resnet(inflate_network(), network_pre())
 
     print(f"Spawning {nprocs} processes")
     device.spawn(
@@ -84,7 +82,7 @@ def validate(
         (
             {
                 "name": model_name,
-                "network": network,
+                "network_pre": network_pre,
                 "network_type": network_type,
                 "data": val_data,
                 "epochs": epochs,
@@ -100,7 +98,7 @@ def validate(
 def _worker(idx: int, _args: dict):
     _validate(
         name=_args["name"],
-        network=_args["network"],
+        network_pre=_args["network_pre"],
         network_type=_args["network_type"],
         data=_args["data"],
         epochs=_args["epochs"],
@@ -112,7 +110,7 @@ def _worker(idx: int, _args: dict):
 @torch.no_grad()
 def _validate(
     name: str,
-    network: nn.Module,
+    network_pre: Callable[[], nn.Module],
     network_type: Callable[[], nn.Module],
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
@@ -132,6 +130,9 @@ def _validate(
                 raise Exception(f"Epoch not found for {name}: {epoch}")
             network = network_type()
             network.load_state_dict(save_state["model"])
+        else:
+            network = network_pre()
+        network.eval()
 
         network = network.to(device.device())
         softmax = nn.Softmax(dim=2).to(device.device())

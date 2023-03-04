@@ -34,6 +34,7 @@ def resnet(network0: ResNet, network1: ResNet):
                 child1.get_parameter("bn3.bias").zero_()
             else:
                 copy(child0, child1)
+    return network1
 
 
 @torch.no_grad()
