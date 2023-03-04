@@ -84,7 +84,7 @@ def validate(
         (
             {
                 "name": model_name,
-                "network": device.model(network),
+                "network": network,
                 "network_type": network_type,
                 "data": val_data,
                 "epochs": epochs,
