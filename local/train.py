@@ -138,7 +138,6 @@ def train(
                 "args": args,
             },
         )
-    model = device.model(model)
 
     print(f"Spawning {nprocs} processes")
     device.spawn(
@@ -146,8 +145,8 @@ def train(
         (
             {
                 "name": model_name,
-                "model": model,
-                "model_ema": _model_ema,
+                "model": device.model(model),
+                "model_ema": device.model(_model_ema),
                 "optimizer": optimizer,
                 "scheduler": scheduler,
                 "train_dataset": train_dataset,
@@ -213,6 +212,7 @@ def _train(
 
     model = model.to(device.device())
     model.train()
+    model_ema = model_ema.to(device.device())
     criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing).to(device.device())
 
     total = len(train_dataset)
