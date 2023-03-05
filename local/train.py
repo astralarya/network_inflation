@@ -139,6 +139,7 @@ def train(
                 "num_epochs": num_epochs,
                 "num_workers": num_workers,
                 "batch_size": batch_size,
+                "label_smoothing": label_smoothing,
             },
         ),
         nprocs=nprocs,
@@ -161,6 +162,7 @@ def _train(
     num_epochs: int,
     num_workers: int,
     batch_size: int,
+    label_smoothing: float = 0.1,
 ):
     device.sync_seed()
 
@@ -189,7 +191,7 @@ def _train(
 
     network = network.to(device.device())
     network.train()
-    criterion = nn.CrossEntropyLoss().to(device.device())
+    criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing).to(device.device())
 
     total = len(train_dataset)
     if device.is_main():
