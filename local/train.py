@@ -44,8 +44,6 @@ def train(
     mixup_alpha: float = 0.2,
     cutmix_alpha: float = 1.0,
     random_erase: float = 0.1,
-    ra_sampler=True,
-    ra_reps=4,
     model_ema=True,
     model_ema_steps=32,
     model_ema_decay=0.9998,
