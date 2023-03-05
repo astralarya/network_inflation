@@ -39,7 +39,7 @@ def prune_epochs(name: str, keep: int = 32):
 
 def iter_epochs(name: str, from_epoch: int = 0):
     epoch = get_epoch(name, latest=False)
-    i = min(from_epoch, epoch if epoch else math.inf)
+    i = max(from_epoch, epoch or -math.inf)
     p = Path(f"{name}/{i:08}.pkl")
     while p.exists():
         yield i
