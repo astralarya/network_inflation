@@ -40,11 +40,6 @@ def validate(
 
     val_data = data.load_dataset(imagenet_path / "val", transform=data.val_transform())
 
-    name = resnet.network_name(name, inflate, not finetune)
-    if epochs is None:
-        epochs = ["pre"]
-    epochs = checkpoint.iter_epochs(name, from_epoch) if "all" in epochs else epochs
-
     print(f"Spawning {nprocs} processes")
     device.spawn(
         _worker,
@@ -54,6 +49,7 @@ def validate(
                 "network_type": resnet.network_type(name),
                 "data": val_data,
                 "epochs": epochs,
+                "from_epoch": from_epoch,
                 "batch_size": batch_size,
                 "num_workers": num_workers,
             },
@@ -73,10 +69,15 @@ def _validate(
     network_type: Callable[[], nn.Module],
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
+    from_epoch: int = 0,
     batch_size=64,
     num_workers=4,
 ):
     name = resnet.network_name(*network_spec)
+    if epochs is None:
+        epochs = ["pre"]
+    epochs = checkpoint.iter_epochs(name, from_epoch) if "all" in epochs else epochs
+
     for epoch in epochs:
         if device.is_main():
             print(f"Validating epoch {epoch}")
