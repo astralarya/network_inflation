@@ -94,6 +94,5 @@ def _divergence(
         total_loss += epoch_loss
         if device.is_main():
             print(f"Divergence (epoch {epoch}): {epoch_loss}")
-            print(f"Divergence (total per epoch): {total_loss}")
-            print(f"Divergence (total): {total_loss * total}")
-    return total_loss
+            print(f"Divergence (total): {total_loss / (epoch+1)}")
+    return total_loss / num_epochs
