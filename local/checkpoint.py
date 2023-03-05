@@ -37,8 +37,8 @@ def prune_epochs(name: str, keep: int = 32):
         Path(save_path).unlink()
 
 
-def iter_epochs(name: str):
-    i = 0
+def iter_epochs(name: str, from_epoch: int = 0):
+    i = from_epoch
     p = Path(f"{name}/{i:08}.pkl")
     while p.exists():
         yield i
