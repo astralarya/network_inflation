@@ -51,7 +51,7 @@ def network_type(name: str):
 
 
 def network_load(name: str, inflate: Optional[str] = None, reset: bool = False):
-    network_name = network_name(name, inflate, reset)
+    _name = network_name(name, inflate, reset)
 
     if inflate is None and reset is False:
         network = network_pre(name)
@@ -63,7 +63,7 @@ def network_load(name: str, inflate: Optional[str] = None, reset: bool = False):
         inflate_network = network_pre(inflate)
         network = _inflate.resnet(inflate_network, network)
 
-    return (name, network)
+    return (_name, network)
 
 
 def network_name(name, inflate, reset):
