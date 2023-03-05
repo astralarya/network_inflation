@@ -72,7 +72,7 @@ def train(
 
     network = resnet.network_load(name, inflate, reset=not finetune)
 
-    train_dataset = data.train_dataset(
+    train_dataset = data.load_dataset(
         imagenet_path / "train",
         transform=data.train_transform(
             crop_size=train_crop_size, random_erase=random_erase

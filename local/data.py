@@ -8,11 +8,11 @@ from torchvision.transforms.functional import InterpolationMode
 from local.extern import transforms as extern_transforms
 
 
-def train_dataset(
+def load_dataset(
     root: str,
     transform: nn.Module,
 ):
-    print(f"Loading train data `{root}`... ", flush=True, end="")
+    print(f"Loading data `{root}`... ", flush=True, end="")
     r = ImageFolder(root, transform=transform)
     print("DONE")
     return r
