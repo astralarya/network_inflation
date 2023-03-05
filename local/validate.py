@@ -93,7 +93,7 @@ def _validate(
             if "model_ema" in save_state:
                 network = ExponentialMovingAverage(network, decay=0)
         else:
-            network = resnet.network_load(*network_spec)
+            _, network = resnet.network_load(*network_spec)
         network.eval()
 
         network = network.to(device.device())
