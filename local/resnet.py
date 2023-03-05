@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 
 from torch.hub import load
@@ -7,6 +8,7 @@ from local import inflate as _inflate
 
 
 def network_pre(name: str):
+    name = Path(name).name
     if name == "resnet18":
         return load(
             "pytorch/vision:v0.10.0",
@@ -43,6 +45,7 @@ def network_pre(name: str):
 
 
 def network_type(name: str):
+    name = Path(name).name
     network = getattr(resnet, name, lambda: None)
     if network is None:
         print(f"Unknown network: {name}")
@@ -51,6 +54,7 @@ def network_type(name: str):
 
 
 def network_load(name: str, inflate: Optional[str] = None, reset: bool = False):
+    name = Path(name).name
     _name = network_name(name, inflate, reset)
 
     if inflate is None and reset is False:
