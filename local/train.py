@@ -6,8 +6,9 @@ import torch
 import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
-from torchvision import datasets
 from torch.utils.data import DataLoader2
+from torch.utils.data.distributed import DistributedSampler
+from torchvision import datasets
 from tqdm import tqdm
 
 
@@ -184,7 +185,7 @@ def _train(
     args = {"batch_size": batch_size, "nprocs": device.world_size()}
 
     data_sampler = (
-        torch.utils.data.distributed.DistributedSampler(
+        DistributedSampler(
             train_dataset,
             num_replicas=device.world_size(),
             rank=device.ordinal(),
