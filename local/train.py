@@ -46,9 +46,8 @@ def train(
     ra_reps=4,
     model_ema=True,
     model_ema_steps=32,
-    modeal_ema_decay=0.9998,
+    model_ema_decay=0.9998,
     train_crop_size=224,
-    val_crop_size=224,
     model_path: Optional[Path] = None,
     imagenet_path: Optional[Union[Path, str]] = None,
 ):
