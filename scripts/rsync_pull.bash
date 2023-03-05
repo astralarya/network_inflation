@@ -3,7 +3,7 @@ RSYNC_USER="$RSYNC_USER"
 
 
 INSTANCES=(
-    "us-central1-f/tpu-1"
+    #"us-central1-f/tpu-1"
     #"us-central1-f/tpu-2"
     #"us-central1-f/tpu-3"
     #"us-central1-f/tpu-4"
