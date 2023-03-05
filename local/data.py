@@ -5,7 +5,7 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 from torchvision.transforms.functional import InterpolationMode
 
-from .extern import transforms as extern_transforms
+from local.extern import transforms as extern_transforms
 
 
 def train_dataset(
