@@ -4,7 +4,8 @@ from typing import Callable, Optional, Union
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
+from torch.optim import Optimizer
+from torch.optim.lr_scheduler import _LRScheduler
 from torchvision import datasets
 from torch.utils.data import DataLoader2
 from tqdm import tqdm
@@ -12,6 +13,7 @@ from tqdm import tqdm
 
 from local import data
 from local import device
+from local import optim as _optim
 from local import model
 from local import resnet
 
@@ -28,6 +30,9 @@ def train(
     momentum: float = 0.9,
     lr: float = 0.5,
     lr_scheduler: str = "cosineannealinglr",
+    lr_step_size=30,
+    lr_gamma=0.1,
+    lr_min=0.0,
     lr_warmup_epochs: int = 5,
     lr_warmup_method: str = "linear",
     lr_warmup_decay: int = 0.01,
@@ -47,9 +52,6 @@ def train(
     model_path: Optional[Path] = None,
     imagenet_path: Optional[Union[Path, str]] = None,
 ):
-    lr_step = 10
-    lr_gamma = 0.5
-
     if model_path is None:
         model_path = Path("models")
     elif type(imagenet_path) == str:
@@ -82,32 +84,33 @@ def train(
         cutmix_alpha=cutmix_alpha,
     )
 
+    optimizer = _optim.optimizer(
+        network.parameters(),
+        optimizer=opt,
+        lr=lr,
+        momentum=momentum,
+        weight_decay=weight_decay,
+    )
+    scheduler = _optim.lr_scheduler(
+        optimizer=optimizer,
+        lr_scheduler=lr_scheduler,
+        num_epochs=num_epochs,
+        lr_step_size=lr_step_size,
+        lr_gamma=lr_gamma,
+        lr_min=lr_min,
+        lr_warmup_method=lr_warmup_method,
+        lr_warmup_epochs=lr_warmup_epochs,
+        lr_warmup_decay=lr_warmup_decay,
+    )
+
     save_epoch, save_state = model.load(model_name)
     if save_epoch is not None:
         print(f"Resuming from epoch: {save_epoch}")
-        optimizer = optim.SGD(
-            network.parameters(),
-            lr=lr,
-            momentum=momentum,
-            weight_decay=weight_decay,
-        )
-        scheduler = optim.lr_scheduler.StepLR(
-            optimizer=optimizer, step_size=lr_step, gamma=lr_gamma
-        )
         network.load_state_dict(save_state["model"])
         optimizer.load_state_dict(save_state["optimizer"])
         scheduler.load_state_dict(save_state["scheduler"])
 
     else:
-        optimizer = optim.SGD(
-            network.parameters(),
-            lr=lr,
-            momentum=momentum,
-            weight_decay=weight_decay,
-        )
-        scheduler = optim.lr_scheduler.StepLR(
-            optimizer=optimizer, step_size=lr_step, gamma=lr_gamma
-        )
         model.save(
             model_name,
             0,
@@ -161,8 +164,8 @@ def _worker(idx: int, _args: dict):
 def _train(
     name: str,
     network: nn.Module,
-    optimizer: optim.Optimizer,
-    scheduler: optim.lr_scheduler._LRScheduler,
+    optimizer: Optimizer,
+    scheduler: _LRScheduler,
     train_dataset: datasets.DatasetFolder,
     train_collate_fn: Optional[Callable],
     init_epoch: int,
