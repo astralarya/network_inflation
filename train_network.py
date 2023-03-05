@@ -31,7 +31,6 @@ parser.add_argument("--cutmix_alpha", default=1.0, type=float)
 parser.add_argument("--random_erase", default=0.1, type=float)
 parser.add_argument("--model_ema_steps", default=32, type=int)
 parser.add_argument("--model_ema_decay", default=0.9998, type=float)
-parser.add_argument("--model_path", default="models", type=Path)
 parser.add_argument(
     "--model_path",
     default=environ.get("MODEL_PATH", "/mnt/models/data"),
