@@ -28,10 +28,8 @@ from local import divergence
 from local import resnet
 
 
-network0 = resnet.network_load(args.network0, args.inflate0, args.reset0)
-name0 = resnet.network_name(args.network0, args.inflate0, args.reset0)
-network1 = resnet.network_load(args.network1, args.inflate1, args.reset1)
-name1 = resnet.network_name(args.network1, args.inflate1, args.reset1)
+name0, network0 = resnet.network_load(args.network0, args.inflate0, args.reset0)
+name1, network1 = resnet.network_load(args.network1, args.inflate1, args.reset1)
 
 train_data = data.load_dataset(
     args.imagenet_path / "train", transform=data.train_transform()

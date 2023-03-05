@@ -60,16 +60,6 @@ def train(
     elif type(imagenet_path) == str:
         imagenet_path = Path(imagenet_path)
 
-    model_name = model_path / name
-    if finetune is True:
-        model_name = f"{model_name}--finetune"
-    if inflate is not None:
-        model_name = f"{model_name}--inflate-{inflate}"
-
-    args = {"batch_size": batch_size}
-
-    model = resnet.network_load(name, inflate, reset=not finetune)
-
     train_dataset = data.load_dataset(
         imagenet_path / "train",
         transform=data.train_transform(random_erase=random_erase),
@@ -79,6 +69,9 @@ def train(
         mixup_alpha=mixup_alpha,
         cutmix_alpha=cutmix_alpha,
     )
+
+    (model_name, model) = resnet.network_load(name, inflate, reset=not finetune)
+    model_name = model_path / model_name
 
     parameters = set_weight_decay(
         model,
@@ -130,7 +123,6 @@ def train(
                 "model_ema": model_ema.state_dict() if model_ema else None,
                 "optimizer": optimizer.state_dict(),
                 "scheduler": scheduler.state_dict(),
-                "args": args,
             },
         )
 
@@ -181,8 +173,6 @@ def _train(
     model_ema_steps: int,
 ):
     device.sync_seed()
-
-    args = {"batch_size": batch_size, "nprocs": device.world_size()}
 
     data_sampler = (
         DistributedSampler(
@@ -244,7 +234,6 @@ def _train(
                     "model_ema": model_ema.state_dict() if model_ema else None,
                     "optimizer": optimizer.state_dict(),
                     "scheduler": scheduler.state_dict(),
-                    "args": args,
                 },
             )
     device.rendezvous("end")

@@ -1,6 +1,6 @@
 from os import environ
 from pathlib import Path
-from typing import Callable, Optional, Sequence, Union
+from typing import Callable, Optional, Sequence, Tuple, Union
 
 import torch
 import torch.nn as nn
@@ -39,14 +39,11 @@ def validate(
 
     val_data = data.load_dataset(imagenet_path / "val", transform=data.val_transform())
 
-    model_name = resnet.network_name(model_path / name, inflate, not finetune)
-
     print(f"Spawning {nprocs} processes")
     device.spawn(
         _worker,
         (
             {
-                "name": model_name,
                 "network_spec": (name, inflate, not finetune),
                 "network_type": resnet.network_type(name),
                 "data": val_data,
@@ -66,14 +63,14 @@ def _worker(idx: int, _args: dict):
 
 @torch.no_grad()
 def _validate(
-    name: str,
-    network_spec: Callable[[], nn.Module],
+    network_spec: Tuple[str, str, bool],
     network_type: Callable[[], nn.Module],
     data: datasets.DatasetFolder,
     epochs: Optional[Sequence[Union[int, str]]],
     batch_size=64,
     num_workers=4,
 ):
+    name = resnet.network_name(*network_spec)
     if epochs is None:
         epochs = ["pre"]
     epochs = checkpoint.iter_epochs(name) if "all" in epochs else epochs
