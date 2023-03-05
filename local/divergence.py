@@ -79,7 +79,7 @@ def _divergence(
     network1.to(device.device())
 
     total_loss = 0.0
-    total = len(data_loader.dataset)
+    total = len(data)
     print(f"Iterating {total} samples")
     for epoch in range(num_epochs):
         epoch_loss = 0.0
@@ -88,8 +88,10 @@ def _divergence(
             outputs0 = network0(inputs)
             outputs1 = network1(inputs)
             loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
-            total_loss += loss.item() / total
+            epoch_loss += loss.item() / total
             device.step()
+        total_loss += epoch_loss
         print(f"Divergence (epoch {epoch}): {epoch_loss}")
-        print(f"Divergence (total): {total_loss}")
+        print(f"Divergence (total per epoch): {total_loss}")
+        print(f"Divergence (total): {total_loss * total}")
     return total_loss
