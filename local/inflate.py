@@ -35,4 +35,4 @@ def resnet(network0: ResNet, network1: ResNet):
 def copy(network0: nn.Module, network1: nn.Module):
     """Copy all parameters from network0 to network1 by name"""
 
-    network1.load_state_dict(network1.state_dict())
+    network1.load_state_dict(network0.state_dict())
