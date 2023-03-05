@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import glob
+import math
 from pathlib import Path
 from typing import Any
 
@@ -37,7 +38,8 @@ def prune_epochs(name: str, keep: int = 32):
 
 
 def iter_epochs(name: str, from_epoch: int = 0):
-    i = min(from_epoch, get_epoch(name, latest=False))
+    epoch = get_epoch(name, latest=False)
+    i = min(from_epoch, epoch if epoch else math.inf)
     p = Path(f"{name}/{i:08}.pkl")
     while p.exists():
         yield i
