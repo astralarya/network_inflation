@@ -62,7 +62,6 @@ def network_load(name: str, inflate: Optional[str] = None, reset: bool = False):
     else:
         network = network_type(name)()
 
-    inflate_network = None
     if inflate is not None:
         inflate_network = network_pre(inflate)
         network = _inflate.resnet(inflate_network, network)
