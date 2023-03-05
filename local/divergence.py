@@ -95,4 +95,5 @@ def _divergence(
         if device.is_main():
             print(f"Divergence (epoch {epoch}): {epoch_loss}")
             print(f"Divergence (total): {total_loss / (epoch+1)}")
+    device.rendezvous("end")
     return total_loss / num_epochs
