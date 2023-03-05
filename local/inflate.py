@@ -6,7 +6,7 @@ from torchvision.models import ResNet
 
 
 @torch.no_grad()
-def resnet(network0: ResNet, network1: ResNet):
+def resnet(network0: ResNet, network1: ResNet, mask=True):
     """Initialize network1 via inflating network0
 
     Args:
@@ -24,7 +24,7 @@ def resnet(network0: ResNet, network1: ResNet):
         for child0, child1 in zip_longest(children0, children1):
             if child1 is None:
                 raise Exception("Inflate destination is smaller than source!")
-            elif child0 is None:
+            elif child0 is None and mask:
                 child1.get_parameter("conv3.weight").zero_()
             else:
                 copy(child0, child1)

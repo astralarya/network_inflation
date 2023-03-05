@@ -53,7 +53,12 @@ def network_type(name: str):
     return network
 
 
-def network_load(name: str, inflate: Optional[str] = None, reset: bool = False):
+def network_load(
+    name: str,
+    inflate: Optional[str] = None,
+    reset: bool = False,
+    mask_inflate: bool = True,
+):
     name = Path(name).name
     _name = network_name(name, inflate, reset)
 
@@ -64,7 +69,7 @@ def network_load(name: str, inflate: Optional[str] = None, reset: bool = False):
 
     if inflate is not None:
         inflate_network = network_pre(inflate)
-        network = _inflate.resnet(inflate_network, network)
+        network = _inflate.resnet(inflate_network, network, mask=mask_inflate)
 
     return (_name, network)
 
