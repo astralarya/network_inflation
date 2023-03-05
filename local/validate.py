@@ -45,7 +45,7 @@ def validate(
         _worker,
         (
             {
-                "network_spec": (name, inflate, not finetune),
+                "network_spec": (model_path / name, inflate, not finetune),
                 "network_type": resnet.network_type(name),
                 "data": val_data,
                 "epochs": epochs,
