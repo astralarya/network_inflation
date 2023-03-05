@@ -45,7 +45,7 @@ def validate(
         _worker,
         (
             {
-                "network_spec": (name, inflate, not finetune),
+                "network_spec": (model_path / name, inflate, not finetune),
                 "network_type": resnet.network_type(name),
                 "data": val_data,
                 "epochs": epochs,
@@ -73,16 +73,11 @@ def _validate(
     from_epoch: int = 0,
     batch_size=64,
     num_workers=4,
-    model_path: Path = None,
 ):
     name = resnet.network_name(*network_spec)
     if epochs is None:
         epochs = ["pre"]
-    epochs = (
-        checkpoint.iter_epochs(model_path / name, from_epoch)
-        if "all" in epochs
-        else epochs
-    )
+    epochs = checkpoint.iter_epochs(name, from_epoch) if "all" in epochs else epochs
 
     for epoch in epochs:
         if device.is_main():
