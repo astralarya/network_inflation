@@ -9,13 +9,14 @@ parser.add_argument(
     "name", choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
 )
 parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
+parser.add_argument("--finetune", action="store_true")
 parser.add_argument("--batch_size", default=64, type=int)
 parser.add_argument("--num_workers", default=4, type=int)
 parser.add_argument("--nprocs", default=8, type=int)
 parser.add_argument(
     "--epoch",
     dest="epochs",
-    type=lambda x: x if x in ["pre", "init", "all"] else int(x),
+    type=lambda x: x if x in ["pre", "all"] else int(x),
     action="append",
 )
 parser.add_argument("--model_path", default="models", type=Path)

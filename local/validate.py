@@ -18,7 +18,7 @@ from local.extern.model_ema import ExponentialMovingAverage
 
 def validate(
     name: str,
-    epochs: Sequence[Union[str, int]],
+    epochs: Optional[Sequence[Union[str, int]]],
     finetune: bool = False,
     inflate: Optional[str] = None,
     batch_size: int = 64,
@@ -39,11 +39,7 @@ def validate(
 
     val_data = data.load_dataset(imagenet_path / "val", transform=data.val_transform())
 
-    model_name = model_path / name
-    if finetune is True:
-        model_name = f"{model_name}--finetune"
-    if inflate is not None:
-        model_name = f"{model_name}--inflate-{inflate}"
+    model_name = resnet.network_name(model_path / name, inflate, not finetune)
 
     print(f"Spawning {nprocs} processes")
     device.spawn(
@@ -75,11 +71,12 @@ def _validate(
     network_spec: Callable[[], nn.Module],
     network_type: Callable[[], nn.Module],
     data: datasets.DatasetFolder,
-    epochs: Sequence[Union[int, str]],
+    epochs: Optional[Sequence[Union[int, str]]],
     batch_size=64,
-    nprocs=8,
     num_workers=4,
 ):
+    if epochs is None:
+        epochs = ["pre"]
     epochs = checkpoint.iter_epochs(name) if "all" in epochs else epochs
     for epoch in epochs:
         if device.is_main():
