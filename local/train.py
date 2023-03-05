@@ -199,7 +199,7 @@ def _train(
     network.train()
     criterion = nn.CrossEntropyLoss().to(device.device())
 
-    total = len(data)
+    total = len(train_dataset)
     if device.is_main():
         print(f"Iterating {total} samples")
 
