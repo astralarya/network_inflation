@@ -12,3 +12,18 @@ Divergence (total): 0.0
 100%|██████████████████████████████████████████████████████████████████████████████| 626/626 [10:41<00:00,  1.02s/it]
 Divergence (epoch 1): 0.0
 Divergence (total): 0.0
+
+Mara@t1v-n-fd863902-w-0:~/network_inflation$ python3 run_divergence.py resnet50 resnet101
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Loading data `/mnt/imagenet/imagenet-1k/train`... DONE
+Divergence: resnet50-pretrained <-> resnet101-pretrained
+Spawning 8 processes
+Device: xla:1
+Iterating 1281167 samples
+100%|██████████████████████████████████████████████████████████████████████████████| 626/626 [09:00<00:00,  1.16it/s]
+Divergence (epoch 0): 0.05943428147104672
+Divergence (total): 0.05943428147104672
+100%|██████████████████████████████████████████████████████████████████████████████| 626/626 [08:30<00:00,  1.23it/s]
+Divergence (epoch 1): 0.059194751549884655
+Divergence (total): 0.05931451651046569
