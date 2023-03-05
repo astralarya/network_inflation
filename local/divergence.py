@@ -50,7 +50,7 @@ def _divergence(
     collate_fn: Optional[Callable],
     num_epochs=8,
     batch_size=256,
-    num_workers=8,
+    num_workers=4,
 ):
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(

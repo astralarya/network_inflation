@@ -15,7 +15,7 @@ parser.add_argument("--inflate0", choices=["resnet50", "resnet101"])
 parser.add_argument("--inflate1", choices=["resnet50", "resnet101"])
 parser.add_argument("--num_epochs", default=8, type=int)
 parser.add_argument("--batch_size", default=64, type=int)
-parser.add_argument("--num_workers", default=8, type=int)
+parser.add_argument("--num_workers", default=4, type=int)
 parser.add_argument(
     "--imagenet_path",
     default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),
