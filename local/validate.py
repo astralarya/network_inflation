@@ -87,11 +87,10 @@ def _validate(
             )
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
+            network = network_type()
+            network.load_state_dict(save_state["model"])
             if "model_ema" in save_state:
                 network = ExponentialMovingAverage(network, decay=0)
-            else:
-                network = network_type()
-                network.load_state_dict(save_state["model"])
         else:
             network = resnet.network_load(*network_spec)
         network.eval()
