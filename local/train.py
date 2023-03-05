@@ -14,7 +14,7 @@ from tqdm import tqdm
 from local import data
 from local import device
 from local import optim as _optim
-from local import model as _model
+from local import checkpoint
 from local import resnet
 from local.extern.weight_decay import set_weight_decay
 from local.extern.model_ema import ExponentialMovingAverage
@@ -116,7 +116,7 @@ def train(
         alpha = min(1.0, alpha * adjust)
         _model_ema = ExponentialMovingAverage(model, decay=1.0 - alpha)
 
-    save_epoch, save_state = _model.load(model_name)
+    save_epoch, save_state = checkpoint.load(model_name)
     if save_epoch is not None:
         print(f"Resuming from epoch: {save_epoch}")
         model.load_state_dict(save_state["model"])
@@ -126,7 +126,7 @@ def train(
         scheduler.load_state_dict(save_state["scheduler"])
 
     else:
-        _model.save(
+        checkpoint.save(
             model_name,
             0,
             {
@@ -240,7 +240,7 @@ def _train(
                     model_ema.n_averaged.fill_(0)
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
-            _model.save(
+            checkpoint.save(
                 name,
                 epoch,
                 {

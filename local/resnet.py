@@ -62,3 +62,11 @@ def network_load(name: str, inflate: Optional[str] = None, reset: bool = False):
         network = lambda: _inflate.resnet(inflate_network, network)
 
     return network
+
+
+def network_name(name, inflate, reset):
+    if reset is False:
+        name = f"{name}--finetune"
+    if inflate is not None:
+        name = f"{name}--inflate-{inflate}"
+    return name

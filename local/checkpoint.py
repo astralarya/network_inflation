@@ -91,15 +91,10 @@ def load(name: str, epoch: int = None, device: torch.device = None, print_output
 
 
 @torch.no_grad()
-def reset(module: nn.Module):
-    def reset(module: nn.Module):
+def reset(module: torch.nn.Module):
+    def reset(module: torch.nn.Module):
         reset_parameters = getattr(module, "reset_parameters", None)
         if callable(reset_parameters):
             module.reset_parameters()
 
     module.apply(fn=reset)
-
-
-@torch.no_grad()
-def clone(module: nn.Module):
-    return copy.deepcopy(module)

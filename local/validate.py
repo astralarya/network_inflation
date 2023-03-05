@@ -10,7 +10,7 @@ from torchvision import datasets, transforms
 from tqdm import tqdm
 
 from local import data
-from local import model
+from local import checkpoint
 from local import device
 from local import resnet
 
@@ -77,13 +77,13 @@ def _validate(
     batch_size=64,
     num_workers=4,
 ):
-    epochs = model.iter_epochs(name) if "all" in epochs else epochs
+    epochs = checkpoint.iter_epochs(name) if "all" in epochs else epochs
     for epoch in epochs:
         if device.is_main():
             print(f"Validating epoch {epoch}")
 
         if type(epoch) == int:
-            save_epoch, save_state = model.load(
+            save_epoch, save_state = checkpoint.load(
                 name, epoch, print_output=device.is_main()
             )
             if save_epoch is None:
@@ -148,7 +148,7 @@ def _validate(
         if device.is_main():
             print(f"Top1 accuracy: {top1_accuracy}")
             print(f"Top5 accuracy: {top5_accuracy}")
-            model.write_log(
+            checkpoint.write_log(
                 f"{name}.__val__",
                 f"{epoch}\t{top1_accuracy}\t{top5_accuracy}\n",
             )

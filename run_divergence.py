@@ -22,53 +22,15 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-
-from local import inflate
-from local import model
 from local import resnet
 from local import stats
 from local import train
 
 
-network0 = getattr(resnet, args.network0, lambda: None)()
-network1 = getattr(resnet, args.network1, lambda: None)()
-name0 = args.network0
-name1 = args.network1
-
-if network0 is None:
-    print(f"Unknown network: {args.network0}")
-    exit(1)
-if network1 is None:
-    print(f"Unknown network: {args.network1}")
-    exit(1)
-
-
-if args.reset0 is None:
-    print(f"Reset network: {args.network0}")
-    model.reset(network0)
-    name0 = f"{name0}-reset"
-if args.reset1 is None:
-    print(f"Reset network: {args.network1}")
-    model.reset(network1)
-    name1 = f"{name1}-reset"
-
-if args.inflate0 is not None:
-    inflate_source0 = getattr(resnet, args.inflate0, lambda: None)()
-    if args.inflate0 is not None and inflate_source0 is None:
-        print(f"Unknown network: {args.inflate0}")
-        exit(1)
-    print(f"Inflating network0 ({args.network0}) from {args.inflate0}")
-    inflate.resnet(inflate_source0, network0)
-    name0 = f"{name0}--inflate-{args.inflate0}"
-if args.inflate1 is not None:
-    inflate_source1 = getattr(resnet, args.inflate1, lambda: None)()
-    if args.inflate1 is not None and inflate_source1 is None:
-        print(f"Unknown network: {args.inflate1}")
-        exit(1)
-    print(f"Inflating network1 ({args.network1}) from {args.inflate1}")
-    inflate.resnet(inflate_source1, network1)
-    name1 = f"{name1}--inflate-{args.inflate1}"
-
+network0 = resnet.network_load(args.network0, args.inflate0, args.reset0)
+name0 = resnet.network_name(args.network0, args.inflate0, args.reset0)
+network1 = resnet.network_load(args.network1, args.inflate1, args.reset1)
+name1 = resnet.network_name(args.network1, args.inflate1, args.reset1)
 
 train_data = train.data(args.imagenet_path / "train")
 
