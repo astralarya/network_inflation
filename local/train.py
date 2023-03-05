@@ -16,6 +16,7 @@ from local import device
 from local import optim as _optim
 from local import model
 from local import resnet
+from local.extern.weight_decay import set_weight_decay
 
 
 def train(
@@ -83,8 +84,13 @@ def train(
         cutmix_alpha=cutmix_alpha,
     )
 
+    parameters = set_weight_decay(
+        network,
+        weight_decay=weight_decay,
+        norm_weight_decay=norm_weight_decay,
+    )
     optimizer = _optim.optimizer(
-        network.parameters(),
+        parameters=parameters,
         optimizer=opt,
         lr=lr,
         momentum=momentum,
