@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 
 from torch.utils.data import DataLoader2
+from torch.utils.data.distributed import DistributedSampler
 from torchvision import datasets
 from tqdm import tqdm
 
@@ -53,7 +54,7 @@ def _divergence(
     num_workers=4,
 ):
     data_sampler = (
-        torch.utils.data.distributed.DistributedSampler(
+        DistributedSampler(
             data,
             num_replicas=device.world_size(),
             rank=device.ordinal(),
