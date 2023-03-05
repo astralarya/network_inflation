@@ -9,6 +9,8 @@ source ~/.bashrc
 sudo mkdir /mnt/imagenet
 sudo mount -o discard,defaults /dev/sdb /mnt/imagenet
 
+sudo mkdir /mnt/models
+sudo mount -o discard,defaults /dev/sdc /mnt/models
 
 ssh-keygen
 cat ~/.ssh/id_rsa.pub
