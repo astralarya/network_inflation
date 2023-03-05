@@ -1,17 +1,11 @@
 from collections import OrderedDict
 import copy
 import glob
-import os
 from pathlib import Path
 from typing import Any
 
 import torch
 import torch.nn as nn
-
-try:
-    import torch_xla.core.xla_model as xla
-except ImportError:
-    xla = None
 
 from . import device as _device
 
