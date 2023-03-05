@@ -33,6 +33,7 @@ def prune_epochs(name: str, keep: int = 32):
     save_paths = glob.glob(f"{name}/{'[0-9]'*8}.pkl")
     save_paths.sort(reverse=True)
     for save_path in save_paths[keep:]:
+        print(f"Removing {save_path}")
         Path(save_path).unlink()
 
 
