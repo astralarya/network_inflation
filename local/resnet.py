@@ -74,7 +74,7 @@ def network_load(
     return (_name, network)
 
 
-def network_name(name, inflate, reset, mask_inflate):
+def network_name(name, inflate, reset, mask_inflate=True):
     if inflate is None and reset is False:
         name = f"{name}-pretrained"
     if inflate is not None:
