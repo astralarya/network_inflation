@@ -7,7 +7,7 @@ RSYNC_USER="$RSYNC_USER"
 GCLOUD_ZONE=$( dirname "$INSTANCE_ADDR" )
 INSTANCE_NAME=$( basename "$INSTANCE_ADDR" )
 
-DEST_DIR="/mnt/models/remotes/$SOURCE_DIR"
+DEST_DIR="/mnt/models/$SOURCE_DIR"
 
 
 address="$( \
