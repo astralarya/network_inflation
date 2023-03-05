@@ -26,7 +26,7 @@ def train(
     inflate: Optional[str] = None,
     nprocs: int = 8,
     num_workers: int = 4,
-    batch_size: int = 256,
+    batch_size: int = 128,
     num_epochs: int = 600,
     opt: str = "sgd",
     momentum: float = 0.9,
@@ -44,10 +44,8 @@ def train(
     mixup_alpha: float = 0.2,
     cutmix_alpha: float = 1.0,
     random_erase: float = 0.1,
-    model_ema=True,
     model_ema_steps=32,
     model_ema_decay=0.9998,
-    train_crop_size=224,
     model_path: Optional[Path] = None,
     imagenet_path: Optional[Union[Path, str]] = None,
 ):
@@ -73,9 +71,7 @@ def train(
 
     train_dataset = data.load_dataset(
         imagenet_path / "train",
-        transform=data.train_transform(
-            crop_size=train_crop_size, random_erase=random_erase
-        ),
+        transform=data.train_transform(random_erase=random_erase),
     )
     train_collate_fn = data.train_collate_fn(
         dataset=train_dataset,
@@ -107,19 +103,19 @@ def train(
         lr_warmup_decay=lr_warmup_decay,
     )
 
-    _model_ema = None
-    if model_ema:
+    model_ema = None
+    if model_ema_steps > 1:
         adjust = nprocs * batch_size * model_ema_steps / num_epochs
         alpha = 1.0 - model_ema_decay
         alpha = min(1.0, alpha * adjust)
-        _model_ema = ExponentialMovingAverage(model, decay=1.0 - alpha)
+        model_ema = ExponentialMovingAverage(model, decay=1.0 - alpha)
 
     save_epoch, save_state = checkpoint.load(model_name)
     if save_epoch is not None:
         print(f"Resuming from epoch: {save_epoch}")
         model.load_state_dict(save_state["model"])
-        if _model_ema:
-            _model_ema.load_state_dict(save_state["model_ema"])
+        if model_ema:
+            model_ema.load_state_dict(save_state["model_ema"])
         optimizer.load_state_dict(save_state["optimizer"])
         scheduler.load_state_dict(save_state["scheduler"])
 
@@ -130,7 +126,7 @@ def train(
             {
                 "loss": None,
                 "model": model.state_dict(),
-                "model_ema": _model_ema.state_dict() if _model_ema else None,
+                "model_ema": model_ema.state_dict() if model_ema else None,
                 "optimizer": optimizer.state_dict(),
                 "scheduler": scheduler.state_dict(),
                 "args": args,
@@ -144,7 +140,7 @@ def train(
             {
                 "name": model_name,
                 "model": device.model(model),
-                "model_ema": device.model(_model_ema),
+                "model_ema": device.model(model_ema),
                 "optimizer": optimizer,
                 "scheduler": scheduler,
                 "train_dataset": train_dataset,
