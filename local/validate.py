@@ -13,6 +13,7 @@ from local import data
 from local import checkpoint
 from local import device
 from local import resnet
+from local.extern.model_ema import ExponentialMovingAverage
 
 
 def validate(
@@ -55,6 +56,7 @@ def validate(
                 "data": val_data,
                 "epochs": epochs,
                 "batch_size": batch_size,
+                "nprocs": nprocs,
                 "num_workers": num_workers,
             },
         ),
@@ -75,6 +77,7 @@ def _validate(
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
     batch_size=64,
+    nprocs=8,
     num_workers=4,
 ):
     epochs = checkpoint.iter_epochs(name) if "all" in epochs else epochs
@@ -88,8 +91,11 @@ def _validate(
             )
             if save_epoch is None:
                 raise Exception(f"Epoch not found for {name}: {epoch}")
-            network = network_type()
-            network.load_state_dict(save_state["model"])
+            if "model_ema" in save_state:
+                network = ExponentialMovingAverage(network, decay=0)
+            else:
+                network = network_type()
+                network.load_state_dict(save_state["model"])
         else:
             network = resnet.network_load(*network_spec)
         network.eval()
