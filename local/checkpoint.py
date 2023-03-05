@@ -28,7 +28,7 @@ def get_epoch(name: str, epoch: int = None):
         )
 
 
-def prune_epochs(name: str, keep: int = 4):
+def prune_epochs(name: str, keep: int = 32):
     print(f"Pruning epochs for {name}")
     save_paths = glob.glob(f"{name}/{'[0-9]'*8}.pkl")
     save_paths.sort(reverse=True)

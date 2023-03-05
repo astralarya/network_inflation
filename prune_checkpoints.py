@@ -5,7 +5,7 @@ from local import checkpoint
 
 parser = argparse.ArgumentParser(prog="Prune checkpoints")
 parser.add_argument("path", type=Path)
-parser.add_argument("--keep", default=4, type=int)
+parser.add_argument("--keep", default=32, type=int)
 args = parser.parse_args()
 
 
