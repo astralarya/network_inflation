@@ -9,8 +9,10 @@ source ~/.bashrc
 sudo mkdir /mnt/imagenet
 sudo mount -o discard,defaults /dev/sdb /mnt/imagenet
 
+sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdc
 sudo mkdir /mnt/models
 sudo mount -o discard,defaults /dev/sdc /mnt/models
+sudo chmod a+w /mnt/models/
 
 ssh-keygen
 cat ~/.ssh/id_rsa.pub
