@@ -51,7 +51,7 @@ def network_type(name: str):
 
 
 def network_load(name: str, inflate: Optional[str] = None, reset: bool = False):
-    name = network_name(name, inflate, reset)
+    network_name = network_name(name, inflate, reset)
 
     if inflate is None and reset is False:
         network = network_pre(name)
@@ -68,7 +68,7 @@ def network_load(name: str, inflate: Optional[str] = None, reset: bool = False):
 
 def network_name(name, inflate, reset):
     if inflate is None and reset is False:
-        name = f"{name}--finetune"
+        name = f"{name}-pretrained"
     if inflate is not None:
         name = f"{name}--inflate-{inflate}"
     return name
