@@ -176,7 +176,10 @@ def _train(
 
     data_sampler = (
         torch.utils.data.distributed.DistributedSampler(
-            data, num_replicas=device.world_size(), rank=device.ordinal(), shuffle=True
+            train_dataset,
+            num_replicas=device.world_size(),
+            rank=device.ordinal(),
+            shuffle=True,
         )
         if device.world_size() > 1
         else None
