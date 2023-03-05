@@ -37,7 +37,7 @@ train_data = data.load_dataset(
 
 print(f"Divergence: {name0} <-> {name1}")
 divergence.divergence(
-    network1,
+    network0,
     network1,
     train_data,
     num_epochs=args.num_epochs,
