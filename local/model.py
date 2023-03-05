@@ -44,12 +44,12 @@ def write_log(name: str, data: str):
 
 
 @torch.no_grad()
-def state_to(state: Any, device: torch.device):
+def to(state: Any, device: torch.device):
     to = _device.to_cpu if device == _device.cpu else lambda x: x.to(device)
     if type(state) == dict or type(state) == OrderedDict:
         r = type(state)()
         for key, val in state.items():
-            r[key] = state_to(val, device)
+            r[key] = to(val, device)
         return r
     elif type(state) == torch.Tensor:
         return to(state)
@@ -61,7 +61,7 @@ def state_to(state: Any, device: torch.device):
 def save(name: str, epoch: int, state: Any):
     save_path = Path(f"{name}/{epoch:08}.pkl")
     print(f"Saving `{save_path}`... ", flush=True, end="")
-    state = state_to(state, _device.cpu)
+    state = to(state, _device.cpu)
     Path(name).mkdir(parents=True, exist_ok=True)
     with save_path.open("wb") as save_file:
         torch.save(state, save_file)
@@ -84,7 +84,7 @@ def load(name: str, epoch: int = None, device: torch.device = None, print_output
         state = torch.load(save_path, map_location=device)
     except RuntimeError:
         state = torch.load(save_path, map_location=_device.cpu)
-        state = state_to(state, device)
+        state = to(state, device)
     if print_output:
         print("DONE")
     return (epoch, state)
