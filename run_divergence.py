@@ -43,5 +43,5 @@ divergence.divergence(
     network1,
     train_data,
     num_epochs=args.num_epochs,
-    collate_fn=data.train_collate_fn(),
+    collate_fn=data.train_collate_fn(train_data),
 )
