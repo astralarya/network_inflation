@@ -60,7 +60,7 @@ def network_load(
     mask_inflate: bool = True,
 ):
     name = Path(name).name
-    _name = network_name(name, inflate, reset)
+    _name = network_name(name, inflate, reset, mask_inflate)
 
     if inflate is None and reset is False:
         network = network_pre(name)
@@ -74,9 +74,11 @@ def network_load(
     return (_name, network)
 
 
-def network_name(name, inflate, reset):
+def network_name(name, inflate, reset, mask_inflate):
     if inflate is None and reset is False:
         name = f"{name}-pretrained"
     if inflate is not None:
         name = f"{name}--inflate-{inflate}"
+        if mask_inflate is False:
+            name = f"{name}-unmasked"
     return name
