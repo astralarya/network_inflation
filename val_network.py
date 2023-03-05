@@ -20,7 +20,11 @@ parser.add_argument(
     action="append",
 )
 parser.add_argument("--from_epoch", default=0, type=int)
-parser.add_argument("--model_path", default="models", type=Path)
+parser.add_argument(
+    "--model_path",
+    default=environ.get("MODEL_PATH", "/mnt/models/data"),
+    type=Path,
+)
 parser.add_argument(
     "--imagenet_path",
     default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),

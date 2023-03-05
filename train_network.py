@@ -33,6 +33,11 @@ parser.add_argument("--model_ema_steps", default=32, type=int)
 parser.add_argument("--model_ema_decay", default=0.9998, type=float)
 parser.add_argument("--model_path", default="models", type=Path)
 parser.add_argument(
+    "--model_path",
+    default=environ.get("MODEL_PATH", "/mnt/models/data"),
+    type=Path,
+)
+parser.add_argument(
     "--imagenet_path",
     default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),
     type=Path,
