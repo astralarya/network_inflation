@@ -1,0 +1,59 @@
+Mara@t1v-n-fd863902-w-0:~/network_inflation$ python3 val_network.py resnet50 --finetune | tee val.log
+Loading data `/mnt/imagenet/imagenet-1k/val`... DONE
+Spawning 8 processes
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Validating epoch pre
+Device: xla:1
+Iterating 50000 samples
+  0%|                                                                           | 0/98 [00:00<?, ?it/s0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+100%|██████████████████████████████████████████████████████████████████| 98/98 [04:47<00:00,  2.93s/it]
+Top1 accuracy: 0.815739972924348
+Top5 accuracy: 0.9592799784732051
+
+
+Mara@t1v-n-2b7ef659-w-0:~/network_inflation$ python3 val_network.py resnet101 --finetune
+Loading data `/mnt/imagenet/imagenet-1k/val`... DONE
+Spawning 8 processes
+Validating epoch pre
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Downloading: "https://download.pytorch.org/models/resnet101-cd907fc2.pth" to /home/Mara/.cache/torch/hub/checkpoints/resnet101-cd907fc2.pth
+  0%|                                                                                     | 0.00/171M [00:00<?, ?B/s]Downloading: "https://download.pytorch.org/models/resnet101-cd907fc2.pth" to /home/Mara/.cache/torch/hub/checkpoints/resnet101-cd907fc2.pth
+100%|█████████████████████████████████████████████████████████████████████████████| 171M/171M [00:01<00:00, 90.8MB/s]
+100%|█████████████████████████████████████████████████████████████████████████████| 171M/171M [00:02<00:00, 86.3MB/s]
+Device: xla:1
+Iterating 50000 samples
+  0%|                                                                                         | 0/98 [00:00<?, ?it/s]Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+100%|████████████████████████████████████████████████████████████████████████████████| 98/98 [05:52<00:00,  3.59s/it]
+Top1 accuracy: 0.8280599720892496
+Top5 accuracy: 0.9624799794401042
+
+
+Mara@t1v-n-9eb6954d-w-0:~/network_inflation$ python3 val_network.py resnet152 --finetune
+Loading data `/mnt/imagenet/imagenet-1k/val`... DONE
+Spawning 8 processes
+Validating epoch pre
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Device: xla:1
+Iterating 50000 samples
+  0%|                                                                                         | 0/98 [00:00<?, ?it/s]Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+100%|████████████████████████████████████████████████████████████████████████████████| 98/98 [06:44<00:00,  4.13s/it]
+Top1 accuracy: 0.832659971958492
+Top5 accuracy: 0.9649399773334153
