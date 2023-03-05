@@ -15,7 +15,7 @@ INSTANCES=(
     "europe-west4-a/tpu-eu-5"
 )
 
-SOURCE_DIR="network_inflation/models"
+SOURCE_DIR="/mnt/models/data"
 OUTPUT_DIR="$SCRIPT_DIR/../remotes"
 
 mkdir -p "$OUTPUT_DIR"
