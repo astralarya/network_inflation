@@ -1,5 +1,4 @@
 from collections import OrderedDict
-import copy
 import glob
 from pathlib import Path
 from typing import Any
@@ -10,7 +9,7 @@ import torch.nn as nn
 from . import device as _device
 
 
-def get_epoch(name: str, epoch: int = None):
+def get_epoch(name: str, epoch: int = None, latest=True):
     if epoch is not None:
         save_path = Path(f"{name}/{epoch:08}.pkl")
         if save_path.exists():
@@ -19,7 +18,7 @@ def get_epoch(name: str, epoch: int = None):
             return None
     else:
         save_paths = glob.glob(f"{name}/{'[0-9]'*8}.pkl")
-        save_paths.sort(reverse=True)
+        save_paths.sort(reverse=latest)
         save_path = next(iter(save_paths), None)
         return (
             int(save_path[len(f"{name}.") :].split(".")[0])
@@ -38,7 +37,7 @@ def prune_epochs(name: str, keep: int = 32):
 
 
 def iter_epochs(name: str, from_epoch: int = 0):
-    i = from_epoch
+    i = min(from_epoch, get_epoch(name, latest=False))
     p = Path(f"{name}/{i:08}.pkl")
     while p.exists():
         yield i
