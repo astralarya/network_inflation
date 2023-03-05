@@ -75,7 +75,7 @@ def _validate(
 ):
     name = resnet.network_name(*network_spec)
     if epochs is None:
-        epochs = ["pre"]
+        epochs = ["all"]
     epochs = checkpoint.iter_epochs(name, from_epoch) if "all" in epochs else epochs
 
     for epoch in epochs:
