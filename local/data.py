@@ -74,6 +74,28 @@ def train_transform(
     return transform
 
 
+def val_transform(
+    crop_size=224,
+    resize_size=256,
+    mean=(0.485, 0.456, 0.406),
+    std=(0.229, 0.224, 0.225),
+    interpolation=InterpolationMode.BILINEAR,
+):
+    return transforms.Compose(
+        [
+            transforms.Resize(resize_size, interpolation=interpolation),
+            transforms.PILToTensor(),
+            transforms.ConvertImageDtype(torch.float),
+            transforms.Normalize(
+                mean=mean,
+                std=std,
+            ),
+            transforms.TenCrop(crop_size),
+            transforms.Lambda(lambda crops: torch.stack([crop for crop in crops])),
+        ]
+    )
+
+
 def train_collate_fn(
     dataset: ImageFolder,
     mixup_alpha=0.2,

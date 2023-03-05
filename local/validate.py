@@ -4,32 +4,15 @@ from typing import Callable, Optional, Sequence, Union
 
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader2
+from torch.utils.data.distributed import DistributedSampler
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
+from local import data
 from local import model
 from local import device
 from local import resnet
-
-
-def data(data_root: str):
-    print(f"Loading val data `{data_root}`... ", flush=True, end="")
-    r = datasets.ImageFolder(
-        data_root,
-        transform=transforms.Compose(
-            [
-                transforms.Resize(256),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
-                transforms.TenCrop(224),
-                transforms.Lambda(lambda crops: torch.stack([crop for crop in crops])),
-            ]
-        ),
-    )
-    print("DONE")
-    return r
 
 
 def validate(
@@ -53,7 +36,7 @@ def validate(
     elif type(imagenet_path) == str:
         imagenet_path = Path(imagenet_path)
 
-    val_data = data(imagenet_path / "val")
+    val_data = data.load_dataset(imagenet_path / "val", transform=data.val_transform())
 
     model_name = model_path / name
     if finetune is True:
@@ -81,15 +64,7 @@ def validate(
 
 
 def _worker(idx: int, _args: dict):
-    _validate(
-        name=_args["name"],
-        network_spec=_args["network_spec"],
-        network_type=_args["network_type"],
-        data=_args["data"],
-        epochs=_args["epochs"],
-        batch_size=_args["batch_size"],
-        num_workers=_args["num_workers"],
-    )
+    _validate(**_args)
 
 
 @torch.no_grad()
@@ -123,7 +98,7 @@ def _validate(
         softmax = nn.Softmax(dim=2).to(device.device())
 
         data_sampler = (
-            torch.utils.data.distributed.DistributedSampler(
+            DistributedSampler(
                 data,
                 num_replicas=device.world_size(),
                 rank=device.ordinal(),
@@ -132,7 +107,7 @@ def _validate(
             else None
         )
         data_loader = device.loader(
-            torch.utils.data.DataLoader2(
+            DataLoader2(
                 data,
                 batch_size=batch_size,
                 num_workers=num_workers,
