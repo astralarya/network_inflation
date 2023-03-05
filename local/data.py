@@ -5,6 +5,8 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 from torchvision.transforms.functional import InterpolationMode
 
+from .extern import transforms as extern_transforms
+
 
 def train_dataset(
     root: str,
@@ -82,11 +84,11 @@ def train_collate_fn(
     mixup_transforms = []
     if mixup_alpha > 0.0:
         mixup_transforms.append(
-            transforms.RandomMixup(num_classes, p=1.0, alpha=mixup_alpha)
+            extern_transforms.RandomMixup(num_classes, p=1.0, alpha=mixup_alpha)
         )
     if cutmix_alpha > 0.0:
         mixup_transforms.append(
-            transforms.RandomCutmix(num_classes, p=1.0, alpha=cutmix_alpha)
+            extern_transforms.RandomCutmix(num_classes, p=1.0, alpha=cutmix_alpha)
         )
     if mixup_transforms:
         mixupcutmix = transforms.RandomChoice(mixup_transforms)
