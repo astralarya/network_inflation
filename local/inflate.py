@@ -26,8 +26,6 @@ def resnet(network0: ResNet, network1: ResNet):
                 raise Exception("Inflate destination is smaller than source!")
             elif child0 is None:
                 child1.get_parameter("conv3.weight").zero_()
-                child1.get_parameter("bn3.weight").zero_()
-                child1.get_parameter("bn3.bias").zero_()
             else:
                 copy(child0, child1)
     return network1
