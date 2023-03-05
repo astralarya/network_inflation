@@ -14,9 +14,10 @@ from tqdm import tqdm
 from local import data
 from local import device
 from local import optim as _optim
-from local import model
+from local import model as _model
 from local import resnet
 from local.extern.weight_decay import set_weight_decay
+from local.extern.model_ema import ExponentialMovingAverage
 
 
 def train(
@@ -70,7 +71,7 @@ def train(
 
     args = {"batch_size": batch_size}
 
-    network = resnet.network_load(name, inflate, reset=not finetune)
+    model = resnet.network_load(name, inflate, reset=not finetune)
 
     train_dataset = data.load_dataset(
         imagenet_path / "train",
@@ -85,7 +86,7 @@ def train(
     )
 
     parameters = set_weight_decay(
-        network,
+        model,
         weight_decay=weight_decay,
         norm_weight_decay=norm_weight_decay,
     )
@@ -108,26 +109,36 @@ def train(
         lr_warmup_decay=lr_warmup_decay,
     )
 
-    save_epoch, save_state = model.load(model_name)
+    _model_ema = None
+    if model_ema:
+        adjust = nprocs * batch_size * model_ema_steps / num_epochs
+        alpha = 1.0 - model_ema_decay
+        alpha = min(1.0, alpha * adjust)
+        _model_ema = ExponentialMovingAverage(model, decay=1.0 - alpha)
+
+    save_epoch, save_state = _model.load(model_name)
     if save_epoch is not None:
         print(f"Resuming from epoch: {save_epoch}")
-        network.load_state_dict(save_state["model"])
+        model.load_state_dict(save_state["model"])
+        if _model_ema:
+            _model_ema.load_state_dict(save_state["model_ema"])
         optimizer.load_state_dict(save_state["optimizer"])
         scheduler.load_state_dict(save_state["scheduler"])
 
     else:
-        model.save(
+        _model.save(
             model_name,
             0,
             {
                 "loss": None,
-                "model": network.state_dict(),
+                "model": model.state_dict(),
+                "model_ema": _model_ema.state_dict() if _model_ema else None,
                 "optimizer": optimizer.state_dict(),
                 "scheduler": scheduler.state_dict(),
                 "args": args,
             },
         )
-    network = device.model(network)
+    model = device.model(model)
 
     print(f"Spawning {nprocs} processes")
     device.spawn(
@@ -135,7 +146,8 @@ def train(
         (
             {
                 "name": model_name,
-                "network": network,
+                "model": model,
+                "model_ema": _model_ema,
                 "optimizer": optimizer,
                 "scheduler": scheduler,
                 "train_dataset": train_dataset,
@@ -145,6 +157,8 @@ def train(
                 "num_workers": num_workers,
                 "batch_size": batch_size,
                 "label_smoothing": label_smoothing,
+                "lr_warmup_epochs": lr_warmup_epochs,
+                "model_ema_steps": model_ema_steps,
             },
         ),
         nprocs=nprocs,
@@ -158,7 +172,8 @@ def _worker(idx: int, _args: dict):
 
 def _train(
     name: str,
-    network: nn.Module,
+    model: nn.Module,
+    model_ema: nn.Module,
     optimizer: Optimizer,
     scheduler: _LRScheduler,
     train_dataset: datasets.DatasetFolder,
@@ -167,7 +182,9 @@ def _train(
     num_epochs: int,
     num_workers: int,
     batch_size: int,
-    label_smoothing: float = 0.1,
+    label_smoothing: float,
+    lr_warmup_epochs: int,
+    model_ema_steps: int,
 ):
     device.sync_seed()
 
@@ -194,8 +211,8 @@ def _train(
         )
     )
 
-    network = network.to(device.device())
-    network.train()
+    model = model.to(device.device())
+    model.train()
     criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing).to(device.device())
 
     total = len(train_dataset)
@@ -204,10 +221,12 @@ def _train(
 
     for epoch in range(init_epoch, num_epochs + 1):
         epoch_loss = 0.0
-        for inputs, labels in tqdm(data_loader, disable=not device.is_main()):
+        for i, (inputs, labels) in enumerate(
+            tqdm(data_loader, disable=not device.is_main())
+        ):
             inputs = inputs.to(device.device())
             labels = labels.to(device.device())
-            outputs = network(inputs)
+            outputs = model(inputs)
             loss = criterion(outputs, labels)
             losses = device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
             epoch_loss += losses / total
@@ -215,14 +234,19 @@ def _train(
             loss.backward()
             device.optim_step(optimizer)
             scheduler.step()
+            if model_ema and i % model_ema_steps == 0:
+                model_ema.update_parameters(model)
+                if epoch < lr_warmup_epochs:
+                    model_ema.n_averaged.fill_(0)
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
-            model.save(
+            _model.save(
                 name,
                 epoch,
                 {
                     "loss": epoch_loss,
-                    "model": network.state_dict(),
+                    "model": model.state_dict(),
+                    "model_ema": model_ema.state_dict() if model_ema else None,
                     "optimizer": optimizer.state_dict(),
                     "scheduler": scheduler.state_dict(),
                     "args": args,
