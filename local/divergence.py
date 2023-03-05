@@ -4,7 +4,7 @@ import torch.nn as nn
 
 from torch.utils.data import DataLoader2
 from torchvision import datasets
-import tqdm
+from tqdm import tqdm
 
 from local import device
 
@@ -80,10 +80,11 @@ def _divergence(
 
     total_loss = 0.0
     total = len(data)
-    print(f"Iterating {total} samples")
+    if device.is_main():
+        print(f"Iterating {total} samples")
     for epoch in range(num_epochs):
         epoch_loss = 0.0
-        for inputs, _ in tqdm(data_loader):
+        for inputs, _ in tqdm(data_loader, disable=not device.is_main()):
             inputs = inputs.to(device.device())
             outputs0 = network0(inputs)
             outputs1 = network1(inputs)
@@ -91,7 +92,8 @@ def _divergence(
             epoch_loss += loss.item() / total
             device.step()
         total_loss += epoch_loss
-        print(f"Divergence (epoch {epoch}): {epoch_loss}")
-        print(f"Divergence (total per epoch): {total_loss}")
-        print(f"Divergence (total): {total_loss * total}")
+        if device.is_main():
+            print(f"Divergence (epoch {epoch}): {epoch_loss}")
+            print(f"Divergence (total per epoch): {total_loss}")
+            print(f"Divergence (total): {total_loss * total}")
     return total_loss
