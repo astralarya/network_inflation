@@ -52,7 +52,6 @@ def validate(
                 "data": val_data,
                 "epochs": epochs,
                 "batch_size": batch_size,
-                "nprocs": nprocs,
                 "num_workers": num_workers,
             },
         ),
