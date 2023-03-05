@@ -2,11 +2,6 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
-from torchvision import datasets
-import tqdm
-
-from local import device
-
 
 def cosine_similarity(weight0, weight1):
     cos = nn.functional.cosine_similarity
@@ -71,38 +66,3 @@ def null_similarity(weight0: torch.Tensor):
         ]
     )
     histogram(measure, bins=1000)
-
-
-@torch.no_grad()
-def divergence(
-    network0: nn.Module,
-    network1: nn.Module,
-    data: datasets.DatasetFolder,
-    batch_size=256,
-    num_workers=8,
-):
-    data_loader = torch.utils.data.DataLoader2(
-        data,
-        batch_size=batch_size,
-        num_workers=num_workers,
-    )
-
-    log_softmax = nn.LogSoftmax(dim=1).to(device.device())
-    criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device.device())
-    network0.eval()
-    network0.to(device.device())
-    network1.eval()
-    network1.to(device.device())
-
-    total_loss = 0.0
-    total = len(data_loader.dataset)
-    print(f"Iterating {total} samples")
-    for inputs, _ in tqdm(data_loader):
-        inputs = inputs.to(device.device())
-        outputs0 = network0(inputs)
-        outputs1 = network1(inputs)
-        loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
-        total_loss += loss.item() / total
-        device.step()
-    print(f"Divergence: {total_loss}")
-    return total_loss
