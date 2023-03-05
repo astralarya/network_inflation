@@ -147,18 +147,7 @@ def train(
 
 
 def _worker(idx: int, _args: dict):
-    _train(
-        name=_args["name"],
-        network=_args["network"],
-        optimizer=_args["optimizer"],
-        scheduler=_args["scheduler"],
-        train_dataset=_args["train_dataset"],
-        train_collate_fn=_args["train_collate_fn"],
-        init_epoch=_args["init_epoch"],
-        num_epochs=_args["num_epochs"],
-        num_workers=_args["num_workers"],
-        batch_size=_args["batch_size"],
-    )
+    _train(**_args)
 
 
 def _train(
