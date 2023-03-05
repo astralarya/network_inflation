@@ -1,61 +1,55 @@
 from os import environ
 from pathlib import Path
-from typing import Optional, Union
+from typing import Callable, Optional, Union
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
+from torchvision import datasets
+from torch.utils.data import DataLoader2
 from tqdm import tqdm
 
 
-from local import inflate as _inflate
+from local import data
+from local import device
 from local import model
 from local import resnet
 
 
-from . import model as model
-import local.device as device
-
-
-def data(data_root: str):
-    print(f"Loading train data `{data_root}`... ", flush=True, end="")
-    r = datasets.ImageFolder(
-        data_root,
-        transform=transforms.Compose(
-            [
-                transforms.Resize(256),
-                transforms.RandomHorizontalFlip(),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
-            ]
-        ),
-    )
-    print("DONE")
-    return r
-
-
 def train(
     name: str,
-    num_epochs: int = 2048,
     finetune: bool = False,
     inflate: Optional[str] = None,
-    lr: float = 0.1,
-    lr_step: int = 10,
-    lr_gamma: float = 0.5,
-    momentum: float = 0.9,
-    dampening: float = 0.0,
-    weight_decay: float = 0.0001,
-    nesterov: bool = True,
-    batch_size: int = 256,
     nprocs: int = 8,
     num_workers: int = 4,
-    model_path: Path = None,
+    batch_size: int = 256,
+    num_epochs: int = 600,
+    opt: str = "sgd",
+    momentum: float = 0.9,
+    lr: float = 0.5,
+    lr_scheduler: str = "cosineannealinglr",
+    lr_warmup_epochs: int = 5,
+    lr_warmup_method: str = "linear",
+    lr_warmup_decay: int = 0.01,
+    weight_decay: float = 2e-05,
+    norm_weight_decay: float = 0.0,
+    label_smoothing: float = 0.1,
+    mixup_alpha: float = 0.2,
+    cutmix_alpha: float = 1.0,
+    random_erase: float = 0.1,
+    ra_sampler=True,
+    ra_reps=4,
+    model_ema=True,
+    model_ema_steps=32,
+    modeal_ema_decay=0.9998,
+    train_crop_size=224,
+    val_crop_size=224,
+    model_path: Optional[Path] = None,
     imagenet_path: Optional[Union[Path, str]] = None,
 ):
+    lr_step = 10
+    lr_gamma = 0.5
+
     if model_path is None:
         model_path = Path("models")
     elif type(imagenet_path) == str:
@@ -76,7 +70,17 @@ def train(
 
     network = resnet.network_load(name, inflate, reset=not finetune)
 
-    train_data = data(imagenet_path / "train")
+    train_dataset = data.train_dataset(
+        imagenet_path / "train",
+        transform=data.train_transform(
+            crop_size=train_crop_size, random_erase=random_erase
+        ),
+    )
+    train_collate_fn = data.train_collate_fn(
+        dataset=train_dataset,
+        mixup_alpha=mixup_alpha,
+        cutmix_alpha=cutmix_alpha,
+    )
 
     save_epoch, save_state = model.load(model_name)
     if save_epoch is not None:
@@ -85,9 +89,7 @@ def train(
             network.parameters(),
             lr=lr,
             momentum=momentum,
-            dampening=dampening,
             weight_decay=weight_decay,
-            nesterov=nesterov,
         )
         scheduler = optim.lr_scheduler.StepLR(
             optimizer=optimizer, step_size=lr_step, gamma=lr_gamma
@@ -101,9 +103,7 @@ def train(
             network.parameters(),
             lr=lr,
             momentum=momentum,
-            dampening=dampening,
             weight_decay=weight_decay,
-            nesterov=nesterov,
         )
         scheduler = optim.lr_scheduler.StepLR(
             optimizer=optimizer, step_size=lr_step, gamma=lr_gamma
@@ -126,15 +126,16 @@ def train(
         _worker,
         (
             {
+                "name": model_name,
                 "network": network,
                 "optimizer": optimizer,
                 "scheduler": scheduler,
-                "name": model_name,
-                "data": train_data,
+                "train_dataset": train_dataset,
+                "train_collate_fn": train_collate_fn,
                 "init_epoch": save_epoch + 1 if save_epoch else 1,
                 "num_epochs": num_epochs,
-                "batch_size": batch_size,
                 "num_workers": num_workers,
+                "batch_size": batch_size,
             },
         ),
         nprocs=nprocs,
@@ -148,11 +149,12 @@ def _worker(idx: int, _args: dict):
         network=_args["network"],
         optimizer=_args["optimizer"],
         scheduler=_args["scheduler"],
-        data=_args["data"],
+        train_dataset=_args["train_dataset"],
+        train_collate_fn=_args["train_collate_fn"],
         init_epoch=_args["init_epoch"],
         num_epochs=_args["num_epochs"],
-        batch_size=_args["batch_size"],
         num_workers=_args["num_workers"],
+        batch_size=_args["batch_size"],
     )
 
 
@@ -161,11 +163,12 @@ def _train(
     network: nn.Module,
     optimizer: optim.Optimizer,
     scheduler: optim.lr_scheduler._LRScheduler,
-    data: datasets.DatasetFolder,
-    init_epoch=1,
-    num_epochs=2048,
-    batch_size=256,
-    num_workers=4,
+    train_dataset: datasets.DatasetFolder,
+    train_collate_fn: Optional[Callable],
+    init_epoch: int,
+    num_epochs: int,
+    num_workers: int,
+    batch_size: int,
 ):
     device.sync_seed()
 
@@ -179,12 +182,13 @@ def _train(
         else None
     )
     data_loader = device.loader(
-        torch.utils.data.DataLoader2(
-            data,
+        DataLoader2(
+            train_dataset,
             batch_size=batch_size,
             num_workers=num_workers,
             sampler=data_sampler,
             shuffle=False if data_sampler else True,
+            collate_fn=train_collate_fn,
         )
     )
 
