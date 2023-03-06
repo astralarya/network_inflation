@@ -1,7 +1,7 @@
 from enum import Enum
-import math
 from typing import Union
 
+import numpy as np
 import torch
 import torch.nn as nn
 from torchvision.models import ResNet
@@ -62,10 +62,9 @@ def inflate_sequence(
         children0.extend([None] * (diff // 2 + diff % 2))
         children0[1:1] = [None] * (diff // 2)
     elif strategy == SequenceInflate.SPACE_EVENLY and diff > 0:
-        skip = 1
-        step = 1 + (len(children0) - skip) / diff
-        for i in range(0, diff):
-            idx = skip + math.ceil(i * step)
+        for idx in np.round(
+            np.linspace(0.5 + np.finfo(float).eps, len(children1) - 0.5, diff)
+        ).astype(int):
             children0[idx:idx] = [None]
 
     for child0, child1 in zip(children0, children1):
