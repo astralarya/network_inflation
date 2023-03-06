@@ -1,3 +1,5 @@
+import functools
+
 import torch
 import torch.nn as nn
 from torch.utils.data.dataloader import default_collate
@@ -101,7 +103,6 @@ def train_collate_fn(
     mixup_alpha=0.2,
     cutmix_alpha=1.0,
 ):
-    collate_fn = None
     num_classes = len(dataset.classes)
     mixup_transforms = []
     if mixup_alpha > 0.0:
@@ -115,7 +116,10 @@ def train_collate_fn(
     if mixup_transforms:
         mixupcutmix = transforms.RandomChoice(mixup_transforms)
 
-        def collate_fn(batch):
-            return mixupcutmix(*default_collate(batch))
+        return functools.partial(_collate_fn, mixupcutmix=mixupcutmix)
 
-    return collate_fn
+    return None
+
+
+def _collate_fn(x, mixupcutmix):
+    return mixupcutmix(*default_collate(x))

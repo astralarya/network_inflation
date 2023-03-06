@@ -4,9 +4,11 @@ import torch.nn as nn
 
 from torch.utils.data import DataLoader2
 from torch.utils.data.distributed import DistributedSampler
+from torch.utils.data.dataloader import default_collate
 from torchvision import datasets
 from tqdm import tqdm
 
+from local import data as _data
 from local import device
 
 
@@ -14,7 +16,6 @@ def divergence(
     network0: nn.Module,
     network1: nn.Module,
     data: datasets.DatasetFolder,
-    collate_fn: Optional[Callable],
     num_epochs=8,
     batch_size=256,
     num_workers=8,
@@ -31,7 +32,6 @@ def divergence(
                 "num_epochs": num_epochs,
                 "batch_size": batch_size,
                 "num_workers": num_workers,
-                "collate_fn": collate_fn,
             },
         ),
         nprocs=nprocs,
@@ -48,7 +48,6 @@ def _divergence(
     network0: nn.Module,
     network1: nn.Module,
     data: datasets.DatasetFolder,
-    collate_fn: Optional[Callable],
     num_epochs=8,
     batch_size=256,
     num_workers=4,
@@ -69,7 +68,7 @@ def _divergence(
             num_workers=num_workers,
             sampler=data_sampler,
             shuffle=False if data_sampler else True,
-            collate_fn=collate_fn,
+            collate_fn=_data.train_collate_fn(data),
         )
     )
     log_softmax = nn.LogSoftmax(dim=1).to(device.device())

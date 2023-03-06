@@ -23,23 +23,23 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-from local import data
-from local import divergence
-from local import resnet
+if __name__ == "__main__":
 
+    from local import data
+    from local import divergence
+    from local import resnet
 
-name0, network0 = resnet.network_load(args.network0, args.inflate0, args.reset0)
-name1, network1 = resnet.network_load(args.network1, args.inflate1, args.reset1)
+    name0, network0 = resnet.network_load(args.network0, args.inflate0, args.reset0)
+    name1, network1 = resnet.network_load(args.network1, args.inflate1, args.reset1)
 
-train_data = data.load_dataset(
-    args.imagenet_path / "train", transform=data.train_transform()
-)
+    train_data = data.load_dataset(
+        args.imagenet_path / "train", transform=data.train_transform()
+    )
 
-print(f"Divergence: {name0} <-> {name1}")
-divergence.divergence(
-    network0,
-    network1,
-    train_data,
-    num_epochs=args.num_epochs,
-    collate_fn=data.train_collate_fn(train_data),
-)
+    print(f"Divergence: {name0} <-> {name1}")
+    divergence.divergence(
+        network0,
+        network1,
+        train_data,
+        num_epochs=args.num_epochs,
+    )
