@@ -4,7 +4,7 @@ from typing import Optional
 from torch.hub import load
 from torchvision.models import resnet
 
-from local import inflate as _inflate
+from local.inflate import resnet as inflate_resnet, SequenceInflate
 
 
 def network_pre(name: str):
@@ -57,6 +57,7 @@ def network_load(
     name: str,
     inflate: Optional[str] = None,
     reset: bool = False,
+    inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
     mask_inflate: bool = True,
 ):
     name = Path(name).name
@@ -69,16 +70,36 @@ def network_load(
 
     if inflate is not None:
         inflate_network = network_pre(inflate)
-        network = _inflate.resnet(inflate_network, network, mask=mask_inflate)
+        network = inflate_resnet(
+            inflate_network, network, strategy=inflate_strategy, mask=mask_inflate
+        )
 
     return (_name, network)
 
 
-def network_name(name, inflate, reset, mask_inflate=True):
+def network_name(
+    name: str,
+    inflate: Optional[str] = None,
+    reset: bool = False,
+    inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
+    mask_inflate: bool = True,
+):
     if inflate is None and reset is False:
         name = f"{name}-pretrained"
+
     if inflate is not None:
         name = f"{name}--inflate-{inflate}"
+
+        if inflate_strategy == SequenceInflate.ALIGN_START:
+            name = f"{name}-align-start"
+        elif inflate_strategy == SequenceInflate.ALIGN_END:
+            name = f"{name}-align-end"
+        elif inflate_strategy == SequenceInflate.CENTER:
+            name = f"{name}-center"
+        elif inflate_strategy == SequenceInflate.SPACE_EVENLY:
+            name = f"{name}-space-evenly"
+
         if mask_inflate is False:
             name = f"{name}-unmasked"
+
     return name
