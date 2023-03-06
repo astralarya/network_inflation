@@ -18,4 +18,7 @@ address="$( \
 echo "Rsync push $INSTANCE_NAME ($address)..."
 
 ssh "$RSYNC_USER@$address" "mkdir -p '$DEST_DIR'" &&
-rsync -aP "$SOURCE_DIR/" "$RSYNC_USER@$address:$DEST_DIR/"
+rsync -aP \
+    "$SOURCE_DIR/" \
+    "$RSYNC_USER@$address:$DEST_DIR/" \
+    --exclude=".[!.]*"
