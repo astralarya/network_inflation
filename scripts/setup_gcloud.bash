@@ -1,15 +1,16 @@
 # Run on local dev
 
-INSTANCE_NAME="tpu-eu-2"
-GCLOUD_ZONE="europe-west4-a"
+INSTANCE_NAME="tpup-1"
+GCLOUD_ZONE="us-central1-f"
 
-TPU_TYPE="v3-8"
+TPU_TYPE="v2-8"
 TPU_VERSION="tpu-vm-pt-1.13"
-GCLOUD_SNAPSHOT="imagenet-1k--eu"
+GCLOUD_SNAPSHOT="imagenet-1k"
 
 gcloud compute tpus tpu-vm create "$INSTANCE_NAME" \
     "--zone=$GCLOUD_ZONE" \
     "--accelerator-type=$TPU_TYPE" \
+    --preemptible \
     "--version=$TPU_VERSION"
 
 # Imagenet
