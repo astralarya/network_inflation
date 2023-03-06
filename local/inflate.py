@@ -8,10 +8,10 @@ from torchvision.models import ResNet
 
 
 class SequenceInflate(Enum):
-    ALIGN_START = 0
-    ALIGN_END = 1
-    CENTER = 2
-    SPACE_EVENLY = 3
+    ALIGN_START = "align-start"
+    ALIGN_END = "align-end"
+    CENTER = "center"
+    SPACE_EVENLY = "space-evenly"
 
 
 @torch.no_grad()
@@ -19,7 +19,7 @@ def resnet(
     network0: ResNet,
     network1: ResNet,
     strategy: SequenceInflate = SequenceInflate.ALIGN_START,
-    mask: Union[str, None] = "conv3.weight",
+    mask=True,
 ):
     """Initialize network1 via inflating network0
 
@@ -36,7 +36,7 @@ def resnet(
             network0.get_submodule(layer),
             network1.get_submodule(layer),
             strategy=strategy,
-            mask=mask,
+            mask="conv3.weight" if mask else None,
         )
     return network1
 
@@ -69,8 +69,9 @@ def inflate_sequence(
             children0[idx:idx] = [None]
 
     for child0, child1 in zip(children0, children1):
-        if child0 is None and mask:
-            child1.get_parameter(mask).zero_()
+        if child0 is None:
+            if mask:
+                child1.get_parameter(mask).zero_()
         else:
             copy(child0, child1)
 
