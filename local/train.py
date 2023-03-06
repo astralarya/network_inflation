@@ -17,6 +17,7 @@ from local import device
 from local import optim as _optim
 from local import checkpoint
 from local import resnet
+from local.inflate import SequenceInflate
 from local.extern.weight_decay import set_weight_decay
 from local.extern.model_ema import ExponentialMovingAverage
 
@@ -25,6 +26,8 @@ def train(
     name: str,
     finetune: bool = False,
     inflate: Optional[str] = None,
+    inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
+    mask_inflate: bool = True,
     nprocs: int = 8,
     num_workers: int = 4,
     batch_size: int = 128,
@@ -70,7 +73,13 @@ def train(
         cutmix_alpha=cutmix_alpha,
     )
 
-    (model_name, model) = resnet.network_load(name, inflate, reset=not finetune)
+    (model_name, model) = resnet.network_load(
+        name,
+        inflate,
+        reset=not finetune,
+        inflate_strategy=inflate_strategy,
+        mask_inflate=mask_inflate,
+    )
     model_name = model_path / model_name
 
     parameters = set_weight_decay(

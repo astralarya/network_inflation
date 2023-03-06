@@ -2,6 +2,8 @@ import argparse
 from os import environ
 from pathlib import Path
 
+from local.inflate import SequenceInflate
+
 parser = argparse.ArgumentParser(prog="ResNet divergence script")
 parser.add_argument(
     "network0", choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
@@ -13,6 +15,14 @@ parser.add_argument("--reset0", action="store_true")
 parser.add_argument("--reset1", action="store_true")
 parser.add_argument("--inflate0", choices=["resnet50", "resnet101"])
 parser.add_argument("--inflate1", choices=["resnet50", "resnet101"])
+parser.add_argument(
+    "--inflate_strategy0", default="align-start", type=SequenceInflate.ALIGN_START
+)
+parser.add_argument(
+    "--inflate_strategy1", default="align-start", type=SequenceInflate.ALIGN_START
+)
+parser.add_argument("--inflate_unmasked0", action="store_false", dest="mask_inflate0")
+parser.add_argument("--inflate_unmasked1", action="store_false", dest="mask_inflate1")
 parser.add_argument("--num_epochs", default=8, type=int)
 parser.add_argument("--batch_size", default=64, type=int)
 parser.add_argument("--num_workers", default=4, type=int)
@@ -29,8 +39,20 @@ if __name__ == "__main__":
     from local import divergence
     from local import resnet
 
-    name0, network0 = resnet.network_load(args.network0, args.inflate0, args.reset0)
-    name1, network1 = resnet.network_load(args.network1, args.inflate1, args.reset1)
+    name0, network0 = resnet.network_load(
+        args.network0,
+        args.inflate0,
+        reset=args.reset0,
+        inflate_strategy=args.inflate_strategy0,
+        mask_inflate=args.mask_inflate0,
+    )
+    name1, network1 = resnet.network_load(
+        args.network1,
+        args.inflate1,
+        reset=args.reset1,
+        inflate_strategy=args.inflate_strategy1,
+        mask_inflate=args.mask_inflate1,
+    )
 
     train_data = data.load_dataset(
         args.imagenet_path / "train", transform=data.train_transform()

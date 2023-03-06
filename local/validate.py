@@ -13,6 +13,7 @@ from local import data
 from local import checkpoint
 from local import device
 from local import resnet
+from local.inflate import SequenceInflate
 from local.extern.model_ema import ExponentialMovingAverage
 
 
@@ -22,6 +23,8 @@ def validate(
     from_epoch: int = 0,
     finetune: bool = False,
     inflate: Optional[str] = None,
+    inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
+    mask_inflate: bool = True,
     batch_size: int = 64,
     num_workers: int = 8,
     nprocs: int = 8,
@@ -45,7 +48,13 @@ def validate(
         _worker,
         (
             {
-                "network_spec": (model_path / name, inflate, not finetune),
+                "network_spec": {
+                    "name": model_path / name,
+                    "inflate": inflate,
+                    "reset": not finetune,
+                    "inflate_strategy": inflate_strategy,
+                    "mask_inflate": mask_inflate,
+                },
                 "network_type": resnet.network_type(name),
                 "data": val_data,
                 "epochs": epochs,
@@ -65,7 +74,7 @@ def _worker(idx: int, _args: dict):
 
 @torch.no_grad()
 def _validate(
-    network_spec: Tuple[str, str, bool],
+    network_spec,
     network_type: Callable[[], nn.Module],
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
@@ -73,7 +82,7 @@ def _validate(
     batch_size=64,
     num_workers=4,
 ):
-    name = resnet.network_name(*network_spec)
+    name = resnet.network_name(**network_spec)
     if epochs is None:
         epochs = ["all"] if checkpoint.get_epoch(name) else ["pre"]
     epochs = checkpoint.iter_epochs(name, from_epoch) if "all" in epochs else epochs
