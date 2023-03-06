@@ -1,4 +1,5 @@
 from enum import Enum
+import math
 from typing import Union
 
 import torch
@@ -50,6 +51,8 @@ def inflate_sequence(
     children0 = list(sequence0.children())
     children1 = list(sequence1.children())
     diff = len(children1) - len(children0)
+    if diff < 0:
+        raise Exception("Inflate destination is smaller than source!")
 
     if strategy == SequenceInflate.ALIGN_START:
         children0.extend([None] * diff)
@@ -59,15 +62,14 @@ def inflate_sequence(
         children0.extend([None] * (diff // 2 + diff % 2))
         children0[1:1] = [None] * (diff // 2)
     elif strategy == SequenceInflate.SPACE_EVENLY and diff > 0:
-        step = (len(children0) - 1) / diff
-        for i in range(1, diff):
-            idx = 1 + round(i * step)
+        skip = 1
+        step = 1 + (len(children0) - skip) / diff
+        for i in range(0, diff):
+            idx = skip + math.ceil(i * step)
             children0[idx:idx] = [None]
 
     for child0, child1 in zip(children0, children1):
-        if child1 is None:
-            raise Exception("Inflate destination is smaller than source!")
-        elif child0 is None and mask:
+        if child0 is None and mask:
             child1.get_parameter(mask).zero_()
         else:
             copy(child0, child1)
