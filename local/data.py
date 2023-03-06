@@ -93,9 +93,13 @@ def val_transform(
                 std=std,
             ),
             transforms.TenCrop(crop_size),
-            transforms.Lambda(lambda crops: torch.stack([crop for crop in crops])),
+            transforms.Lambda(_stack_crops),
         ]
     )
+
+
+def _stack_crops(crops):
+    return torch.stack([crop for crop in crops])
 
 
 def train_collate_fn(
