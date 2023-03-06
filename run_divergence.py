@@ -15,12 +15,8 @@ parser.add_argument("--reset0", action="store_true")
 parser.add_argument("--reset1", action="store_true")
 parser.add_argument("--inflate0", choices=["resnet50", "resnet101"])
 parser.add_argument("--inflate1", choices=["resnet50", "resnet101"])
-parser.add_argument(
-    "--inflate_strategy0", default="align-start", type=SequenceInflate.ALIGN_START
-)
-parser.add_argument(
-    "--inflate_strategy1", default="align-start", type=SequenceInflate.ALIGN_START
-)
+parser.add_argument("--inflate_strategy0", default="align-start", type=SequenceInflate)
+parser.add_argument("--inflate_strategy1", default="align-start", type=SequenceInflate)
 parser.add_argument("--inflate_unmasked0", action="store_false", dest="mask_inflate0")
 parser.add_argument("--inflate_unmasked1", action="store_false", dest="mask_inflate1")
 parser.add_argument("--num_epochs", default=8, type=int)
