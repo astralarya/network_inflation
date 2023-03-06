@@ -61,7 +61,7 @@ def network_load(
     mask_inflate: bool = True,
 ):
     name = Path(name).name
-    _name = network_name(name, inflate, reset, mask_inflate)
+    _name = network_name(name, inflate, reset=reset, inflate_strategy=inflate_strategy, mask_inflate=mask_inflate)
 
     if inflate is None and reset is False:
         network = network_pre(name)
