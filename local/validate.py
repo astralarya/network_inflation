@@ -141,7 +141,7 @@ def _validate(
             top5_outputs = outputs.mean(dim=1).topk(k, dim=1).indices.view(bs, k)
             top5_part = (
                 top5_outputs == labels.repeat(k).view(k, -1).transpose(0, 1)
-            ).max(dim=1).values.sum() / total
+            ).int().max(dim=1).values.sum() / total
             top5_accuracy += device.mesh_reduce(
                 "top5_accuracy", top5_part.item(), lambda x: sum(x)
             )
