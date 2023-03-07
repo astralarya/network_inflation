@@ -31,9 +31,22 @@ Divergence: resnet152-pretrained <-> resnet152
 Spawning 8 processes
 Device: xla:1
 Iterating 1281167 samples
-100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [1:08:55<00:00,  6.61s/it]
 Divergence (epoch 0): 8.836394564288726
 Divergence (total): 8.836394564288726
+Divergence (epoch 1): 8.831871349302379
+Divergence (total): 8.834132956795553
+Divergence (epoch 2): 8.836051521582258
+Divergence (total): 8.834772478391121
+Divergence (epoch 3): 8.842690385911798
+Divergence (total): 8.83675195527129
+Divergence (epoch 4): 8.842776718581453
+Divergence (total): 8.837956907933322
+Divergence (epoch 5): 8.850038286455062
+Divergence (total): 8.839970471020278
+Divergence (epoch 6): 8.841036597947815
+Divergence (total): 8.84012277486707
+Divergence (epoch 7): 8.849600976685373
+Divergence (total): 8.841307550094356
 
 
 Mara@t1v-n-ffd72a6d-w-0:~/network_inflation$ python3 run_divergence.py resnet101 resnet152 --inflate1 resnet101 --inflate_strategy1 space-evenly
