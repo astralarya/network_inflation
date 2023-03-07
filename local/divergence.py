@@ -1,4 +1,5 @@
-from typing import Callable, Optional
+import math
+
 import torch
 import torch.nn as nn
 
@@ -88,11 +89,11 @@ def _divergence(
             outputs0 = network0(inputs)
             outputs1 = network1(inputs)
             loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
-            epoch_loss += loss.item() / total
+            epoch_loss += loss.log().item()
             device.step()
         total_loss += epoch_loss
         if device.is_main():
-            print(f"Divergence (epoch {epoch}): {epoch_loss}")
-            print(f"Divergence (total): {total_loss / (epoch+1)}")
+            print(f"Divergence (epoch {epoch}): {math.exp(epoch_loss) / total}")
+            print(f"Divergence (total): {math.exp(total_loss) / (total * (epoch+1))}")
     device.rendezvous("end")
     return total_loss / num_epochs
