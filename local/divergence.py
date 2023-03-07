@@ -78,11 +78,11 @@ def _divergence(
     network1.to(device.device())
 
     total = len(data)
-    total_loss = np.array()
+    total_loss = np.array([])
     if device.is_main():
         print(f"Iterating {total} samples")
     for epoch in range(num_epochs):
-        epoch_loss = np.array()
+        epoch_loss = np.array([])
         for inputs, _ in tqdm(data_loader, disable=not device.is_main()):
             inputs = inputs.to(device.device())
             outputs0 = network0(inputs)
