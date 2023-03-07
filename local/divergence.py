@@ -88,7 +88,7 @@ def _divergence(
             outputs0 = network0(inputs)
             outputs1 = network1(inputs)
             loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
-            np.append(epoch_loss, loss.numpy())
+            np.append(epoch_loss, loss.detach().cpu().numpy())
             device.step()
         epoch_loss = np.average(epoch_loss)
         np.append(total_loss, epoch_loss)
