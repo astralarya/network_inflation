@@ -1,3 +1,19 @@
+Mara@t1v-n-9eb6954d-w-0:~/network_inflation$ python3 run_divergence.py resnet50 resnet152
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Loading data `/mnt/imagenet/imagenet-1k/train`... DONE
+Divergence: resnet50-pretrained <-> resnet152-pretrained
+Spawning 8 processes
+Device: xla:1
+Iterating 1281167 samples
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [14:07<00:00,  1.35s/it]
+Divergence (epoch 0): 0.5218118935610385
+Divergence (total): 0.5218118935610385
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [13:39<00:00,  1.31s/it]
+Divergence (epoch 1): 0.5234901622606914
+Divergence (total): 0.5226510279108649
+
+
 Mara@t1v-n-ffd72a6d-w-0:~/network_inflation$ python3 run_divergence.py resnet101 resnet152 --inflate1 resnet101 --inflate_strategy1 space-evenly
 Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
 Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
@@ -9,3 +25,22 @@ Iterating 1281167 samples
 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [16:46<00:00,  1.61s/it]
 Divergence (epoch 0): 0.0
 Divergence (total): 0.0
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [16:00<00:00,  1.53s/it]
+Divergence (epoch 1): 0.0
+Divergence (total): 0.0
+
+
+Mara@t1v-n-2b7ef659-w-0:~/network_inflation$ python3 run_divergence.py resnet101 resnet152 --inflate1 resnet101 --inflate_strategy1 space-evenly --inflate_unmasked1
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Loading data `/mnt/imagenet/imagenet-1k/train`... DONE
+Divergence: resnet101-pretrained <-> resnet152--inflate-resnet101-space-evenly-unmasked
+Spawning 8 processes
+Device: xla:1
+Iterating 1281167 samples
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [17:10<00:00,  1.65s/it]
+Divergence (epoch 0): 8.857665513782276
+Divergence (total): 8.857665513782276
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [16:10<00:00,  1.55s/it]
+Divergence (epoch 1): 8.873792090196135
+Divergence (total): 8.865728801989206
