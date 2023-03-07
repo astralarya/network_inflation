@@ -27,10 +27,11 @@ def resnet(
         network0: Network to inflate.  Not mutated.
         network1: Network to initialize.  Mutated.
     """
-    # Copy and mask
+    # Copy shared submodules
     for child in ["conv1", "bn1", "fc"]:
         copy(network0.get_submodule(child), network1.get_submodule(child))
 
+    # Inflate sequences
     for layer in ["layer1", "layer2", "layer3", "layer4"]:
         inflate_sequence(
             network0.get_submodule(layer),
