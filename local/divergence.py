@@ -88,7 +88,7 @@ def _divergence(
             outputs0 = network0(inputs)
             outputs1 = network1(inputs)
             loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
-            epoch_loss += loss.item()
+            epoch_loss += device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
             device.step()
         total_loss += epoch_loss / total
         if device.is_main():
