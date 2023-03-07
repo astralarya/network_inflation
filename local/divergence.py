@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -77,22 +77,23 @@ def _divergence(
     network1.eval()
     network1.to(device.device())
 
-    total_loss = 0.0
     total = len(data)
+    total_loss = np.array()
     if device.is_main():
         print(f"Iterating {total} samples")
     for epoch in range(num_epochs):
-        epoch_loss = 0.0
+        epoch_loss = np.array()
         for inputs, _ in tqdm(data_loader, disable=not device.is_main()):
             inputs = inputs.to(device.device())
             outputs0 = network0(inputs)
             outputs1 = network1(inputs)
             loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
-            epoch_loss += loss.item() / total
+            np.append(epoch_loss, loss.item())
             device.step()
-        total_loss += epoch_loss
+        epoch_loss = np.average(epoch_loss)
+        np.append(total_loss, epoch_loss)
         if device.is_main():
             print(f"Divergence (epoch {epoch}): {epoch_loss}")
-            print(f"Divergence (total): {total_loss / (epoch+1)}")
+            print(f"Divergence (total): {np.average(total_loss)}")
     device.rendezvous("end")
     return total_loss / num_epochs
