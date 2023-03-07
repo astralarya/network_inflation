@@ -4,7 +4,6 @@ import torch.nn as nn
 
 from torch.utils.data import DataLoader2
 from torch.utils.data.distributed import DistributedSampler
-from torch.utils.data.dataloader import default_collate
 from torchvision import datasets
 from tqdm import tqdm
 
