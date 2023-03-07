@@ -13,6 +13,9 @@ class SequenceInflate(Enum):
     CENTER = "center"
     SPACE_EVENLY = "space-evenly"
 
+    def __str__(self):
+        return self.value
+
 
 @torch.no_grad()
 def resnet(
