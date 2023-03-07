@@ -113,3 +113,43 @@ Iterating 1281167 samples
 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [3:03:56<00:00, 17.63s/it]
 Divergence (epoch 0): 0.0
 Divergence (total): 0.0
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [10:40<00:00,  1.02s/it]
+Divergence (epoch 1): 0.0
+Divergence (total): 0.0
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [10:39<00:00,  1.02s/it]
+Divergence (epoch 2): 0.0
+Divergence (total): 0.0
+
+
+Mara@t1v-n-2b7ef659-w-0:~/network_inflation$ python3 run_divergence.py resnet101 resnet152 --inflate1 resnet101 --inflate_strategy1 center
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Loading data `/mnt/imagenet/imagenet-1k/train`... DONE
+Divergence: resnet101-pretrained <-> resnet152--inflate-resnet101-center
+Spawning 8 processes
+Device: xla:1
+Iterating 1281167 samples
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [13:42<00:00,  1.31s/it]
+Divergence (epoch 0): 0.0
+Divergence (total): 0.0
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [12:49<00:00,  1.23s/it]
+Divergence (epoch 1): 0.0
+Divergence (total): 0.0
+
+
+Mara@t1v-n-ffd72a6d-w-0:~/network_inflation$ python3 run_divergence.py resnet101 resnet152 --inflate1 resnet101 --inflate_strategy1 space-evenly
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Downloading: "https://download.pytorch.org/models/resnet101-cd907fc2.pth" to /home/Mara/.cache/torch/hub/checkpoints/resnet101-cd907fc2.pth
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 171M/171M [00:00<00:00, 265MB/s]
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Loading data `/mnt/imagenet/imagenet-1k/train`... DONE
+Divergence: resnet101-pretrained <-> resnet152--inflate-resnet101-space-evenly
+Spawning 8 processes
+Device: xla:1
+Iterating 1281167 samples
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [13:38<00:00,  1.31s/it]
+Divergence (epoch 0): 0.0
+Divergence (total): 0.0
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 626/626 [12:50<00:00,  1.23s/it]
+Divergence (epoch 1): 0.0
+Divergence (total): 0.0
