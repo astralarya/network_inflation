@@ -71,29 +71,28 @@ def _divergence(
         )
     )
     log_softmax = nn.LogSoftmax(dim=1).to(device.device())
-    criterion = nn.KLDivLoss(reduction="none", log_target=True).to(device.device())
+    criterion = nn.KLDivLoss(reduction="sum", log_target=True).to(device.device())
     network0.eval()
     network0.to(device.device())
     network1.eval()
     network1.to(device.device())
 
     total = len(data)
-    total_loss = np.array([])
+    total_loss = 0.0
     if device.is_main():
         print(f"Iterating {total} samples")
     for epoch in range(num_epochs):
-        epoch_loss = np.array([])
+        epoch_loss = 0.0
         for inputs, _ in tqdm(data_loader, disable=not device.is_main()):
             inputs = inputs.to(device.device())
             outputs0 = network0(inputs)
             outputs1 = network1(inputs)
             loss = criterion(log_softmax(outputs0), log_softmax(outputs1))
-            np.append(epoch_loss, loss.detach().cpu().numpy())
+            epoch_loss += loss.item()
             device.step()
-        epoch_loss = np.average(epoch_loss)
-        np.append(total_loss, epoch_loss)
+        total_loss += epoch_loss / total
         if device.is_main():
-            print(f"Divergence (epoch {epoch}): {epoch_loss}")
-            print(f"Divergence (total): {np.average(total_loss)}")
+            print(f"Divergence (epoch {epoch}): {epoch_loss / total}")
+            print(f"Divergence (total): {total_loss / (epoch + 1)}")
     device.rendezvous("end")
     return total_loss / num_epochs
