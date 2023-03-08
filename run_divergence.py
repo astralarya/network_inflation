@@ -47,14 +47,14 @@ if __name__ == "__main__":
 
     name0, network0 = resnet.network_load(
         args.network0,
-        args.inflate0,
+        inflate=args.inflate0,
         reset=args.reset0,
         inflate_strategy=args.inflate_strategy0,
         mask_inflate=args.mask_inflate0,
     )
     name1, network1 = resnet.network_load(
         args.network1,
-        args.inflate1,
+        inflate=args.inflate1,
         reset=args.reset1,
         inflate_strategy=args.inflate_strategy1,
         mask_inflate=args.mask_inflate1,

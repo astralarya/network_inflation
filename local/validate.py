@@ -55,7 +55,6 @@ def validate(
                     "inflate_strategy": inflate_strategy,
                     "mask_inflate": mask_inflate,
                 },
-                "network_type": resnet.network_type(name),
                 "data": val_data,
                 "epochs": epochs,
                 "from_epoch": from_epoch,
@@ -75,7 +74,6 @@ def _worker(idx: int, _args: dict):
 @torch.no_grad()
 def _validate(
     network_spec,
-    network_type: Callable[[], nn.Module],
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
     from_epoch: int = 0,
@@ -91,18 +89,11 @@ def _validate(
         if device.is_main():
             print(f"Validating epoch {epoch}")
 
-        if type(epoch) == int:
-            save_epoch, save_state = checkpoint.load(
-                name, epoch, print_output=device.is_main()
-            )
-            if save_epoch is None:
-                raise Exception(f"Epoch not found for {name}: {epoch}")
-            network = network_type()
-            network.load_state_dict(save_state["model"])
-            if "model_ema" in save_state:
-                network = ExponentialMovingAverage(network, decay=0)
-        else:
-            _, network = resnet.network_load(**network_spec)
+        _, network, save_state = resnet.network_load(
+            **network_spec, epoch=epoch, print_output=device.is_main()
+        )
+        if "model_ema" in save_state:
+            network = ExponentialMovingAverage(network, decay=0)
         network.eval()
 
         network = network.to(device.device())

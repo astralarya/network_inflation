@@ -4,7 +4,9 @@ from typing import Optional
 from torch.hub import load
 from torchvision.models import resnet
 
+from local import checkpoint
 from local.inflate import resnet as inflate_resnet, SequenceInflate
+from local.extern.model_ema import ExponentialMovingAverage
 
 
 def network_pre(name: str):
@@ -56,25 +58,41 @@ def network_type(name: str):
 def network_load(
     name: str,
     inflate: Optional[str] = None,
+    epoch: Optional[int] = None,
     reset: bool = False,
     inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
     mask_inflate: bool = True,
+    print_output: bool = True,
 ):
-    name = Path(name).name
-    _name = network_name(name, inflate, reset=reset, inflate_strategy=inflate_strategy, mask_inflate=mask_inflate)
+    basename = Path(name).name
+    name = network_name(
+        name,
+        inflate,
+        reset=reset,
+        inflate_strategy=inflate_strategy,
+        mask_inflate=mask_inflate,
+    )
 
-    if inflate is None and reset is False:
-        network = network_pre(name)
+    save_state = None
+    if inflate is None and reset is False and not epoch:
+        model = network_pre(basename)
     else:
-        network = network_type(name)()
+        model = network_type(basename)()
+        if type(epoch) == int:
+            save_epoch, save_state = checkpoint.load(
+                name, epoch, print_output=print_output
+            )
+            if save_epoch is None:
+                raise Exception(f"Epoch not found for {name}: {epoch}")
+            model.load_state_dict(save_state["model"])
 
     if inflate is not None:
         inflate_network = network_pre(inflate)
-        network = inflate_resnet(
-            inflate_network, network, strategy=inflate_strategy, mask=mask_inflate
+        model = inflate_resnet(
+            inflate_network, model, strategy=inflate_strategy, mask=mask_inflate
         )
 
-    return (_name, network)
+    return (name, model, save_state)
 
 
 def network_name(
