@@ -212,9 +212,8 @@ def _train(
 
     for epoch in range(init_epoch, num_epochs + 1):
         epoch_loss = 0.0
-        for i, (inputs, labels) in enumerate(
-            tqdm(data_loader, disable=not device.is_main())
-        ):
+        loop = tqdm(data_loader, disable=not device.is_main())
+        for i, (inputs, labels) in enumerate(loop):
             inputs = inputs.to(device.device())
             labels = labels.to(device.device())
             outputs = model(inputs)
@@ -225,6 +224,7 @@ def _train(
             loss.backward()
             device.optim_step(optimizer)
             scheduler.step()
+            loop.set_description(f"Loss: {epoch_loss / ((1 + i) * batch_size) * total}")
             if model_ema and i % model_ema_steps == 0:
                 model_ema.update_parameters(model)
                 if epoch < lr_warmup_epochs:
