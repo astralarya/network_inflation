@@ -55,14 +55,16 @@ def write_log(name: str, data: str):
 
 @torch.no_grad()
 def to(state: Any, device: torch.device):
-    to = _device.to_cpu if device == _device.cpu else lambda x: x.to(device)
     if type(state) == dict or type(state) == OrderedDict:
         r = type(state)()
         for key, val in state.items():
             r[key] = to(val, device)
         return r
     elif type(state) == torch.Tensor:
-        return to(state)
+        if device == _device.cpu:
+            _device.to_cpu(state)
+        else:
+            state.to(device)
     else:
         return state
 
