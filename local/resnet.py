@@ -73,17 +73,16 @@ def network_load(
         mask_inflate=mask_inflate,
     )
 
+    save_epoch = None
     save_state = None
     if inflate is None and reset is False and not epoch:
         model = network_pre(basename)
     else:
         model = network_type(basename)()
-        if type(epoch) == int:
-            save_epoch, save_state = checkpoint.load(
-                name, epoch, print_output=print_output
-            )
-            if save_epoch is None:
-                raise Exception(f"Epoch not found for {name}: {epoch}")
+        save_epoch, save_state = checkpoint.load(name, epoch, print_output=print_output)
+        if type(epoch) == int and save_epoch is None:
+            raise Exception(f"Epoch not found for {name}: {epoch}")
+        if save_epoch:
             model.load_state_dict(save_state["model"])
 
     if inflate is not None:
@@ -92,7 +91,7 @@ def network_load(
             inflate_network, model, strategy=inflate_strategy, mask=mask_inflate
         )
 
-    return (name, model, save_state)
+    return (name, model, save_epoch, save_state)
 
 
 def network_name(

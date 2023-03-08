@@ -73,7 +73,7 @@ def train(
         cutmix_alpha=cutmix_alpha,
     )
 
-    (model_name, model, save_state) = resnet.network_load(
+    (model_name, model, save_epoch, save_state) = resnet.network_load(
         model_path / name,
         inflate=inflate,
         reset=not finetune,
@@ -112,11 +112,8 @@ def train(
         alpha = min(1.0, alpha * adjust)
         model_ema = ExponentialMovingAverage(model, decay=1.0 - alpha)
 
-    save_epoch = None
     if save_state is not None:
-        save_epoch = save_state["epoch"]
         print(f"Resuming from epoch: {save_epoch}")
-        model.load_state_dict(save_state["model"])
         if model_ema:
             model_ema.load_state_dict(save_state["model_ema"])
         optimizer.load_state_dict(save_state["optimizer"])

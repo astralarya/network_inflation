@@ -62,9 +62,9 @@ def to(state: Any, device: torch.device):
         return r
     elif type(state) == torch.Tensor:
         if device == _device.cpu:
-            _device.to_cpu(state)
+            return _device.to_cpu(state)
         else:
-            state.to(device)
+            return state.to(device)
     else:
         return state
 
