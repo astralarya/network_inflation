@@ -81,6 +81,8 @@ def _validate(
     num_workers=4,
 ):
     name = resnet.network_name(**network_spec)
+    if device.is_main():
+        print(f"Validating {name}")
     if epochs is None:
         epochs = ["all"] if checkpoint.get_epoch(name) else ["pre"]
     epochs = checkpoint.iter_epochs(name, from_epoch) if "all" in epochs else epochs
