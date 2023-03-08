@@ -75,7 +75,7 @@ def network_load(
 
     save_epoch = None
     save_state = None
-    if inflate is None and reset is False and not epoch:
+    if inflate is None and reset is False and type(epoch) != int:
         model = network_pre(basename)
     else:
         model = network_type(basename)()
