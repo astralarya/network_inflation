@@ -25,6 +25,7 @@ def validate(
     inflate: Optional[str] = None,
     inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
     mask_inflate: bool = True,
+    model_ema: bool = False,
     batch_size: int = 64,
     num_workers: int = 8,
     nprocs: int = 8,
@@ -60,6 +61,7 @@ def validate(
                 "from_epoch": from_epoch,
                 "batch_size": batch_size,
                 "num_workers": num_workers,
+                "model_ema": model_ema,
             },
         ),
         nprocs=nprocs,
@@ -79,10 +81,12 @@ def _validate(
     from_epoch: int = 0,
     batch_size=64,
     num_workers=4,
+    model_ema: bool = False,
 ):
     name = resnet.network_name(**network_spec)
+    outname = f"{name}--ema" if model_ema else name
     if device.is_main():
-        print(f"Validating {name}")
+        print(f"Validating {outname}")
     if epochs is None:
         epochs = ["all"] if checkpoint.get_epoch(name) else ["pre"]
     epochs = checkpoint.iter_epochs(name, from_epoch) if "all" in epochs else epochs
@@ -94,7 +98,7 @@ def _validate(
         _, network, save_epoch, save_state = resnet.network_load(
             **network_spec, epoch=epoch, print_output=device.is_main()
         )
-        if save_state and "model_ema" in save_state:
+        if model_ema and save_state and "model_ema" in save_state:
             network = ExponentialMovingAverage(network, decay=0)
         network.eval()
 
@@ -153,7 +157,7 @@ def _validate(
             print(f"Top1 accuracy: {top1_accuracy}")
             print(f"Top5 accuracy: {top5_accuracy}")
             checkpoint.write_log(
-                f"{name}.__val__",
+                f"{outname}.__val__",
                 f"{epoch}\t{top1_accuracy}\t{top5_accuracy}\n",
             )
     device.rendezvous("end")
