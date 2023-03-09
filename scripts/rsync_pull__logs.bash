@@ -31,7 +31,7 @@ do
     )"
     echo "Rsync $item ($address)..."
     mkdir -p "$OUTPUT_DIR/$zone/$instance"
-    rsync -aP \
+    rsync -aP --copy-links \
         "$RSYNC_USER@$address:$SOURCE_DIR/" \
         "$OUTPUT_DIR/$zone/$instance/" \
         --exclude='*.pkl' \
