@@ -5,11 +5,11 @@ import torch.optim as optim
 
 
 def optimizer(
-    parameters=Sequence[nn.Parameter],
-    optimizer="sgd",
-    lr=0.5,
-    momentum=0.9,
-    weight_decay=2e-05,
+    parameters,
+    optimizer: str,
+    lr: float,
+    momentum: float,
+    weight_decay: float,
 ):
     optimizer = optimizer.lower()
     if optimizer.startswith("sgd"):
@@ -39,14 +39,14 @@ def optimizer(
 
 def lr_scheduler(
     optimizer: optim.Optimizer,
-    lr_scheduler="cosineannealinglr",
-    num_epochs=600,
-    lr_step_size=30,
-    lr_gamma=0.1,
-    lr_min=0.0,
-    lr_warmup_method="linear",
-    lr_warmup_epochs=5,
-    lr_warmup_decay=0.01,
+    lr_scheduler: str,
+    num_epochs: int,
+    lr_step_size: int,
+    lr_gamma: float,
+    lr_min: float,
+    lr_warmup_method: str,
+    lr_warmup_epochs: int,
+    lr_warmup_decay: float,
 ):
     lr_scheduler = lr_scheduler.lower()
     if lr_scheduler == "steplr":
