@@ -224,11 +224,11 @@ def _train(
             optimizer.zero_grad()
             loss.backward()
             device.optim_step(optimizer)
-            scheduler.step()
             if model_ema and i % model_ema_steps == 0:
                 model_ema.update_parameters(model)
                 if epoch < lr_warmup_epochs:
                     model_ema.n_averaged.fill_(0)
+        scheduler.step()
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
             checkpoint.save(
