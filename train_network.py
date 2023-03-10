@@ -14,7 +14,7 @@ parser.add_argument("--finetune", action="store_true")
 parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
 parser.add_argument(
     "--inflate_strategy",
-    default="align-start",
+    default="space-evenly",
     type=SequenceInflate,
     choices=list(SequenceInflate),
 )
