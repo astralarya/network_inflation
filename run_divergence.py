@@ -45,14 +45,14 @@ if __name__ == "__main__":
     from local import divergence
     from local import resnet
 
-    name0, network0 = resnet.network_load(
+    name0, network0, _, _ = resnet.network_load(
         args.network0,
         inflate=args.inflate0,
         reset=args.reset0,
         inflate_strategy=args.inflate_strategy0,
         mask_inflate=args.mask_inflate0,
     )
-    name1, network1 = resnet.network_load(
+    name1, network1, _, _ = resnet.network_load(
         args.network1,
         inflate=args.inflate1,
         reset=args.reset1,
