@@ -101,6 +101,31 @@ Divergence (epoch 7): 8.849600976685373
 Divergence (total): 8.841307550094356
 
 
+Mara@t1v-n-fd863902-w-0:~/network_inflation$ python3 run_divergence.py resnet152 resnet152 --reset1
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Loading data `/mnt/imagenet/imagenet-1k/train`... DONE
+Divergence: resnet152-pretrained <-> resnet152
+Spawning 8 processes
+Device: xla:1
+Iterating 1281167 samples
+Divergence (epoch 0): 8.875581581501352
+Divergence (total): 8.875581581501352
+Divergence (epoch 1): 8.88633699632545
+Divergence (total): 8.880959288913402
+Divergence (epoch 2): 8.886352338592197
+Divergence (total): 8.882756972139667
+Divergence (epoch 3): 8.887714614150523
+Divergence (total): 8.883996382642382
+Divergence (epoch 4): 8.900154326918106
+Divergence (total): 8.887227971497527
+Divergence (epoch 5): 8.891453419995482
+Divergence (total): 8.887932212913853
+Divergence (epoch 6): 8.87166939961937
+Divergence (total): 8.885608953871785
+Divergence (epoch 7): 8.883579860113926
+Divergence (total): 8.885355317152051
+
+
 Mara@t1v-n-2b7ef659-w-0:~/network_inflation$ python3 run_divergence.py resnet101 resnet101 --reset1
 Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
 Loading data `/mnt/imagenet/imagenet-1k/train`... DONE
@@ -124,6 +149,32 @@ Divergence (epoch 6): 8.784301046066698
 Divergence (total): 8.784568857976879
 Divergence (epoch 7): 8.786006681520485
 Divergence (total): 8.78474858591983
+
+
+Mara@t1v-n-9eb6954d-w-0:~/network_inflation$ python3 run_divergence.py resnet152 resnet152
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Using cache found in /home/Mara/.cache/torch/hub/pytorch_vision_v0.10.0
+Loading data `/mnt/imagenet/imagenet-1k/train`... DONE
+Divergence: resnet152-pretrained <-> resnet152-pretrained
+Spawning 8 processes
+Device: xla:1
+Iterating 1281167 samples
+Divergence (epoch 0): 0.0
+Divergence (total): 0.0
+Divergence (epoch 1): 0.0
+Divergence (total): 0.0
+Divergence (epoch 2): 0.0
+Divergence (total): 0.0
+Divergence (epoch 3): 0.0
+Divergence (total): 0.0
+Divergence (epoch 4): 0.0
+Divergence (total): 0.0
+Divergence (epoch 5): 0.0
+Divergence (total): 0.0
+Divergence (epoch 6): 0.0
+Divergence (total): 0.0
+Divergence (epoch 7): 0.0
+Divergence (total): 0.0
 
 
 Mara@t1v-n-708f5b80-w-0:~/network_inflation$ python3 run_divergence.py resnet50 resnet152 --inflate1 resnet50 --inflate_strategy1 align-start
