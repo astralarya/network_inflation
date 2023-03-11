@@ -11,7 +11,7 @@ from . import device as _device
 
 
 def get_epoch(name: str, epoch: int = None, latest=True):
-    if epoch is not None:
+    if type(epoch) == int:
         save_path = Path(f"{name}/{epoch:08}.pkl")
         if save_path.exists():
             return epoch
