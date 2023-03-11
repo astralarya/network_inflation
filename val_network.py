@@ -15,7 +15,7 @@ parser.add_argument("--batch_size", default=64, type=int)
 parser.add_argument("--num_workers", default=4, type=int)
 parser.add_argument(
     "--inflate_strategy",
-    default="align-start",
+    default="space-evenly",
     type=SequenceInflate,
     choices=list(SequenceInflate),
 )
