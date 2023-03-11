@@ -82,7 +82,7 @@ def network_load(
         save_epoch, save_state = checkpoint.load(name, epoch, print_output=print_output)
         if type(epoch) == int and save_epoch is None:
             raise Exception(f"Epoch not found for {name}: {epoch}")
-        if save_epoch:
+        if save_epoch is not None:
             model.load_state_dict(save_state["model"])
         elif inflate is not None:
             inflate_network = network_pre(inflate)
