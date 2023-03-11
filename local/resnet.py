@@ -84,12 +84,11 @@ def network_load(
             raise Exception(f"Epoch not found for {name}: {epoch}")
         if save_epoch:
             model.load_state_dict(save_state["model"])
-
-    if inflate is not None:
-        inflate_network = network_pre(inflate)
-        model = inflate_resnet(
-            inflate_network, model, strategy=inflate_strategy, mask=mask_inflate
-        )
+        elif inflate is not None:
+            inflate_network = network_pre(inflate)
+            model = inflate_resnet(
+                inflate_network, model, strategy=inflate_strategy, mask=mask_inflate
+            )
 
     return (name, model, save_epoch, save_state)
 
