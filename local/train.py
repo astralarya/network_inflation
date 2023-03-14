@@ -213,8 +213,7 @@ def _train(
             model_ema.load_state_dict(save_state["model_ema"])
         optimizer.load_state_dict(save_state["optimizer"])
         scheduler.load_state_dict(save_state["scheduler"])
-
-    else:
+    elif device.is_main():
         checkpoint.save(
             name,
             0,
