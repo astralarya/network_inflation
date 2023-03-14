@@ -204,7 +204,9 @@ def _train(
         adjust = nprocs * batch_size * model_ema_steps / num_epochs
         alpha = 1.0 - model_ema_decay
         alpha = min(1.0, alpha * adjust)
-        model_ema = ExponentialMovingAverage(model, decay=1.0 - alpha)
+        model_ema = ExponentialMovingAverage(
+            model, decay=1.0 - alpha, device=device.device()
+        )
 
     if save_state is not None:
         if model_ema:
