@@ -219,8 +219,6 @@ def _train(
             labels = labels.to(device.device())
             outputs = model(inputs)
             loss = criterion(outputs, labels)
-            losses = device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
-            epoch_loss += losses / total
             optimizer.zero_grad()
             loss.backward()
             device.optim_step(optimizer)
@@ -228,6 +226,8 @@ def _train(
                 model_ema.update_parameters(model)
                 if epoch < lr_warmup_epochs:
                     model_ema.n_averaged.fill_(0)
+            losses = device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
+            epoch_loss += losses / total
         scheduler.step()
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
