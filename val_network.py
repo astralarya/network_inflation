@@ -11,7 +11,7 @@ parser.add_argument(
 )
 parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
 parser.add_argument("--finetune", action="store_true")
-parser.add_argument("--batch_size", default=64, type=int)
+parser.add_argument("--batch_size", default=32, type=int)
 parser.add_argument("--num_workers", default=4, type=int)
 parser.add_argument(
     "--inflate_strategy",

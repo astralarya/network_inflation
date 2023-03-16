@@ -26,7 +26,7 @@ def validate(
     inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
     mask_inflate: bool = True,
     model_ema: bool = False,
-    batch_size: int = 64,
+    batch_size: int = 32,
     num_workers: int = 8,
     nprocs: int = 8,
     model_path: Path = None,
