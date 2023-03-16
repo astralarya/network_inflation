@@ -3,7 +3,7 @@ SOURCE_DIR="$2"
 DEST_DIR="$3"
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-RSYNC_USER="$RSYNC_USER"
+RSYNC_USER="${RSYNC_USER:-$USER}"
 
 GCLOUD_ZONE=$( dirname "$INSTANCE_ADDR" )
 INSTANCE_NAME=$( basename "$INSTANCE_ADDR" )
