@@ -173,7 +173,7 @@ def _train(
         device=device.device(),
         print_output=device.is_main(),
     )
-    if save_state is not None:
+    if device.is_main() and save_state is not None:
         print(f"Resuming from epoch: {save_epoch}")
     init_epoch = save_epoch + 1 if save_epoch else 1
 
