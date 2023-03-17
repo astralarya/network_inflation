@@ -81,6 +81,7 @@ def network_load(
         model = network_pre(basename)
     else:
         model = network_type(basename)()
+        model.to(device)
         save_epoch, save_state = checkpoint.load(
             name, epoch, device=device, print_output=print_output
         )
