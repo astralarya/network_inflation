@@ -121,7 +121,6 @@ def _train(
     mask_inflate: bool,
     train_dataset: datasets.DatasetFolder,
     train_collate_fn: Optional[Callable],
-    init_epoch: int,
     num_epochs: int,
     nprocs: int,
     num_workers: int,
