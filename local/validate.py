@@ -96,14 +96,16 @@ def _validate(
             print(f"Validating epoch {epoch}")
 
         _, network, save_epoch, save_state = resnet.network_load(
-            **network_spec, epoch=epoch, print_output=device.is_main()
+            **network_spec,
+            epoch=epoch,
+            device=device.device(),
+            print_output=device.is_main(),
         )
         if model_ema and save_state and "model_ema" in save_state:
             network = ExponentialMovingAverage(network, decay=0)
             network.load_state_dict(save_state["model_ema"])
         network.eval()
 
-        network = network.to(device.device())
         softmax = nn.Softmax(dim=2).to(device.device())
 
         data_sampler = (

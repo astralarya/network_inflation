@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
+import torch
 from torch.hub import load
 from torchvision.models import resnet
 
@@ -62,6 +63,7 @@ def network_load(
     reset: bool = False,
     inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
     mask_inflate: bool = True,
+    device: Optional[torch.device] = None,
     print_output: bool = True,
 ):
     basename = Path(name).name
@@ -79,7 +81,9 @@ def network_load(
         model = network_pre(basename)
     else:
         model = network_type(basename)()
-        save_epoch, save_state = checkpoint.load(name, epoch, print_output=print_output)
+        save_epoch, save_state = checkpoint.load(
+            name, epoch, device=device, print_output=print_output
+        )
         if type(epoch) == int and save_epoch is None:
             raise Exception(f"Epoch not found for {name}: {epoch}")
         if save_epoch is not None:

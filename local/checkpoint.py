@@ -2,7 +2,7 @@ from collections import OrderedDict
 import glob
 import math
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import torch
 import torch.nn as nn
@@ -81,7 +81,12 @@ def save(name: str, epoch: int, state: Any):
 
 
 @torch.no_grad()
-def load(name: str, epoch: int = None, device: torch.device = None, print_output=True):
+def load(
+    name: str,
+    epoch: int = None,
+    device: Optional[torch.device] = None,
+    print_output=True,
+):
     epoch = get_epoch(name, epoch)
     if epoch is None:
         return (None, None)

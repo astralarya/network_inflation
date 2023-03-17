@@ -71,27 +71,18 @@ def train(
         cutmix_alpha=cutmix_alpha,
     )
 
-    (model_name, model, save_epoch, save_state) = resnet.network_load(
-        model_path / name,
-        inflate=inflate,
-        reset=not finetune,
-        inflate_strategy=inflate_strategy,
-        mask_inflate=mask_inflate,
-    )
-    if save_state is not None:
-        print(f"Resuming from epoch: {save_epoch}")
-
     print(f"Spawning {nprocs} processes")
     device.spawn(
         _worker,
         (
             {
-                "name": model_name,
-                "model": device.model(model),
-                "save_state": save_state,
+                "name": model_path / name,
+                "finetune": finetune,
+                "inflate": inflate,
+                "inflate_strategy": inflate_strategy,
+                "mask_inflate": mask_inflate,
                 "train_dataset": train_dataset,
                 "train_collate_fn": train_collate_fn,
-                "init_epoch": save_epoch + 1 if save_epoch else 1,
                 "num_epochs": num_epochs,
                 "nprocs": nprocs,
                 "num_workers": num_workers,
@@ -124,8 +115,10 @@ def _worker(idx: int, _args: dict):
 
 def _train(
     name: str,
-    model: nn.Module,
-    save_state: Any,
+    finetune: bool,
+    inflate: Optional[str],
+    inflate_strategy: SequenceInflate,
+    mask_inflate: bool,
     train_dataset: datasets.DatasetFolder,
     train_collate_fn: Optional[Callable],
     init_epoch: int,
@@ -172,7 +165,19 @@ def _train(
         )
     )
 
-    model = model.to(device.device())
+    (model_name, model, save_epoch, save_state) = resnet.network_load(
+        name,
+        inflate=inflate,
+        reset=not finetune,
+        inflate_strategy=inflate_strategy,
+        mask_inflate=mask_inflate,
+        device=device.device(),
+        print_output=device.is_main(),
+    )
+    if save_state is not None:
+        print(f"Resuming from epoch: {save_epoch}")
+    init_epoch = save_epoch + 1 if save_epoch else 1
+
     model.train()
 
     parameters = set_weight_decay(
@@ -215,7 +220,7 @@ def _train(
         scheduler.load_state_dict(save_state["scheduler"])
     elif device.is_main():
         checkpoint.save(
-            name,
+            model_name,
             0,
             {
                 "loss": None,
@@ -255,7 +260,7 @@ def _train(
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
             checkpoint.save(
-                name,
+                model_name,
                 epoch,
                 {
                     "loss": epoch_loss,
