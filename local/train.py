@@ -22,6 +22,7 @@ from local.extern.model_ema import ExponentialMovingAverage
 
 def train(
     name: str,
+    modifier: Optional[str] = None,
     finetune: bool = False,
     inflate: Optional[str] = None,
     inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
@@ -77,6 +78,7 @@ def train(
         (
             {
                 "name": model_path / name,
+                "modifier": modifier,
                 "finetune": finetune,
                 "inflate": inflate,
                 "inflate_strategy": inflate_strategy,
@@ -115,6 +117,7 @@ def _worker(idx: int, _args: dict):
 
 def _train(
     name: str,
+    modifier: Optional[str],
     finetune: bool,
     inflate: Optional[str],
     inflate_strategy: SequenceInflate,
@@ -166,6 +169,7 @@ def _train(
 
     (model_name, model, save_epoch, save_state) = resnet.network_load(
         name,
+        modifier,
         inflate=inflate,
         reset=not finetune,
         inflate_strategy=inflate_strategy,

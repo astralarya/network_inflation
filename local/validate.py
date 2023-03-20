@@ -21,6 +21,7 @@ def validate(
     name: str,
     epochs: Optional[Sequence[Union[str, int]]],
     from_epoch: int = 0,
+    modifier: Optional[str] = None,
     finetune: bool = False,
     inflate: Optional[str] = None,
     inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
@@ -51,6 +52,7 @@ def validate(
             {
                 "network_spec": {
                     "name": model_path / name,
+                    "modifier": modifier,
                     "inflate": inflate,
                     "reset": not finetune,
                     "inflate_strategy": inflate_strategy,

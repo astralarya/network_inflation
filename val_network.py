@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(prog="ResNet validation script")
 parser.add_argument(
     "name", choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
 )
+parser.add_argument("--modifier", help="Name modifier for save/load")
 parser.add_argument("--inflate", choices=["resnet50", "resnet101"])
 parser.add_argument("--finetune", action="store_true")
 parser.add_argument("--batch_size", default=32, type=int)
