@@ -53,6 +53,16 @@ def write_log(name: str, data: str):
         logfile.write(data)
 
 
+def log_epoch(name: str):
+    with Path(name).open() as file:
+        for line in file:
+            pass
+        try:
+            return int(line.split("\t")[0])
+        except:
+            return 0
+
+
 @torch.no_grad()
 def to(state: Any, device: torch.device):
     if type(state) == dict or type(state) == OrderedDict:

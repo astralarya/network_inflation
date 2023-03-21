@@ -29,7 +29,6 @@ parser.add_argument(
     type=lambda x: x if x in ["pre", "all"] else int(x),
     action="append",
 )
-parser.add_argument("--from_epoch", default=0, type=int)
 parser.add_argument(
     "--model_path",
     default=environ.get("MODEL_PATH", "/mnt/models/data"),

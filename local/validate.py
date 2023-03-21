@@ -20,7 +20,6 @@ from local.extern.model_ema import ExponentialMovingAverage
 def validate(
     name: str,
     epochs: Optional[Sequence[Union[str, int]]],
-    from_epoch: int = 0,
     modifier: Optional[str] = None,
     finetune: bool = False,
     inflate: Optional[str] = None,
@@ -60,7 +59,6 @@ def validate(
                 },
                 "data": val_data,
                 "epochs": epochs,
-                "from_epoch": from_epoch,
                 "batch_size": batch_size,
                 "num_workers": num_workers,
                 "model_ema": model_ema,
@@ -80,18 +78,22 @@ def _validate(
     network_spec,
     data: datasets.DatasetFolder,
     epochs: Sequence[Union[int, str]],
-    from_epoch: int = 0,
     batch_size=64,
     num_workers=4,
     model_ema: bool = False,
 ):
     name = resnet.network_name(**network_spec)
     outname = f"{name}--ema" if model_ema else name
+    outname = f"{outname}.__val__"
     if device.is_main():
         print(f"Validating {outname}")
     if epochs is None:
         epochs = ["all"] if checkpoint.get_epoch(name) else ["pre"]
-    epochs = checkpoint.iter_epochs(name, from_epoch) if "all" in epochs else epochs
+    epochs = (
+        checkpoint.iter_epochs(name, checkpoint.log_epoch(outname))
+        if "all" in epochs
+        else epochs
+    )
 
     for epoch in epochs:
         if device.is_main():
@@ -162,7 +164,7 @@ def _validate(
             print(f"Top1 accuracy: {top1_accuracy}")
             print(f"Top5 accuracy: {top5_accuracy}")
             checkpoint.write_log(
-                f"{outname}.__val__",
+                outname,
                 f"{epoch}\t{top1_accuracy}\t{top5_accuracy}\n",
             )
     device.rendezvous("end")
