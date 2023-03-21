@@ -90,7 +90,7 @@ def _validate(
     if epochs is None:
         epochs = ["all"] if checkpoint.get_epoch(name) else ["pre"]
     epochs = (
-        checkpoint.iter_epochs(name, checkpoint.log_epoch(outname))
+        checkpoint.iter_epochs(name, checkpoint.log_epoch(outname, 1))
         if "all" in epochs
         else epochs
     )

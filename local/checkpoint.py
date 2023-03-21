@@ -53,12 +53,12 @@ def write_log(name: str, data: str):
         logfile.write(data)
 
 
-def log_epoch(name: str):
+def log_epoch(name: str, increment: int = 0):
     try:
         with Path(f"{name}.log").open() as f:
             for line in f:
                 pass
-            return int(line.split("\t")[0])
+            return int(line.split("\t")[0]) + increment
     except:
         return 0
 
