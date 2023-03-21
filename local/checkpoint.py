@@ -55,7 +55,7 @@ def write_log(name: str, data: str):
 
 def log_epoch(name: str):
     try:
-        with Path(name).open() as f:
+        with Path(f"{name}.log").open() as f:
             for line in f:
                 pass
             return int(line.split("\t")[0])
