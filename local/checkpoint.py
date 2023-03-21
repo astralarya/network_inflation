@@ -49,13 +49,13 @@ def iter_epochs(name: str, from_epoch: int = 0):
 
 def write_log(name: str, data: str):
     Path(name).parent.mkdir(parents=True, exist_ok=True)
-    with Path(f"{name}.log").open("a") as logfile:
+    with Path(name).open("a") as logfile:
         logfile.write(data)
 
 
 def log_epoch(name: str, increment: int = 0):
     try:
-        with Path(f"{name}.log").open() as f:
+        with Path(name).open() as f:
             for line in f:
                 pass
             return int(line.split("\t")[0]) + increment

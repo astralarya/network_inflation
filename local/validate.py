@@ -84,13 +84,13 @@ def _validate(
 ):
     name = resnet.network_name(**network_spec)
     outname = f"{name}--ema" if model_ema else name
-    outname = f"{outname}.__val__"
+    outfile = f"{outname}.__val__.log"
     if device.is_main():
         print(f"Validating {outname}")
     if epochs is None:
         epochs = ["all"] if checkpoint.get_epoch(name) else ["pre"]
     epochs = (
-        checkpoint.iter_epochs(name, checkpoint.log_epoch(outname, 1))
+        checkpoint.iter_epochs(name, checkpoint.log_epoch(outfile, 1))
         if "all" in epochs
         else epochs
     )
@@ -164,7 +164,7 @@ def _validate(
             print(f"Top1 accuracy: {top1_accuracy}")
             print(f"Top5 accuracy: {top5_accuracy}")
             checkpoint.write_log(
-                outname,
+                outfile,
                 f"{epoch}\t{top1_accuracy}\t{top5_accuracy}\n",
             )
     device.rendezvous("end")
