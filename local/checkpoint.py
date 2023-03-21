@@ -54,13 +54,13 @@ def write_log(name: str, data: str):
 
 
 def log_epoch(name: str):
-    with Path(name).open() as file:
-        for line in file:
-            pass
-        try:
+    try:
+        with Path(name).open() as file:
+            for line in file:
+                pass
             return int(line.split("\t")[0])
-        except:
-            return 0
+    except:
+        return 0
 
 
 @torch.no_grad()
