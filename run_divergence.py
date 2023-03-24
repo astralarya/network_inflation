@@ -47,7 +47,7 @@ if __name__ == "__main__":
     from local import divergence
     from local import resnet
 
-    name0, network0, _, _ = resnet.network_load(
+    save0 = resnet.network_load(
         args.network0,
         modifier=args.modifier0,
         inflate=args.inflate0,
@@ -55,7 +55,10 @@ if __name__ == "__main__":
         inflate_strategy=args.inflate_strategy0,
         mask_inflate=args.mask_inflate0,
     )
-    name1, network1, _, _ = resnet.network_load(
+    name0 = save0.name
+    network0 = save0.network
+
+    save1 = resnet.network_load(
         args.network1,
         modifier=args.modifier1,
         inflate=args.inflate1,
@@ -63,6 +66,8 @@ if __name__ == "__main__":
         inflate_strategy=args.inflate_strategy1,
         mask_inflate=args.mask_inflate1,
     )
+    name1 = save1.name
+    network1 = save1.network
 
     train_data = data.load_dataset(
         args.imagenet_path / "train", transform=data.train_transform()

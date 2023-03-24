@@ -1,3 +1,4 @@
+from collections import namedtuple
 from pathlib import Path
 from typing import Optional
 
@@ -56,6 +57,11 @@ def network_type(name: str):
     return network
 
 
+NetworkInfo = namedtuple(
+    "NetworkInfo", "name network save_epoch save_state inflate_network"
+)
+
+
 def network_load(
     name: str,
     modifier: Optional[str] = None,
@@ -89,15 +95,21 @@ def network_load(
         )
         if type(epoch) == int and save_epoch is None:
             raise Exception(f"Epoch not found for {name}: {epoch}")
+        inflate_network = network_pre(inflate)
         if save_epoch is not None:
             model.load_state_dict(save_state["model"])
         elif inflate is not None:
-            inflate_network = network_pre(inflate)
             model = inflate_resnet(
                 inflate_network, model, strategy=inflate_strategy, mask=mask_inflate
             )
 
-    return (name, model, save_epoch, save_state)
+    return NetworkInfo(
+        name=name,
+        network=model,
+        save_epoch=save_epoch,
+        save_state=save_state,
+        inflate_network=inflate_network,
+    )
 
 
 def network_name(

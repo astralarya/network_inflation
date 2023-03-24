@@ -99,12 +99,14 @@ def _validate(
         if device.is_main():
             print(f"Validating epoch {epoch}")
 
-        _, network, save_epoch, save_state = resnet.network_load(
+        save = resnet.network_load(
             **network_spec,
             epoch=epoch,
             device=device.device(),
             print_output=device.is_main(),
         )
+        save_state = save.save_state
+
         if model_ema and save_state and "model_ema" in save_state:
             network = ExponentialMovingAverage(network, decay=0, device=device.device())
             network.load_state_dict(save_state["model_ema"])

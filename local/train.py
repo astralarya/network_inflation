@@ -46,6 +46,8 @@ def train(
     lr_warmup_decay: float = 0.01,
     weight_decay: float = 2e-05,
     norm_weight_decay: float = 0.0,
+    guide_alpha=1.0,
+    guide_epochs=32,
     label_smoothing: float = 0.1,
     model_ema_steps: int = 32,
     model_ema_decay: float = 0.9998,
@@ -101,6 +103,8 @@ def train(
                 "lr_warmup_decay": lr_warmup_decay,
                 "weight_decay": weight_decay,
                 "norm_weight_decay": norm_weight_decay,
+                "guide_alpha": guide_alpha,
+                "guide_epochs": guide_epochs,
                 "label_smoothing": label_smoothing,
                 "model_ema_steps": model_ema_steps,
                 "model_ema_decay": model_ema_decay,
@@ -140,6 +144,8 @@ def _train(
     lr_warmup_decay: float,
     weight_decay: float,
     norm_weight_decay: float,
+    guide_alpha: float,
+    guide_epochs: int,
     label_smoothing: float,
     model_ema_steps: int,
     model_ema_decay: float,
@@ -167,7 +173,7 @@ def _train(
         )
     )
 
-    (model_name, model, save_epoch, save_state) = resnet.network_load(
+    state = resnet.network_load(
         name,
         modifier,
         inflate=inflate,
@@ -177,8 +183,14 @@ def _train(
         device=device.device(),
         print_output=device.is_main(),
     )
-    if device.is_main() and save_state is not None:
-        print(f"Resuming from epoch: {save_epoch}")
+    model = state.network
+    model_name = state.name
+    guide = state.inflate_network
+    save_epoch = state.save_epoch
+    save_state = state.save_state
+
+    if device.is_main() and state.save_state is not None:
+        print(f"Resuming from epoch: {state.save_epoch}")
     init_epoch = save_epoch + 1 if save_epoch else 1
 
     model.train()
@@ -190,10 +202,13 @@ def _train(
     )
     optimizer = _optim.optimizer(
         parameters=parameters,
+        guide=guide,
         optimizer=opt,
         lr=lr,
         momentum=momentum,
         weight_decay=weight_decay,
+        guide_alpha=guide_alpha,
+        guide_epochs=guide_epochs,
     )
     scheduler = _optim.lr_scheduler(
         optimizer=optimizer,
