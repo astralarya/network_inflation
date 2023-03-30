@@ -65,5 +65,10 @@ def build_params(
     param_groups = []
     for group in params:
         if len(params[group]) > 0:
-            param_groups.append({"params": params[group], **group_params[group]})
+            param_groups.append(
+                {
+                    "params": params[group],
+                    **(group_params[group] if group in group_params else {}),
+                }
+            )
     return param_groups
