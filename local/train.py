@@ -16,7 +16,7 @@ from local import optim as _optim
 from local import checkpoint
 from local import resnet
 from local.inflate import SequenceInflate
-from local.extern.weight_decay import set_weight_decay
+from local.param import set_weight_decay
 from local.extern.model_ema import ExponentialMovingAverage
 
 
