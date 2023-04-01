@@ -67,8 +67,9 @@ def build_params(
                         params[group].append(p)
                         guides[group].append(g)
                         break
-                params[default_group].append(p)
-                guides[default_group].append(g)
+                else:
+                    params[default_group].append(p)
+                    guides[default_group].append(g)
 
         for child_name, child_module in module.named_children():
             child_prefix = f"{prefix}.{child_name}" if prefix != "" else child_name
