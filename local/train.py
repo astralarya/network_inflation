@@ -185,7 +185,6 @@ def _train(
     )
     model = state.network
     model_name = state.name
-    guide = state.inflate_network
     save_epoch = state.save_epoch
     save_state = state.save_state
 
@@ -199,10 +198,11 @@ def _train(
         model,
         weight_decay=weight_decay,
         norm_weight_decay=norm_weight_decay,
+        guide=state.guide,
     )
     optimizer = _optim.optimizer(
-        parameters=parameters,
-        guide=guide,
+        parameters=parameters.parameters,
+        guide=parameters.guide,
         optimizer=opt,
         lr=lr,
         momentum=momentum,

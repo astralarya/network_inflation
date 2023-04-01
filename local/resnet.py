@@ -58,7 +58,7 @@ def network_type(name: str):
 
 
 NetworkInfo = namedtuple(
-    "NetworkInfo", "name network save_epoch save_state inflate_network"
+    "NetworkInfo", "name network save_epoch save_state inflate_network guide"
 )
 
 
@@ -109,6 +109,7 @@ def network_load(
         save_epoch=save_epoch,
         save_state=save_state,
         inflate_network=inflate_network,
+        guide=lambda _: None,
     )
 
 

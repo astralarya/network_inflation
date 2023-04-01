@@ -1,7 +1,12 @@
-from collections import defaultdict
-from typing import Any, Mapping, List, Iterable, Optional, Tuple
+from collections import defaultdict, namedtuple
+from typing import Any, Callable, Mapping, List, Iterable, Optional, Tuple
 
 import torch
+
+
+Parameters = namedtuple("Parameters", "parameters guide")
+
+Guide = Callable[[str], Optional[torch.TupleType]]
 
 
 def set_weight_decay(
@@ -9,7 +14,8 @@ def set_weight_decay(
     weight_decay: float,
     norm_weight_decay: Optional[float] = None,
     norm_classes: Optional[List[type]] = None,
-):
+    guide: Optional[Guide] = None,
+) -> Parameters:
     if not norm_classes:
         norm_classes = [
             torch.nn.modules.batchnorm._BatchNorm,
@@ -22,39 +28,47 @@ def set_weight_decay(
 
     return build_params(
         model,
+        guide=guide,
         group_classes={"norm": norm_classes},
-        group_params={"norm": norm_weight_decay, "__default__": weight_decay},
+        group_params={
+            "norm": {"weight_decay": norm_weight_decay},
+            "__default__": {"weight_decay": weight_decay},
+        },
     )
 
 
 def build_params(
     model: torch.nn.Module,
+    guide: Optional[Guide] = None,
     group_classes: Mapping[str, Tuple[Any]] = {},
     group_keys: Mapping[str, Iterable[str]] = {},
     group_params: Mapping[str, Mapping] = {},
     default_group: str = "__default__",
-):
+) -> Parameters:
     params = defaultdict(list)
+    guides = defaultdict(list)
 
     def _add_params(module, prefix=""):
         for name, p in module.named_parameters(recurse=False):
+            g = guide(name) if guide else None
             if not p.requires_grad:
                 continue
-            is_custom_key = False
             for group, keys in group_keys.items():
                 if any(
                     key == (f"{prefix}.{name}" if prefix != "" and "." in key else name)
                     for key in keys
                 ):
                     params[group].append(p)
-                    is_custom_key = True
+                    guides[group].append(g)
                     break
-            if not is_custom_key:
+            else:
                 for group, classes in group_classes.items():
                     if isinstance(module, classes):
                         params[group].append(p)
+                        guides[group].append(g)
                         break
                 params[default_group].append(p)
+                guides[default_group].append(g)
 
         for child_name, child_module in module.named_children():
             child_prefix = f"{prefix}.{child_name}" if prefix != "" else child_name
@@ -63,6 +77,7 @@ def build_params(
     _add_params(model)
 
     param_groups = []
+    guide_groups = []
     for group in params:
         if len(params[group]) > 0:
             param_groups.append(
@@ -71,4 +86,5 @@ def build_params(
                     **(group_params[group] if group in group_params else {}),
                 }
             )
-    return param_groups
+            guide_groups.append(guides[group])
+    return Parameters(parameters=param_groups, guide=guide_groups if guide else None)
