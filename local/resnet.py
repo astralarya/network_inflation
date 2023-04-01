@@ -11,7 +11,9 @@ from local.inflate import resnet as inflate_resnet, SequenceInflate
 from local.extern.model_ema import ExponentialMovingAverage
 
 
-def network_pre(name: str):
+def network_pre(name: Optional[str]):
+    if name is None:
+        return None
     name = Path(name).name
     if name == "resnet18":
         return load(
