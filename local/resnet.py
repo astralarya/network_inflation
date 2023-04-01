@@ -64,7 +64,7 @@ NetworkInfo = namedtuple(
 
 def network_load(
     name: str,
-    modifier: Optional[str] = None,
+    suffix: Optional[str] = None,
     inflate: Optional[str] = None,
     epoch: Optional[int] = None,
     reset: bool = False,
@@ -76,7 +76,7 @@ def network_load(
     basename = Path(name).name
     name = network_name(
         name,
-        modifier,
+        suffix,
         inflate,
         reset=reset,
         inflate_strategy=inflate_strategy,
@@ -115,7 +115,7 @@ def network_load(
 
 def network_name(
     name: str,
-    modifier: Optional[str] = None,
+    suffix: Optional[str] = None,
     inflate: Optional[str] = None,
     reset: bool = False,
     inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
@@ -139,7 +139,7 @@ def network_name(
         if mask_inflate is False:
             name = f"{name}-unmasked"
 
-    if modifier is not None:
-        name = f"{name}--{modifier}"
+    if suffix is not None:
+        name = f"{name}--{suffix}"
 
     return name

@@ -11,8 +11,8 @@ parser.add_argument(
 parser.add_argument(
     "network1", choices=["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
 )
-parser.add_argument("--modifier0", help="Name modifier for save/load")
-parser.add_argument("--modifier1", help="Name modifier for save/load")
+parser.add_argument("--suffix0", help="Name suffix for save/load")
+parser.add_argument("--suffix1", help="Name suffix for save/load")
 parser.add_argument("--reset0", action="store_true")
 parser.add_argument("--reset1", action="store_true")
 parser.add_argument("--inflate0", choices=["resnet50", "resnet101"])
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     save0 = resnet.network_load(
         args.network0,
-        modifier=args.modifier0,
+        suffix=args.suffix0,
         inflate=args.inflate0,
         reset=args.reset0,
         inflate_strategy=args.inflate_strategy0,
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     save1 = resnet.network_load(
         args.network1,
-        modifier=args.modifier1,
+        suffix=args.suffix1,
         inflate=args.inflate1,
         reset=args.reset1,
         inflate_strategy=args.inflate_strategy1,

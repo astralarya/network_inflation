@@ -20,7 +20,7 @@ from local.extern.model_ema import ExponentialMovingAverage
 def validate(
     name: str,
     epochs: Optional[Sequence[Union[str, int]]],
-    modifier: Optional[str] = None,
+    suffix: Optional[str] = None,
     finetune: bool = False,
     inflate: Optional[str] = None,
     inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
@@ -51,7 +51,7 @@ def validate(
             {
                 "network_spec": {
                     "name": model_path / name,
-                    "modifier": modifier,
+                    "suffix": suffix,
                     "inflate": inflate,
                     "reset": not finetune,
                     "inflate_strategy": inflate_strategy,
