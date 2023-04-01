@@ -8,7 +8,6 @@ from torchvision.models import resnet
 
 from local import checkpoint
 from local.inflate import resnet as inflate_resnet, SequenceInflate
-from local.extern.model_ema import ExponentialMovingAverage
 
 
 def network_pre(name: Optional[str]):
