@@ -61,14 +61,14 @@ def build_params(
                     params[group].append(p)
                     guides[group].append(g)
                     break
-        else:
-            for group, classes in group_classes.items():
-                if isinstance(module, classes):
-                    params[group].append(p)
-                    guides[group].append(g)
-                    break
-            params[default_group].append(p)
-            guides[default_group].append(g)
+            else:
+                for group, classes in group_classes.items():
+                    if isinstance(module, classes):
+                        params[group].append(p)
+                        guides[group].append(g)
+                        break
+                params[default_group].append(p)
+                guides[default_group].append(g)
 
         for child_name, child_module in module.named_children():
             child_prefix = f"{prefix}.{child_name}" if prefix != "" else child_name
