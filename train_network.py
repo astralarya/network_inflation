@@ -2,6 +2,7 @@ import argparse
 from os import environ
 from pathlib import Path
 
+from local import storage
 from local import train
 from local.inflate import SequenceInflate
 
@@ -40,11 +41,7 @@ parser.add_argument("--cutmix_alpha", default=1.0, type=float)
 parser.add_argument("--random_erase", default=0.1, type=float)
 parser.add_argument("--model_ema_steps", default=32, type=int)
 parser.add_argument("--model_ema_decay", default=0.9998, type=float)
-parser.add_argument(
-    "--model_path",
-    default=environ.get("MODEL_PATH", "/mnt/models/data"),
-    type=Path,
-)
+parser.add_argument("--model_path", type=Path)
 parser.add_argument(
     "--imagenet_path",
     default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),
@@ -52,6 +49,10 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+if args.model_path:
+    storage.set_file_path(args.model_path)
+
+args = {key: args[key] for key in args if key not in ["model_path"]}
 
 if __name__ == "__main__":
-    train.train(**vars(args))
+    train.train(**args)

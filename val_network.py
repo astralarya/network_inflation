@@ -2,6 +2,7 @@ import argparse
 from os import environ
 from pathlib import Path
 
+from local import storage
 from local import validate
 from local.inflate import SequenceInflate
 
@@ -41,6 +42,10 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+if args.model_path:
+    storage.set_file_path(args.model_path)
+
+args = {key: args[key] for key in args if key not in ["model_path"]}
 
 if __name__ == "__main__":
-    validate.validate(**vars(args))
+    validate.validate(**args)

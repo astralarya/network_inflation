@@ -9,10 +9,16 @@ except ImportError:
 
 
 GCLOUD_BUCKET = environ.get("GCLOUD_BUCKET", None)
+FILE_PATH = Path(environ.get("MODEL_PATH", "/mnt/models/data"))
+
+
+def set_file_path(file_path):
+    global FILE_PATH
+    FILE_PATH = Path(file_path)
 
 
 def file__path_exists(path):
-    return Path(path).exists()
+    return (FILE_PATH / path).exists()
 
 
 def gcloud__path_exists(path):
@@ -32,7 +38,7 @@ path_exists = _path_exists()
 
 
 def file__path_iter(path):
-    paths = glob.glob(f"{path}/*")
+    paths = glob.glob(f"{FILE_PATH / path}/*")
     for path in paths:
         yield path
 
@@ -53,7 +59,7 @@ path_iter = _path_iter()
 
 
 def file__path_unlink(path):
-    Path(path).unlink()
+    (FILE_PATH / path).unlink()
 
 
 def gcloud__path_unlink(path):
@@ -73,8 +79,8 @@ path_unlink = _path_unlink()
 
 
 def file__path_open(path, mode="r"):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    return Path(path).open(mode)
+    (FILE_PATH / path).parent.mkdir(parents=True, exist_ok=True)
+    return (FILE_PATH / path).open(mode)
 
 
 def gcloud__path_open(path, mode="r"):

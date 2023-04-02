@@ -51,14 +51,8 @@ def train(
     label_smoothing: float = 0.1,
     model_ema_steps: int = 32,
     model_ema_decay: float = 0.9998,
-    model_path: Optional[Path] = None,
     imagenet_path: Optional[Union[Path, str]] = None,
 ):
-    if model_path is None:
-        model_path = Path("models")
-    elif type(imagenet_path) == str:
-        model_path = Path(model_path)
-
     if imagenet_path is None:
         imagenet_path = Path(environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"))
     elif type(imagenet_path) == str:
@@ -79,7 +73,7 @@ def train(
         _worker,
         (
             {
-                "name": model_path / name,
+                "name": name,
                 "suffix": suffix,
                 "finetune": finetune,
                 "inflate": inflate,
