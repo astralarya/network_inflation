@@ -89,7 +89,7 @@ def file__path_open(path, mode="r"):
 def gcloud__path_open(path, mode="r"):
     storage_client = gcloud_storage.Client()
     bucket = storage_client.bucket(GCLOUD_BUCKET)
-    return bucket.blob(path).open(mode)
+    return bucket.blob(path).open(mode, ignore_flush=True)
 
 
 def _path_open():
