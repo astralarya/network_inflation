@@ -53,7 +53,7 @@ def write_log(name: str, data: str):
 
 def log_epoch(name: str, increment: int = 0):
     try:
-        with storage.path_open(f"{LOG_PATH_PREFIX}/{name}").open() as f:
+        with storage.path_open(f"{LOG_PATH_PREFIX}/{name}") as f:
             for line in f:
                 pass
             return int(line.split("\t")[0]) + increment
