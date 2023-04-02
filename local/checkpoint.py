@@ -47,14 +47,13 @@ def iter_epochs(name: str, from_epoch: int = 0):
 
 
 def write_log(name: str, data: str):
-    Path(name).parent.mkdir(parents=True, exist_ok=True)
-    with Path(name).open("a") as logfile:
+    with storage.path_open(name, "a") as logfile:
         logfile.write(data)
 
 
 def log_epoch(name: str, increment: int = 0):
     try:
-        with Path(name).open() as f:
+        with storage.path_open(name).open() as f:
             for line in f:
                 pass
             return int(line.split("\t")[0]) + increment
@@ -80,11 +79,10 @@ def to(state: Any, device: torch.device):
 
 @torch.no_grad()
 def save(name: str, epoch: int, state: Any):
-    save_path = Path(f"{name}/{epoch:08}.pkl")
-    print(f"Saving `{save_path}`... ", flush=True, end="")
+    path = f"{name}/{epoch:08}.pkl"
+    print(f"Saving `{path}`... ", flush=True, end="")
     state = to(state, _device.cpu)
-    Path(name).mkdir(parents=True, exist_ok=True)
-    with save_path.open("wb") as save_file:
+    with storage.path_open(path, "wb") as save_file:
         torch.save(state, save_file)
     print("DONE")
 
@@ -99,18 +97,20 @@ def load(
     epoch = get_epoch(name, epoch)
     if epoch is None:
         return (None, None)
-    save_path = Path(f"{name}/{epoch:08}.pkl")
+    path = f"{name}/{epoch:08}.pkl"
     if print_output:
         print(
-            f"Loading `{save_path}`{f' to {device}' if device is not None else ''}... ",
+            f"Loading `{path}`{f' to {device}' if device is not None else ''}... ",
             flush=True,
             end="",
         )
     try:
-        state = torch.load(save_path, map_location=device)
+        with storage.path_open(path) as save_path:
+            state = torch.load(save_path, map_location=device)
     except RuntimeError:
-        state = torch.load(save_path, map_location=_device.cpu)
-        state = to(state, device)
+        with storage.path_open(path) as save_path:
+            state = torch.load(save_path, map_location=_device.cpu)
+            state = to(state, device)
     if print_output:
         print("DONE")
     return (epoch, state)

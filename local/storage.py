@@ -70,3 +70,24 @@ def _path_unlink():
 
 
 path_unlink = _path_unlink()
+
+
+def file__path_open(path, mode="r"):
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    return Path(path).open(mode)
+
+
+def gcloud__path_open(path, mode="r"):
+    storage_client = gcloud_storage.Client()
+    bucket = storage_client.bucket(GCLOUD_BUCKET)
+    return bucket.Blob(path).open(mode)
+
+
+def _path_open():
+    if gcloud_storage and GCLOUD_BUCKET:
+        return gcloud__path_open
+    else:
+        return file__path_open
+
+
+path_open = _path_open()
