@@ -3,14 +3,23 @@ import glob
 import math
 from pathlib import Path
 from typing import Any, Optional
+from os import environ
 
 import torch
 import torch.nn as nn
 
 from . import device as _device
 
+try:
+    from google.cloud import storage as gcloud_storage
+except ImportError:
+    gcloud_storage = None
 
-def get_epoch(name: str, epoch: int = None, latest=True):
+
+GCLOUD_BUCKET = environ.get("GCLOUD_BUCKET_KEY", None)
+
+
+def file__get_epoch(name: str, epoch: int = None, latest=True):
     if type(epoch) == int:
         save_path = Path(f"{name}/{epoch:08}.pkl")
         if save_path.exists():
@@ -22,10 +31,41 @@ def get_epoch(name: str, epoch: int = None, latest=True):
         save_paths.sort(reverse=latest)
         save_path = next(iter(save_paths), None)
         return (
-            int(save_path[len(f"{name}.") :].split(".")[0])
+            int(save_path[len(f"{name}/") :].split(".")[0])
             if save_path is not None
             else None
         )
+
+
+def gcloud__get_epoch(name: str, epoch: int = None, latest=True):
+    storage_client = gcloud_storage.Client()
+    bucket = storage_client.bucket(GCLOUD_BUCKET)
+    if type(epoch) == int:
+        save_path = f"{name}/{epoch:08}.pkl"
+        if bucket.Blob(save_path).exists():
+            return epoch
+        else:
+            return None
+    else:
+        save_paths = list(
+            storage_client.list_blobs(GCLOUD_BUCKET, prefix=f"{name}/")
+        ).sort(reverse=latest)
+        save_path = next(iter(save_paths), None)
+        return (
+            int(save_path.name[len(f"{name}/") :].split(".")[0])
+            if save_path is not None
+            else None
+        )
+
+
+def _get_epoch():
+    if gcloud_storage and GCLOUD_BUCKET:
+        return gcloud__get_epoch
+    else:
+        return file__get_epoch
+
+
+get_epoch = _get_epoch()
 
 
 def prune_epochs(name: str, keep: int = 32):
