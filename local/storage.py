@@ -24,7 +24,7 @@ def file__path_exists(path):
 def gcloud__path_exists(path):
     storage_client = gcloud_storage.Client()
     bucket = storage_client.bucket(GCLOUD_BUCKET)
-    return bucket.Blob(path).exists()
+    return bucket.blob(path).exists()
 
 
 def _path_exists():
@@ -68,7 +68,7 @@ def file__path_unlink(path):
 def gcloud__path_unlink(path):
     storage_client = gcloud_storage.Client()
     bucket = storage_client.bucket(GCLOUD_BUCKET)
-    bucket.Blob(path).delete()
+    bucket.blob(path).delete()
 
 
 def _path_unlink():
@@ -89,7 +89,7 @@ def file__path_open(path, mode="r"):
 def gcloud__path_open(path, mode="r"):
     storage_client = gcloud_storage.Client()
     bucket = storage_client.bucket(GCLOUD_BUCKET)
-    return bucket.Blob(path).open(mode)
+    return bucket.blob(path).open(mode)
 
 
 def _path_open():
