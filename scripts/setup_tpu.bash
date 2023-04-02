@@ -3,6 +3,7 @@
 
 echo 'export XRT_TPU_CONFIG="localservice;0;localhost:51011"' >> ~/.bashrc
 echo 'export PATH="$PATH:$HOME/.local/bin/"' >> ~/.bashrc
+echo 'export GCLOUD_BUCKET="network_inflation__us_central1"' >> ~/.bashrc
 source ~/.bashrc
 
 # https://cloud.google.com/compute/docs/disks/add-persistent-disk
