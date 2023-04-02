@@ -89,9 +89,15 @@ def file__path_open(path, mode="r"):
 def gcloud__path_open(path, mode="r"):
     storage_client = gcloud_storage.Client()
     bucket = storage_client.bucket(GCLOUD_BUCKET)
-    return bucket.blob(path).open(
-        mode, ignore_flush=True if "w" in mode and "b" in mode else False
-    )
+    if mode == "a":
+        data = bucket.blob(path).download_as_string()
+        file = bucket.blob(path).open("r")
+        file.write(data)
+        return file
+    else:
+        return bucket.blob(path).open(
+            mode, ignore_flush=True if "w" in mode and "b" in mode else False
+        )
 
 
 def _path_open():
