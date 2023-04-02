@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import math
+from pathlib import Path
 from typing import Any, Optional
 
 import torch
@@ -24,9 +25,7 @@ def get_epoch(name: str, epoch: int = None, latest=True):
         save_paths.sort(reverse=latest)
         save_path = next(iter(save_paths), None)
         return (
-            int(save_path[len(f"{path}/") :].split(".")[0])
-            if save_path is not None
-            else None
+            int(Path(save_path).name.split(".")[0]) if save_path is not None else None
         )
 
 
