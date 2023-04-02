@@ -24,7 +24,7 @@ def get_epoch(name: str, epoch: int = None, latest=True):
         save_paths.sort(reverse=latest)
         save_path = next(iter(save_paths), None)
         return (
-            int(save_path[len(f"{name}.") :].split(".")[0])
+            int(save_path[len(f"{path}/") :].split(".")[0])
             if save_path is not None
             else None
         )
