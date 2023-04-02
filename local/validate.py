@@ -102,7 +102,9 @@ def _validate(
         save_state = save.save_state
 
         if model_ema and save_state and "model_ema" in save_state:
-            network = ExponentialMovingAverage(network, decay=0, device=device.device())
+            network = ExponentialMovingAverage(
+                save.network, decay=0, device=device.device()
+            )
             network.load_state_dict(save_state["model_ema"])
         network.eval()
 
