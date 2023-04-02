@@ -105,10 +105,10 @@ def load(
             end="",
         )
     try:
-        with storage.path_open(path) as save_path:
+        with storage.path_open(path, "rb") as save_path:
             state = torch.load(save_path, map_location=device)
     except RuntimeError:
-        with storage.path_open(path) as save_path:
+        with storage.path_open(path, "rb") as save_path:
             state = torch.load(save_path, map_location=_device.cpu)
             state = to(state, device)
     if print_output:
