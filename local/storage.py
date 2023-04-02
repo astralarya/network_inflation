@@ -94,7 +94,7 @@ def gcloud__path_open(path, mode="r"):
         data = None
         if blob.exists():
             data = blob.download_as_string()
-        file = blob.open("r")
+        file = blob.open("w")
         if data:
             file.write(data)
         return file
