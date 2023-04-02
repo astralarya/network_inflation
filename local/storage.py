@@ -45,7 +45,10 @@ def file__path_iter(path):
 
 def gcloud__path_iter(path):
     storage_client = gcloud_storage.Client()
-    return storage_client.list_blobs(GCLOUD_BUCKET, prefix=f"{path}/")
+    return (
+        item.name
+        for item in storage_client.list_blobs(GCLOUD_BUCKET, prefix=f"{path}/")
+    )
 
 
 def _path_iter():
