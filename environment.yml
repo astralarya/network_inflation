@@ -5,6 +5,7 @@ channels:
   - pytorch
 dependencies:
   - python>=3.7
+  - google-cloud-storage
   - jupyter
   - matplotlib
   - pytorch
