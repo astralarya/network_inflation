@@ -29,13 +29,13 @@ def get_epoch(name: str, epoch: int = None, latest=True):
         )
 
 
-def prune_epochs(name: str, keep: int = 32):
+def prune_epochs(name: str, keep: Optional[int] = None):
     print(f"Pruning epochs for {name}")
-    save_paths = glob.glob(f"{name}/{'[0-9]'*8}.pkl")
+    save_paths = list(storage.path_iter(name))
     save_paths.sort(reverse=True)
-    for save_path in save_paths[keep:]:
+    for save_path in save_paths[len(save_paths) if keep is None else keep :]:
         print(f"Removing {save_path}")
-        Path(save_path).unlink()
+        storage.path_unlink(save_path)
 
 
 def iter_epochs(name: str, from_epoch: int = 0):

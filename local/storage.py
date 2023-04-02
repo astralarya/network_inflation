@@ -50,3 +50,23 @@ def _path_iter():
 
 
 path_iter = _path_iter()
+
+
+def file__path_unlink(path):
+    Path(path).unlink()
+
+
+def gcloud__path_unlink(path):
+    storage_client = gcloud_storage.Client()
+    bucket = storage_client.bucket(GCLOUD_BUCKET)
+    bucket.Blob(path).delete()
+
+
+def _path_unlink():
+    if gcloud_storage and GCLOUD_BUCKET:
+        return gcloud__path_unlink
+    else:
+        return file__path_unlink
+
+
+path_unlink = _path_unlink()
