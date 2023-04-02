@@ -1,7 +1,5 @@
 from collections import OrderedDict
-import glob
 import math
-from pathlib import Path
 from typing import Any, Optional
 
 import torch
@@ -10,16 +8,19 @@ import torch.nn as nn
 from . import device as _device
 from . import storage
 
+MODEL_PATH_PREFIX = "model"
+LOG_PATH_PREFIX = "log"
+
 
 def get_epoch(name: str, epoch: int = None, latest=True):
+    path = f"{MODEL_PATH_PREFIX}/{name}"
     if type(epoch) == int:
-        save_path = Path(f"{name}/{epoch:08}.pkl")
-        if storage.path_exists(save_path):
+        if storage.path_exists(f"{path}/{epoch:08}.pkl"):
             return epoch
         else:
             return None
     else:
-        save_paths = list(storage.path_iter(name))
+        save_paths = list(storage.path_iter(path))
         save_paths.sort(reverse=latest)
         save_path = next(iter(save_paths), None)
         return (
@@ -31,7 +32,7 @@ def get_epoch(name: str, epoch: int = None, latest=True):
 
 def prune_epochs(name: str, keep: Optional[int] = None):
     print(f"Pruning epochs for {name}")
-    save_paths = list(storage.path_iter(name))
+    save_paths = list(storage.path_iter(f"{MODEL_PATH_PREFIX}/{name}"))
     save_paths.sort(reverse=True)
     for save_path in save_paths[len(save_paths) if keep is None else keep :]:
         print(f"Removing {save_path}")
@@ -41,19 +42,19 @@ def prune_epochs(name: str, keep: Optional[int] = None):
 def iter_epochs(name: str, from_epoch: int = 0):
     epoch = get_epoch(name, latest=False)
     i = max(from_epoch, epoch or -math.inf)
-    while storage.path_exists(f"{name}/{i:08}.pkl"):
+    while storage.path_exists(f"{MODEL_PATH_PREFIX}/{name}/{i:08}.pkl"):
         yield i
         i += 1
 
 
 def write_log(name: str, data: str):
-    with storage.path_open(name, "a") as logfile:
+    with storage.path_open(f"{LOG_PATH_PREFIX}/{name}", "a") as logfile:
         logfile.write(data)
 
 
 def log_epoch(name: str, increment: int = 0):
     try:
-        with storage.path_open(name).open() as f:
+        with storage.path_open(f"{LOG_PATH_PREFIX}/{name}").open() as f:
             for line in f:
                 pass
             return int(line.split("\t")[0]) + increment
@@ -79,7 +80,7 @@ def to(state: Any, device: torch.device):
 
 @torch.no_grad()
 def save(name: str, epoch: int, state: Any):
-    path = f"{name}/{epoch:08}.pkl"
+    path = f"{MODEL_PATH_PREFIX}/{name}/{epoch:08}.pkl"
     print(f"Saving `{path}`... ", flush=True, end="")
     state = to(state, _device.cpu)
     with storage.path_open(path, "wb") as save_file:
@@ -97,7 +98,7 @@ def load(
     epoch = get_epoch(name, epoch)
     if epoch is None:
         return (None, None)
-    path = f"{name}/{epoch:08}.pkl"
+    path = f"{MODEL_PATH_PREFIX}/{name}/{epoch:08}.pkl"
     if print_output:
         print(
             f"Loading `{path}`{f' to {device}' if device is not None else ''}... ",
