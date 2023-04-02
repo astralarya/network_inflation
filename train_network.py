@@ -52,7 +52,7 @@ args = parser.parse_args()
 if args.model_path:
     storage.set_file_path(args.model_path)
 
-args = {key: args[key] for key in args if key not in ["model_path"]}
+args = {key: args[key] for key in vars(args) if key not in ["model_path"]}
 
 if __name__ == "__main__":
     train.train(**args)
