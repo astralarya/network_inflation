@@ -90,7 +90,7 @@ def gcloud__path_open(path, mode="r"):
     storage_client = gcloud_storage.Client()
     bucket = storage_client.bucket(GCLOUD_BUCKET)
     return bucket.blob(path).open(
-        mode, ignore_flush=True if "r" in mode and "b" in mode else False
+        mode, ignore_flush=True if "w" in mode and "b" in mode else False
     )
 
 
