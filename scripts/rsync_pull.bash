@@ -11,7 +11,7 @@ INSTANCES=(
     "europe-west4-a/tpu-eu-1"
     "europe-west4-a/tpu-eu-2"
     "europe-west4-a/tpu-eu-3"
-    "europe-west4-a/tpu-eu-4"
+    # "europe-west4-a/tpu-eu-4"
     # "europe-west4-a/tpu-eu-5"
 )
 
