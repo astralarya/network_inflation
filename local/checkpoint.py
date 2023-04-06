@@ -13,8 +13,8 @@ MODEL_PATH_PREFIX = "model"
 LOG_PATH_PREFIX = "log"
 
 
-def get_epoch(name: str, epoch: int = None, latest=True):
-    path = f"{MODEL_PATH_PREFIX}/{name}"
+def get_epoch(name: str, epoch: int = None, latest=True, prefix=MODEL_PATH_PREFIX):
+    path = f"{prefix}/{name}" if prefix else name
     if type(epoch) == int:
         if storage.path_exists(f"{path}/{epoch:08}.pkl"):
             return epoch
@@ -29,31 +29,51 @@ def get_epoch(name: str, epoch: int = None, latest=True):
         )
 
 
-def prune_epochs(name: str, keep: Optional[int] = None):
+def prune_epochs(name: str, keep: Optional[int] = None, prefix=MODEL_PATH_PREFIX):
+    path = f"{prefix}/{name}" if prefix else name
     print(f"Pruning epochs for {name}")
-    save_paths = list(storage.path_iter(f"{MODEL_PATH_PREFIX}/{name}"))
+    save_paths = list(storage.path_iter(path))
     save_paths.sort(reverse=True)
     for save_path in save_paths[len(save_paths) if keep is None else keep :]:
         print(f"Removing {save_path}")
         storage.path_unlink(save_path)
 
 
-def iter_epochs(name: str, from_epoch: int = 0):
-    epoch = get_epoch(name, latest=False)
+def iter_epochs(name: str, from_epoch: int = 0, prefix=MODEL_PATH_PREFIX):
+    path = f"{prefix}/{name}" if prefix else name
+    epoch = get_epoch(name, latest=False, prefix=prefix)
     i = max(from_epoch, epoch or -math.inf)
-    while storage.path_exists(f"{MODEL_PATH_PREFIX}/{name}/{i:08}.pkl"):
+    while storage.path_exists(f"{path}/{i:08}.pkl"):
         yield i
         i += 1
 
 
-def write_log(name: str, data: str):
-    with storage.path_open(f"{LOG_PATH_PREFIX}/{name}", "a") as logfile:
+def check_epochs(name: str, prefix=MODEL_PATH_PREFIX):
+    latest = get_epoch(name, prefix=prefix)
+    print(f"Checking {name} ({latest})")
+    it = 0
+    missing = []
+    while it < latest:
+        if get_epoch(name, epoch=it, prefix=prefix) is None:
+            missing.append(it)
+        it += 1
+    if len(missing) == 0:
+        print(f"{name} PASS")
+    else:
+        print(f"{name} FAIL: {', '.join(map(lambda x: str(x), missing))}")
+    return missing
+
+
+def write_log(name: str, data: str, prefix=LOG_PATH_PREFIX):
+    path = f"{prefix}/{name}" if prefix else name
+    with storage.path_open(path, "a") as logfile:
         logfile.write(data)
 
 
-def log_epoch(name: str, increment: int = 0):
+def log_epoch(name: str, increment: int = 0, prefix=LOG_PATH_PREFIX):
+    path = f"{prefix}/{name}" if prefix else name
     try:
-        with storage.path_open(f"{LOG_PATH_PREFIX}/{name}") as f:
+        with storage.path_open(path) as f:
             for line in f:
                 pass
             return int(line.split("\t")[0]) + increment
@@ -78,8 +98,9 @@ def to(state: Any, device: torch.device):
 
 
 @torch.no_grad()
-def save(name: str, epoch: int, state: Any):
-    path = f"{MODEL_PATH_PREFIX}/{name}/{epoch:08}.pkl"
+def save(name: str, epoch: int, state: Any, prefix=MODEL_PATH_PREFIX):
+    path = f"{prefix}/{name}" if prefix else name
+    path = f"{path}/{epoch:08}.pkl"
     print(f"Saving `{path}`... ", flush=True, end="")
     state = to(state, _device.cpu)
     with storage.path_open(path, "wb") as save_file:
@@ -93,11 +114,13 @@ def load(
     epoch: int = None,
     device: Optional[torch.device] = None,
     print_output=True,
+    prefix=MODEL_PATH_PREFIX,
 ):
-    epoch = get_epoch(name, epoch)
+    path = f"{prefix}/{name}" if prefix else name
+    epoch = get_epoch(name, epoch=epoch, prefix=prefix)
     if epoch is None:
         return (None, None)
-    path = f"{MODEL_PATH_PREFIX}/{name}/{epoch:08}.pkl"
+    path = f"{path}/{epoch:08}.pkl"
     if print_output:
         print(
             f"Loading `{path}`{f' to {device}' if device is not None else ''}... ",

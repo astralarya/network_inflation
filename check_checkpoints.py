@@ -3,11 +3,12 @@ from pathlib import Path
 
 from local import checkpoint
 
-parser = argparse.ArgumentParser(prog="Prune checkpoints")
+parser = argparse.ArgumentParser(prog="Check checkpoints")
 parser.add_argument("path", type=Path)
-parser.add_argument("--keep", default=128, type=int)
 args = parser.parse_args()
 
 
 if __name__ == "__main__":
-    checkpoint.prune_epochs(args.path, args.keep)
+    missing = checkpoint.check_epochs(args.path, prefix=None)
+    if len(missing) == 0:
+        exit(1)
