@@ -22,7 +22,7 @@ EPOCH_DEPRECATION_WARNING = (
 class Scheduler(object):
     def __init__(self, optimizer, parameter: str, last_epoch=-1, verbose=False):
         self.parameter = parameter
-        init_param = "initial_{}".format(init_param)
+        init_param = "init__{}".format(init_param)
 
         # Attach optimizer
         if not isinstance(optimizer, Optimizer):
