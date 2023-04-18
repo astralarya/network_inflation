@@ -4,8 +4,6 @@ from typing import Any, Callable, Mapping, List, Iterable, Optional, Tuple
 import torch
 
 
-Parameters = namedtuple("Parameters", "parameters guide")
-
 Guide = Callable[[str], Optional[torch.TupleType]]
 
 
@@ -15,7 +13,7 @@ def set_weight_decay(
     norm_weight_decay: Optional[float] = None,
     norm_classes: Optional[List[type]] = None,
     guide: Optional[Guide] = None,
-) -> Parameters:
+) -> list[dict]:
     if not norm_classes:
         norm_classes = [
             torch.nn.modules.batchnorm._BatchNorm,
@@ -44,7 +42,7 @@ def build_params(
     group_keys: Mapping[str, Iterable[str]] = {},
     group_params: Mapping[str, Mapping] = {},
     default_group: str = "__default__",
-) -> Parameters:
+) -> list[dict]:
     params = defaultdict(list)
     guides = defaultdict(list)
 
@@ -78,14 +76,13 @@ def build_params(
     _add_params(model)
 
     param_groups = []
-    guide_groups = []
     for group in params:
         if len(params[group]) > 0:
             param_groups.append(
                 {
                     "params": params[group],
+                    "guide": guides[group],
                     **(group_params[group] if group in group_params else {}),
                 }
             )
-            guide_groups.append(guides[group])
-    return Parameters(parameters=param_groups, guide=guide_groups if guide else None)
+    return param_groups
