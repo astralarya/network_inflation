@@ -40,7 +40,7 @@ class GuidedSGD(SGD):
             for p in group["params"]:
                 for idx, pos in enumerate(group["guide"]):
                     s_pos_dist[idx] += p.sub(pos).pow(2)
-        guide_weight = torch.stack([d.sum().sqrt() for d in s_pos_dist])
+        guide_p = torch.stack([d.sum().sqrt() for d in s_pos_dist])
 
         for group in self.param_groups:
             params_with_grad = []
@@ -65,7 +65,7 @@ class GuidedSGD(SGD):
                 params_with_grad,
                 d_p_list,
                 momentum_buffer_list,
-                guide_weights=guide_weight,
+                guide_p=guide_p,
                 weight_decay=group["weight_decay"],
                 momentum=group["momentum"],
                 lr=group["lr"],
@@ -93,7 +93,7 @@ def guided_sgd(
     has_sparse_grad: bool = None,
     foreach: bool = None,
     *,
-    guide_weights: Optional[List[Tensor]],
+    guide_p: Optional[List[Tensor]],
     weight_decay: float,
     momentum: float,
     lr: float,
@@ -122,7 +122,7 @@ def guided_sgd(
         params,
         d_p_list,
         momentum_buffer_list,
-        guide_weights=guide_weights,
+        guide_p=guide_p,
         weight_decay=weight_decay,
         momentum=momentum,
         lr=lr,
@@ -138,7 +138,7 @@ def _single_tensor_guided_sgd(
     d_p_list: List[Tensor],
     momentum_buffer_list: List[Optional[Tensor]],
     *,
-    guide_weights: Optional[List[Tensor]],
+    guide_p: Optional[List[Tensor]],
     weight_decay: float,
     momentum: float,
     lr: float,
@@ -176,7 +176,7 @@ def _multi_tensor_guided_sgd(
     grads: List[Tensor],
     momentum_buffer_list: List[Optional[Tensor]],
     *,
-    guide_weights=List[Tensor],
+    guide_p=List[Tensor],
     weight_decay: float,
     momentum: float,
     lr: float,
