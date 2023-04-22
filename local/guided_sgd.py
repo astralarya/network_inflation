@@ -1,4 +1,5 @@
 from typing import List, Optional
+from itertools import zip_longest
 
 import torch
 from torch import Tensor
@@ -13,12 +14,10 @@ class GuidedSGD(SGD):
     def __init__(
         self,
         params,
-        guide,
         guide_alpha=1.0,
         guide_epochs=32,
         **kwargs,
     ) -> None:
-        self.guide = guide
         self.guide_alpha = guide_alpha
         self.guide_epochs = guide_epochs
         super().__init__(params, **kwargs)
@@ -35,6 +34,13 @@ class GuidedSGD(SGD):
         if closure is not None:
             with torch.enable_grad():
                 loss = closure()
+
+        s_pos_dist = [0.0] * len(self.param_groups[0]["guide"][0])
+        for group in self.param_groups:
+            for p in group["params"]:
+                for idx, pos in enumerate(group["guide"]):
+                    s_pos_dist[idx] += p.sub(pos).pow(2)
+        guide_weight = torch.stack([d.sum().sqrt() for d in s_pos_dist])
 
         for group in self.param_groups:
             params_with_grad = []
@@ -59,6 +65,7 @@ class GuidedSGD(SGD):
                 params_with_grad,
                 d_p_list,
                 momentum_buffer_list,
+                guide_weights=guide_weight,
                 weight_decay=group["weight_decay"],
                 momentum=group["momentum"],
                 lr=group["lr"],
@@ -86,6 +93,7 @@ def guided_sgd(
     has_sparse_grad: bool = None,
     foreach: bool = None,
     *,
+    guide_weights: Optional[List[Tensor]],
     weight_decay: float,
     momentum: float,
     lr: float,
@@ -106,14 +114,15 @@ def guided_sgd(
         raise RuntimeError("torch.jit.script not supported with foreach optimizers")
 
     if foreach and not torch.jit.is_scripting():
-        func = _multi_tensor_sgd
+        func = _multi_tensor_guided_sgd
     else:
-        func = _single_tensor_sgd
+        func = _single_tensor_guided_sgd
 
     func(
         params,
         d_p_list,
         momentum_buffer_list,
+        guide_weights=guide_weights,
         weight_decay=weight_decay,
         momentum=momentum,
         lr=lr,
@@ -124,11 +133,12 @@ def guided_sgd(
     )
 
 
-def _single_tensor_sgd(
+def _single_tensor_guided_sgd(
     params: List[Tensor],
     d_p_list: List[Tensor],
     momentum_buffer_list: List[Optional[Tensor]],
     *,
+    guide_weights: Optional[List[Tensor]],
     weight_decay: float,
     momentum: float,
     lr: float,
@@ -161,11 +171,12 @@ def _single_tensor_sgd(
         param.add_(d_p, alpha=-lr)
 
 
-def _multi_tensor_sgd(
+def _multi_tensor_guided_sgd(
     params: List[Tensor],
     grads: List[Tensor],
     momentum_buffer_list: List[Optional[Tensor]],
     *,
+    guide_weights=List[Tensor],
     weight_decay: float,
     momentum: float,
     lr: float,
