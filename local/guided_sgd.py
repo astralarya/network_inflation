@@ -5,7 +5,7 @@ import torch
 from torch import Tensor
 from torch.nn.functional import softmax
 from torch.optim import SGD
-from torch.optim.optimizer import _use_grad_for_differentiable
+from torch.optim.optimizer import _use_grad_for_differentiable, required
 
 
 __all__ = ["GuidedSGD", "guided_sgd"]
@@ -15,9 +15,40 @@ class GuidedSGD(SGD):
     def __init__(
         self,
         params,
-        **kwargs,
-    ) -> None:
-        super().__init__(params, **kwargs)
+        lr=required,
+        guide_alpha=0,
+        momentum=0,
+        dampening=0,
+        weight_decay=0,
+        nesterov=False,
+        *,
+        maximize=False,
+        foreach: Optional[bool] = None,
+        differentiable=False,
+    ):
+        if lr is not required and lr < 0.0:
+            raise ValueError("Invalid learning rate: {}".format(lr))
+        if guide_alpha < 0.0:
+            raise ValueError("Invalid guide alpha: {}".format(lr))
+        if momentum < 0.0:
+            raise ValueError("Invalid momentum value: {}".format(momentum))
+        if weight_decay < 0.0:
+            raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
+
+        defaults = dict(
+            lr=lr,
+            guide_alpha=guide_alpha,
+            momentum=momentum,
+            dampening=dampening,
+            weight_decay=weight_decay,
+            nesterov=nesterov,
+            maximize=maximize,
+            foreach=foreach,
+            differentiable=differentiable,
+        )
+        if nesterov and (momentum <= 0 or dampening != 0):
+            raise ValueError("Nesterov momentum requires a momentum and zero dampening")
+        super().__init__(params, defaults)
 
     @_use_grad_for_differentiable
     def step(self, closure=None):

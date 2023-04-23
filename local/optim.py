@@ -15,17 +15,14 @@ def optimizer(
     weight_decay=2e-05,
     guide: Optional[Sequence[torch.Tensor]] = None,
     guide_alpha=1.0,
-    guide_epochs=32,
 ):
     optimizer = optimizer.lower()
     if optimizer.startswith("sgd"):
         if guide is not None:
             return GuidedSGD(
                 parameters,
-                guide=guide,
-                guide_alpha=guide_alpha,
-                guide_epochs=guide_epochs,
                 lr=lr,
+                guide_alpha=guide_alpha,
                 momentum=momentum,
                 weight_decay=weight_decay,
                 nesterov="nesterov" in optimizer,
