@@ -204,7 +204,7 @@ def _train(
         guide_alpha=guide_alpha,
         guide_epochs=guide_epochs,
     )
-    scheduler = _optim.lr_scheduler(
+    lr_scheduler = _optim.lr_scheduler(
         optimizer=optimizer,
         lr_scheduler=lr_scheduler,
         num_epochs=num_epochs,
@@ -229,7 +229,7 @@ def _train(
         if model_ema:
             model_ema.load_state_dict(save_state["model_ema"])
         optimizer.load_state_dict(save_state["optimizer"])
-        scheduler.load_state_dict(save_state["scheduler"])
+        lr_scheduler.load_state_dict(save_state["scheduler"])
     elif device.is_main():
         checkpoint.save(
             model_name,
@@ -239,7 +239,7 @@ def _train(
                 "model": model.state_dict(),
                 "model_ema": model_ema.state_dict() if model_ema else None,
                 "optimizer": optimizer.state_dict(),
-                "scheduler": scheduler.state_dict(),
+                "lr_scheduler": lr_scheduler.state_dict(),
             },
         )
 
@@ -268,7 +268,7 @@ def _train(
                     model_ema.n_averaged.fill_(0)
             losses = device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
             epoch_loss += losses / total
-        scheduler.step()
+        lr_scheduler.step()
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
             checkpoint.save(
@@ -279,7 +279,7 @@ def _train(
                     "model": model.state_dict(),
                     "model_ema": model_ema.state_dict() if model_ema else None,
                     "optimizer": optimizer.state_dict(),
-                    "scheduler": scheduler.state_dict(),
+                    "lr_scheduler": lr_scheduler.state_dict(),
                 },
             )
     device.rendezvous("end")
