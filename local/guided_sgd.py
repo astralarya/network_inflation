@@ -46,13 +46,15 @@ class GuidedSGD(SGD):
         for group in self.param_groups:
             params_with_grad = []
             d_p_list = []
+            guide = []
             momentum_buffer_list = []
             has_sparse_grad = False
 
-            for p in group["params"]:
+            for idx, p in enumerate(group["params"]):
                 if p.grad is not None:
                     params_with_grad.append(p)
                     d_p_list.append(p.grad)
+                    guide.append(group["guide"][idx])
                     if p.grad.is_sparse:
                         has_sparse_grad = True
 
@@ -66,6 +68,7 @@ class GuidedSGD(SGD):
                 params_with_grad,
                 d_p_list,
                 momentum_buffer_list,
+                guide=guide,
                 guide_p=guide_p,
                 weight_decay=group["weight_decay"],
                 momentum=group["momentum"],
@@ -94,6 +97,7 @@ def guided_sgd(
     has_sparse_grad: bool = None,
     foreach: bool = None,
     *,
+    guide: List[Tensor],
     guide_p: Optional[List[Tensor]],
     weight_decay: float,
     momentum: float,
@@ -139,6 +143,7 @@ def _single_tensor_guided_sgd(
     d_p_list: List[Tensor],
     momentum_buffer_list: List[Optional[Tensor]],
     *,
+    guide: List[Tensor],
     guide_p: Optional[List[Tensor]],
     weight_decay: float,
     momentum: float,
@@ -177,6 +182,7 @@ def _multi_tensor_guided_sgd(
     grads: List[Tensor],
     momentum_buffer_list: List[Optional[Tensor]],
     *,
+    guide: List[Tensor],
     guide_p=List[Tensor],
     weight_decay: float,
     momentum: float,
