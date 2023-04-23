@@ -125,7 +125,7 @@ def guided_sgd(
     has_sparse_grad: bool = None,
     foreach: bool = None,
     *,
-    guide: List[Tensor],
+    guide: List[List[Optional[Tensor]]],
     guide_alpha: float,
     guide_p: Optional[List[Tensor]],
     weight_decay: float,
@@ -156,6 +156,8 @@ def guided_sgd(
         params,
         d_p_list,
         momentum_buffer_list,
+        guide=guide,
+        guide_alpha=guide_alpha,
         guide_p=guide_p,
         weight_decay=weight_decay,
         momentum=momentum,
@@ -172,9 +174,9 @@ def _single_tensor_guided_sgd(
     d_p_list: List[Tensor],
     momentum_buffer_list: List[Optional[Tensor]],
     *,
-    guide: List[Tensor],
+    guide: List[List[Optional[Tensor]]],
     guide_alpha: float,
-    guide_p: Optional[List[Tensor]],
+    guide_p: List[Tensor],
     weight_decay: float,
     momentum: float,
     lr: float,
@@ -189,7 +191,9 @@ def _single_tensor_guided_sgd(
 
         if guide_alpha != 0:
             for p in guide_p:
-                d_p = d_p.add(param.sub(guide[i]), p * guide_alpha)
+                guide_val = guide[i]
+                if guide_val is not None:
+                    d_p = d_p.add(param.sub(guide_val), p * guide_alpha)
 
         if weight_decay != 0:
             d_p = d_p.add(param, alpha=weight_decay)
@@ -216,7 +220,7 @@ def _multi_tensor_guided_sgd(
     grads: List[Tensor],
     momentum_buffer_list: List[Optional[Tensor]],
     *,
-    guide: List[Tensor],
+    guide: List[List[Optional[Tensor]]],
     guide_alpha: float,
     guide_p=List[Tensor],
     weight_decay: float,
@@ -239,7 +243,12 @@ def _multi_tensor_guided_sgd(
 
     if guide_alpha != 0:
         for idx, p in enumerate(guide_p):
-            guide_grad = torch._foreach_sub(params, [x[idx] for x in guide])
+            guide_grad = torch._foreach_sub(
+                params, [x[idx] if x[idx] is not None else 0 for x in guide]
+            )
+            guide_grad = torch._foreach_mul(
+                guide_grad, [1 if x[idx] is not None else 0 for x in guide]
+            )
             grads = torch._foreach_add(grads, guide_grad, alpha=p * guide_alpha)
 
     if weight_decay != 0:
