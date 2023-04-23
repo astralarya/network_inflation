@@ -3,6 +3,7 @@ from itertools import zip_longest
 
 import torch
 from torch import Tensor
+from torch.nn.functional import softmax
 from torch.optim import SGD
 from torch.optim.optimizer import _use_grad_for_differentiable
 
@@ -35,12 +36,12 @@ class GuidedSGD(SGD):
             with torch.enable_grad():
                 loss = closure()
 
-        s_pos_dist = [0.0] * len(self.param_groups[0]["guide"][0])
+        guide_distance = [0.0] * len(self.param_groups[0]["guide"][0])
         for group in self.param_groups:
             for p in group["params"]:
                 for idx, pos in enumerate(group["guide"]):
-                    s_pos_dist[idx] += p.sub(pos).pow(2)
-        guide_p = torch.stack([d.sum().sqrt() for d in s_pos_dist])
+                    guide_distance[idx] += p.sub(pos).pow(2)
+        guide_p = softmax(torch.stack([d.sum().sqrt() for d in guide_distance]))
 
         for group in self.param_groups:
             params_with_grad = []
