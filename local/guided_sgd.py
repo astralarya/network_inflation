@@ -15,12 +15,8 @@ class GuidedSGD(SGD):
     def __init__(
         self,
         params,
-        guide_alpha=1.0,
-        guide_epochs=32,
         **kwargs,
     ) -> None:
-        self.guide_alpha = guide_alpha
-        self.guide_epochs = guide_epochs
         super().__init__(params, **kwargs)
 
     @_use_grad_for_differentiable
