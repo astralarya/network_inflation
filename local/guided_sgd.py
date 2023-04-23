@@ -160,6 +160,10 @@ def _single_tensor_guided_sgd(
     for i, param in enumerate(params):
         d_p = d_p_list[i] if not maximize else -d_p_list[i]
 
+        if guide_alpha != 0:
+            for p in guide_p:
+                d_p = d_p.add(param.sub(guide[i]), p * guide_alpha)
+
         if weight_decay != 0:
             d_p = d_p.add(param, alpha=weight_decay)
 
@@ -205,6 +209,11 @@ def _multi_tensor_guided_sgd(
 
     if maximize:
         grads = torch._foreach_neg(tuple(grads))  # type: ignore[assignment]
+
+    if guide_alpha != 0:
+        for idx, p in enumerate(guide_p):
+            guide_grad = torch._foreach_sub(params, [x[idx] for x in guide])
+            grads = torch._foreach_add(grads, guide_grad, alpha=p * guide_alpha)
 
     if weight_decay != 0:
         grads = torch._foreach_add(grads, params, alpha=weight_decay)
