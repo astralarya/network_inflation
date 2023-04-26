@@ -215,6 +215,12 @@ def _train(
         lr_warmup_epochs=lr_warmup_epochs,
         lr_warmup_decay=lr_warmup_decay,
     )
+    guide_alpha_scheduler = _optim.guide_alpha_scheduler(
+        optimizer=optimizer,
+        start_factor=1.0,
+        end_factor=0.0,
+        total_iters=guide_epochs,
+    )
 
     model_ema = None
     if model_ema_steps > 1:
@@ -240,6 +246,7 @@ def _train(
                 "model_ema": model_ema.state_dict() if model_ema else None,
                 "optimizer": optimizer.state_dict(),
                 "lr_scheduler": lr_scheduler.state_dict(),
+                "guide_alpha_scheduler": guide_alpha_scheduler.state_dict(),
             },
         )
 
@@ -269,6 +276,7 @@ def _train(
             losses = device.mesh_reduce("loss", loss.item(), lambda x: sum(x))
             epoch_loss += losses / total
         lr_scheduler.step()
+        guide_alpha_scheduler.step()
         if device.is_main():
             print(f"[epoch {epoch}]: loss: {epoch_loss}")
             checkpoint.save(
@@ -280,6 +288,7 @@ def _train(
                     "model_ema": model_ema.state_dict() if model_ema else None,
                     "optimizer": optimizer.state_dict(),
                     "lr_scheduler": lr_scheduler.state_dict(),
+                    "guide_alpha_scheduler": guide_alpha_scheduler.state_dict(),
                 },
             )
     device.rendezvous("end")

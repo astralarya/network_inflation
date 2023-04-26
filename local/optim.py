@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from local.guided_sgd import GuidedSGD
+from local.scheduler import LinearScheduler
 
 
 def optimizer(
@@ -49,6 +50,21 @@ def optimizer(
         raise RuntimeError(
             f"Invalid optimizer {optimizer}. Only SGD, RMSprop and AdamW are supported."
         )
+
+
+def guide_alpha_scheduler(
+    optimizer: optim.Optimizer,
+    guide_alpha_start=1.0,
+    guide_alpha_end=0.0,
+    guide_alpha_iters=32,
+):
+    return LinearScheduler(
+        optimizer,
+        parameter="guide_alpha",
+        start_factor=guide_alpha_start,
+        end_factor=guide_alpha_end,
+        total_iters=guide_alpha_iters,
+    )
 
 
 def lr_scheduler(
