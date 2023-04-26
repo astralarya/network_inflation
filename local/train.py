@@ -235,7 +235,12 @@ def _train(
         if model_ema:
             model_ema.load_state_dict(save_state["model_ema"])
         optimizer.load_state_dict(save_state["optimizer"])
-        lr_scheduler.load_state_dict(save_state["scheduler"])
+        if "scheduler" in save_state:
+            # legacy format
+            lr_scheduler.load_state_dict(save_state["scheduler"])
+        else:
+            lr_scheduler.load_state_dict(save_state["lr_scheduler"])
+            guide_alpha_scheduler.load_state_dict(save_state["guide_alpha_scheduler"])
     elif device.is_main():
         checkpoint.save(
             model_name,
