@@ -70,6 +70,7 @@ def network_load(
     epoch: Optional[int] = None,
     reset: bool = False,
     inflate_strategy: SequenceInflate = SequenceInflate.ALIGN_START,
+    init_only: bool = False,
     mask_inflate: bool = True,
     device: Optional[torch.device] = None,
     print_output: bool = True,
@@ -96,10 +97,10 @@ def network_load(
         )
         if type(epoch) == int and save_epoch is None:
             raise Exception(f"Epoch not found for {name}: {epoch}")
-        inflate_network = network_pre(inflate)
         if save_epoch is not None:
             model.load_state_dict(save_state["model"])
         elif inflate is not None:
+            inflate_network = network_pre(inflate)
             model = inflate_resnet(
                 inflate_network, model, strategy=inflate_strategy, mask=mask_inflate
             )
