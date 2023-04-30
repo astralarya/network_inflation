@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import Sequence, Union
 
 import numpy as np
 import torch
@@ -15,6 +15,67 @@ class SequenceInflate(Enum):
 
     def __str__(self):
         return self.value
+
+
+@torch.no_grad()
+def guide_resnet(
+    network: ResNet,
+    parameter_name: str,
+    inflate_sequence: Sequence[int],
+    strategy: SequenceInflate = SequenceInflate.ALIGN_START,
+):
+    """Return the guide for a Resnet parameter"""
+    parameter_path = parameter_name.split(".")
+    if parameter_path[0] in ["conv1", "bn1", "fc1"]:
+        return network.get_parameter(parameter_name)
+    elif parameter_path[0] in ["layer1", "layer2", "layer3", "layer4"]:
+        layer_idx = int(parameter_path[0][5]) - 1
+        sequence_idx = int(parameter_path[1])
+        guide_module = guide_sequence(
+            network.get_submodule(parameter_path[0]),
+            index=sequence_idx,
+            inflate_size=inflate_sequence[layer_idx],
+            strategy=strategy,
+        )
+        if guide_module is None:
+            return None
+        return guide_module.get_parameter(".".join(parameter_path[1:]))
+
+
+@torch.no_grad()
+def guide_sequence(
+    sequence: nn.Module,
+    index: int,
+    inflate_size: int,
+    strategy: SequenceInflate,
+):
+    children = list(sequence.children())
+    diff = len(inflate_size) - len(children)
+    if diff < 0:
+        raise Exception("Inflate destination is smaller than source!")
+
+    if strategy == SequenceInflate.ALIGN_START:
+        if index < len(sequence):
+            return sequence[index]
+        else:
+            return None
+    elif strategy == SequenceInflate.ALIGN_END:
+        if index < diff:
+            return None
+        else:
+            return sequence[index - diff]
+    elif strategy == SequenceInflate.CENTER:
+        start = diff // 2 + diff % 2
+        if index < start:
+            return None
+        else:
+            return sequence[start - index]
+    elif strategy == SequenceInflate.SPACE_EVENLY and diff > 0:
+        for idx in np.round(
+            np.linspace(0.5 + np.finfo(float).eps, len(children1) - 0.5, diff)
+        ).astype(int):
+            children[idx:idx] = [None]
+        return children[index]
 
 
 @torch.no_grad()

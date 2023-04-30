@@ -7,7 +7,7 @@ from torch.hub import load
 from torchvision.models import resnet
 
 from local import checkpoint
-from local.inflate import resnet as inflate_resnet, SequenceInflate
+from local.inflate import resnet as inflate_resnet, guide_resnet, SequenceInflate
 
 
 def network_pre(name: Optional[str]):
@@ -58,6 +58,21 @@ def network_type(name: str):
     return network
 
 
+def network_sequence(name: Optional[str]):
+    if name is None:
+        return None
+    name = Path(name).name
+    if name == "resnet50":
+        return [3, 4, 6, 3]
+    elif name == "resnet101":
+        return [3, 4, 23, 3]
+    elif name == "resnet152":
+        return [3, 8, 36, 3]
+    else:
+        print(f"Unknown network: {name}")
+        exit(1)
+
+
 NetworkInfo = namedtuple(
     "NetworkInfo", "name network save_epoch save_state inflate_network guide"
 )
@@ -87,6 +102,7 @@ def network_load(
 
     save_epoch = None
     save_state = None
+    guide = lambda _: None
     if inflate is None and reset is False and type(epoch) != int:
         model = network_pre(basename)
     else:
@@ -100,18 +116,25 @@ def network_load(
         if save_epoch is not None:
             model.load_state_dict(save_state["model"])
         elif inflate is not None:
-            inflate_network = network_pre(inflate)
-            model = inflate_resnet(
-                inflate_network, model, strategy=inflate_strategy, mask=mask_inflate
-            )
+            if init_only:
+                inflate_network = network_pre(inflate)
+                model = inflate_resnet(
+                    inflate_network, model, strategy=inflate_strategy, mask=mask_inflate
+                )
+            else:
+                guide = lambda param: guide_resnet(
+                    inflate_network,
+                    param,
+                    network_sequence(basename),
+                    strategy=inflate_strategy,
+                )
 
     return NetworkInfo(
         name=name,
         network=model,
         save_epoch=save_epoch,
         save_state=save_state,
-        inflate_network=inflate_network,
-        guide=lambda _: None,
+        guide=guide,
     )
 
 
