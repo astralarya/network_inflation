@@ -72,7 +72,7 @@ def guide_sequence(
             return sequence[start - index]
     elif strategy == SequenceInflate.SPACE_EVENLY and diff > 0:
         for idx in np.round(
-            np.linspace(0.5 + np.finfo(float).eps, len(children1) - 0.5, diff)
+            np.linspace(0.5 + np.finfo(float).eps, len(children - 0.5, diff))
         ).astype(int):
             children[idx:idx] = [None]
         return children[index]
