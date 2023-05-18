@@ -22,7 +22,7 @@ parser.add_argument(
     choices=list(SequenceInflate),
 )
 parser.add_argument("--inflate_unmasked", action="store_false", dest="mask_inflate")
-parser.add_argument("--model_ema", action="store_true")
+parser.add_argument("--no_model_ema", dest="model_ema", action="store_false")
 parser.add_argument("--nprocs", default=8, type=int)
 parser.add_argument(
     "--epoch",
