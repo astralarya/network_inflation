@@ -1,6 +1,7 @@
 import argparse
 from os import environ
 from pathlib import Path
+from sys import stderr
 
 from local import checkpoint
 from local import storage
@@ -11,6 +12,7 @@ parser.add_argument("--no_model_ema", dest="model_ema", action="store_false")
 args = parser.parse_args()
 
 if __name__ == "__main__":
+    print("Fetching status...", flush=True, end="", file=stderr)
     todo = []
     for name in checkpoint.iter_models():
         outname = f"{name}--ema" if args.model_ema else name
@@ -18,6 +20,7 @@ if __name__ == "__main__":
         epoch = checkpoint.get_epoch(name)
         log_epoch = checkpoint.log_epoch(outfile)
         if epoch != log_epoch:
-            todo.append(name, f"{log_epoch}/{epoch}")
+            todo.append((name, f"{log_epoch}/{epoch}"))
+    print("DONE", file=stderr)
     for name, status in todo:
         print(name, status)
