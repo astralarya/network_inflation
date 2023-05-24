@@ -16,7 +16,7 @@ LOG_PATH_PREFIX = "log"
 def iter_models(prefix=MODEL_PATH_PREFIX):
     len_prefix = len(prefix) + 1
     for folder in storage.path_iter(prefix, shallow=True):
-        yield folder[len_prefix:]
+        yield folder[len_prefix:-1]
 
 
 def get_epoch(name: str, epoch: int = None, latest=True, prefix=MODEL_PATH_PREFIX):
