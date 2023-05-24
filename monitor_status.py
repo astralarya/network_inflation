@@ -10,8 +10,6 @@ parser = argparse.ArgumentParser(prog="ResNet validation script")
 parser.add_argument("--no_model_ema", dest="model_ema", action="store_false")
 args = parser.parse_args()
 
-args = {key: vars(args)[key] for key in vars(args) if key not in ["model_path"]}
-
 if __name__ == "__main__":
     todo = []
     for name in checkpoint.iter_models():
