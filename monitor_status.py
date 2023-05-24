@@ -8,15 +8,7 @@ from local.inflate import SequenceInflate
 
 parser = argparse.ArgumentParser(prog="ResNet validation script")
 parser.add_argument("--no_model_ema", dest="model_ema", action="store_false")
-parser.add_argument(
-    "--model_path",
-    default=environ.get("MODEL_PATH", "/mnt/models/data"),
-    type=Path,
-)
 args = parser.parse_args()
-
-if args.model_path:
-    storage.set_file_path(args.model_path)
 
 args = {key: vars(args)[key] for key in vars(args) if key not in ["model_path"]}
 

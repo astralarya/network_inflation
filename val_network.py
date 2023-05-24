@@ -31,19 +31,11 @@ parser.add_argument(
     action="append",
 )
 parser.add_argument(
-    "--model_path",
-    default=environ.get("MODEL_PATH", "/mnt/models/data"),
-    type=Path,
-)
-parser.add_argument(
     "--imagenet_path",
     default=environ.get("IMAGENET_PATH", "/mnt/imagenet/imagenet-1k"),
     type=Path,
 )
 args = parser.parse_args()
-
-if args.model_path:
-    storage.set_file_path(args.model_path)
 
 args = {key: vars(args)[key] for key in vars(args) if key not in ["model_path"]}
 
