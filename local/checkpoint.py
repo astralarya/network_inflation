@@ -13,6 +13,11 @@ MODEL_PATH_PREFIX = "model"
 LOG_PATH_PREFIX = "log"
 
 
+def iter_models(prefix=MODEL_PATH_PREFIX):
+    for folder in storage.path_iter(prefix):
+        yield folder
+
+
 def get_epoch(name: str, epoch: int = None, latest=True, prefix=MODEL_PATH_PREFIX):
     path = f"{prefix}/{name}" if prefix else name
     if type(epoch) == int:
