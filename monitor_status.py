@@ -18,5 +18,6 @@ if __name__ == "__main__":
         epoch = checkpoint.get_epoch(name)
         log_epoch = checkpoint.log_epoch(outfile)
         if epoch != log_epoch:
-            todo.append(name)
-    print(name)
+            todo.append(name, f"{log_epoch}/{epoch}")
+    for name, status in todo:
+        print(name, status)
