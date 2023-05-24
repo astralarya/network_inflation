@@ -7,6 +7,11 @@ try:
 except ImportError:
     gcloud_storage = None
 
+try:
+    from google.api_core import page_iterator
+except ImportError:
+    gcloud_page_iterator = None
+
 
 GCLOUD_BUCKET = environ.get("GCLOUD_BUCKET", None)
 
@@ -31,17 +36,42 @@ def _path_exists():
 path_exists = _path_exists()
 
 
-def file__path_iter(path):
+def file__path_iter(path, shallow=False):
     paths = glob.glob(f"{path}/*")
     for path in paths:
         yield path
 
 
-def gcloud__path_iter(path):
+def gcloud__path_iter(path, shallow=False):
+    if shallow:
+        return glcoud_list_directories(path)
     storage_client = gcloud_storage.Client()
     return (
         item.name
         for item in storage_client.list_blobs(GCLOUD_BUCKET, prefix=f"{path}/")
+    )
+
+
+def glcoud_list_directories(prefix):
+    def _item_to_value(iterator, item):
+        return item
+
+    if prefix and not prefix.endswith("/"):
+        prefix += "/"
+
+    extra_params = {"projection": "noAcl", "prefix": prefix, "delimiter": "/"}
+
+    gcs = gcloud_storage.Client()
+
+    path = "/b/" + GCLOUD_BUCKET + "/o"
+
+    return page_iterator.HTTPIterator(
+        client=gcs,
+        api_request=gcs._connection.api_request,
+        path=path,
+        items_key="prefixes",
+        item_to_value=_item_to_value,
+        extra_params=extra_params,
     )
 
 

@@ -14,7 +14,7 @@ LOG_PATH_PREFIX = "log"
 
 
 def iter_models(prefix=MODEL_PATH_PREFIX):
-    for folder in storage.path_iter(prefix):
+    for folder in storage.path_iter(prefix, shallow=True):
         yield folder
 
 
