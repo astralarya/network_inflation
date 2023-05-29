@@ -27,7 +27,10 @@ def get_epoch(name: str, epoch: int = None, latest=True, prefix=MODEL_PATH_PREFI
         else:
             return None
     else:
-        save_paths = list(storage.path_iter(path))
+        min_path = len(path) + 1
+        save_paths = list(
+            item for item in storage.path_iter(path) if len(item) > min_path
+        )
         save_paths.sort(reverse=latest)
         save_path = next(iter(save_paths), None)
         return (
