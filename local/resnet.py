@@ -73,9 +73,7 @@ def network_sequence(name: Optional[str]):
         exit(1)
 
 
-NetworkInfo = namedtuple(
-    "NetworkInfo", "name network save_epoch save_state inflate_network guide"
-)
+NetworkInfo = namedtuple("NetworkInfo", "name network save_epoch save_state guide")
 
 
 def network_load(
