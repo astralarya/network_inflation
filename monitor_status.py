@@ -8,6 +8,7 @@ from local import storage
 from local.inflate import SequenceInflate
 
 parser = argparse.ArgumentParser(prog="ResNet validation script")
+parser.add_argument("--all", dest="all", action="store_true")
 parser.add_argument("--no_model_ema", dest="model_ema", action="store_false")
 args = parser.parse_args()
 
@@ -19,7 +20,7 @@ if __name__ == "__main__":
         outfile = f"{outname}.__val__.log"
         epoch = checkpoint.get_epoch(name)
         log_epoch = checkpoint.log_epoch(outfile)
-        if epoch != log_epoch:
+        if args.all or epoch != log_epoch:
             todo.append((name, f"{log_epoch}/{epoch}"))
     print("DONE", file=stderr)
     for name, status in todo:
