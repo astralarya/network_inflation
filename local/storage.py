@@ -46,9 +46,11 @@ def gcloud__path_iter(path, shallow=False):
     if shallow:
         return glcoud_list_directories(path)
     storage_client = gcloud_storage.Client()
+    min_path = len(path) + 1
     return (
         item.name
         for item in storage_client.list_blobs(GCLOUD_BUCKET, prefix=f"{path}/")
+        if len(item.name) > min_path
     )
 
 
